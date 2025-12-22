@@ -112,6 +112,14 @@ class SettingsTableSeeder extends Seeder
                 'label' => 'Favicon',
                 'order' => 7,
             ],
+            [
+                'key' => 'license_key',
+                'value' => null,
+                'type' => 'text',
+                'group' => 'general',
+                'label' => 'License Key',
+                'order' => 9,
+            ]
         ];
 
         foreach ($generalSettings as $setting) {
