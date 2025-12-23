@@ -35,3 +35,19 @@ if (!function_exists('setMailConfigFromDB')) {
         Config::set('mail.from.name', setting('mail_from_name', config('app.name')));
     }
 }
+
+if (!function_exists('setLicenseConfigFromDB')) {
+    function setLicenseConfigFromDB()
+    {
+        Config::set('license.license_key', setting('license_key', null));
+    }
+}
+
+if (!function_exists('isLicenseValid')) {
+    function isLicenseValid()
+    {
+        $licenseStatus = Cache::get(config('license.cache.key'));
+
+        return $licenseStatus === 'valid';
+    }
+}
