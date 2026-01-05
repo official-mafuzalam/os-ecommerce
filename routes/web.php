@@ -38,7 +38,7 @@ Route::get('/clear-cache', [ArtisanController::class, 'clearCache'])->name('clea
 // =====================================================================
 // PUBLIC ROUTES (With License Warnings Only)
 // =====================================================================
-Route::middleware(['web', 'license.warning'])->group(function () {
+Route::middleware(['web'])->group(function () {
     Route::get('/', [PublicHomeController::class, 'index'])->name('public.welcome');
 
     // Search routes

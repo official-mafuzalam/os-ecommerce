@@ -179,6 +179,22 @@
                                             {{ number_format($item->unit_price * $item->quantity, 2) }} TK
                                         </p>
                                     </div>
+
+                                    <!-- Display Attributes if they exist -->
+                                    @if ($item->attributes && $item->attributes->count() > 0)
+                                        <div class="mt-3">
+                                            <h4 class="text-sm font-medium text-gray-700 mb-2">Selected Options:</h4>
+                                            <div class="flex flex-wrap gap-2">
+                                                @foreach ($item->attributes as $attribute)
+                                                    <span
+                                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        {{ $attribute->name }}: {{ $attribute->pivot->value }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     <div class="mt-4 flex items-center justify-between">
                                         <div class="flex items-center space-x-4">
                                             <span class="text-sm text-gray-600">Quantity: {{ $item->quantity }}</span>

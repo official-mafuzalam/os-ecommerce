@@ -1,28 +1,6 @@
 <x-app-layout>
-    @section('title', 'Cart')
+    @section('title', 'Cart - ' . config('app.name'))
     <x-slot name="main">
-        <!-- Breadcrumb -->
-        {{-- <div class="bg-gray-50 border-b border-gray-200 py-4">
-            <div class="container mx-auto px-4">
-                <nav class="flex" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                        <li class="inline-flex items-center">
-                            <a href="{{ route('public.welcome') }}"
-                                class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-                                <i class="fas fa-home mr-2"></i> Home
-                            </a>
-                        </li>
-                        <li aria-current="page">
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 text-xs mx-2"></i>
-                                <span class="text-sm font-medium text-gray-500">Shopping Cart</span>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
-            </div>
-        </div> --}}
-
         <!-- Cart Section -->
         <div class="container mx-auto px-4 py-8">
             <div class="flex items-center mb-6">
@@ -63,6 +41,22 @@
                                                             {{ $item->product->name }}
                                                         </a>
                                                     </h3>
+
+                                                    <!-- Display Attributes -->
+                                                    @if ($item->attributes && $item->attributes->count() > 0)
+                                                        <div class="mt-2">
+                                                            <div class="flex flex-wrap gap-1">
+                                                                @foreach ($item->attributes as $attribute)
+                                                                    <span
+                                                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                                                        {{ $attribute->name }}:
+                                                                        {{ $attribute->pivot->value }}
+                                                                    </span>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    @endif
+
                                                     <div class="flex flex-wrap items-center gap-2 mt-1">
                                                         <span
                                                             class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">SKU:

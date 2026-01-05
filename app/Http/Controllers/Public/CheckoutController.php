@@ -9,10 +9,12 @@ use App\Models\Product;
 use App\Models\ShippingAddress;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Attribute;
+use App\Models\OrderItemAttribute;
 use App\Services\FacebookCapiService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class CheckoutController extends Controller
@@ -27,7 +29,7 @@ class CheckoutController extends Controller
     public function index(FacebookCapiService $fbService)
     {
         $cart = $this->getCart();
-        $items = $cart->items()->with('product')->get();
+        $items = $cart->items()->with(['product', 'attributes'])->get();
 
         if ($items->isEmpty()) {
             return redirect()->route('public.products')->with('error', 'Your cart is empty.');
@@ -56,7 +58,6 @@ class CheckoutController extends Controller
                 })->toArray(),
             ]);
 
-            // Pass eventId to view for Pixel script
             session()->flash('fb_event_id', $eventId);
         }
 
@@ -69,10 +70,11 @@ class CheckoutController extends Controller
         ]);
     }
 
-
     // Buy now for a single product
     public function buyNow(Product $product, Request $request)
     {
+        Log::info('Buy Now Request Data:', $request->all());
+
         $quantity = $request->input('quantity', 1);
 
         if ($quantity < 1)
@@ -84,14 +86,74 @@ class CheckoutController extends Controller
         $cart = $this->getCart();
 
         // Clear current cart for single product checkout
-        $cart->clear();
+        $cart->items()->delete();
 
-        $cart->addItem($product->id, $quantity);
+        // Create cart item
+        $item = $cart->items()->create([
+            'product_id' => $product->id,
+            'quantity' => $quantity
+        ]);
+
+        // Handle attributes if provided
+        $attributes = $request->input('attributes', []);
+        if (!empty($attributes)) {
+            Log::info('Attributes received:', $attributes);
+
+            foreach ($attributes as $attributeIdentifier => $value) {
+                if ($value) {
+                    Log::info("Processing attribute: ID={$attributeIdentifier}, Value={$value}");
+
+                    // Find attribute by ID, slug, or name
+                    $attribute = null;
+
+                    // First, try to find by ID (if numeric)
+                    if (is_numeric($attributeIdentifier)) {
+                        $attribute = Attribute::find($attributeIdentifier);
+                    }
+
+                    // If not found by ID, try slug or name
+                    if (!$attribute) {
+                        $attribute = Attribute::where('slug', $attributeIdentifier)
+                            ->orWhere('name', $attributeIdentifier)
+                            ->first();
+                    }
+
+                    if ($attribute) {
+                        Log::info("Found attribute: ID={$attribute->id}, Name={$attribute->name}");
+
+                        $item->attributes()->attach($attribute->id, [
+                            'value' => $value,
+                            'order' => $attribute->order ?? 0
+                        ]);
+
+                        Log::info("Attribute attached successfully");
+                    } else {
+                        Log::warning("Attribute not found: {$attributeIdentifier}");
+                    }
+                }
+            }
+        }
+
+        Log::info('Cart item created:', $item->toArray());
+
+        // Reload the item with attributes
+        $item->load('attributes');
+
+        Log::info('Attributes attached to cart item: ', [
+            'count' => $item->attributes->count(),
+            'attributes' => $item->attributes->map(function ($attr) {
+                return [
+                    'id' => $attr->id,
+                    'name' => $attr->name,
+                    'value' => $attr->pivot->value
+                ];
+            })->toArray()
+        ]);
 
         return redirect()->route('public.checkout')->with('success', $product->name . ' added for checkout.');
     }
 
-    // Process checkout (cart or single product)
+    // Process checkout
     public function process(Request $request, FacebookCapiService $fbService)
     {
         $request->validate([
@@ -104,8 +166,11 @@ class CheckoutController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
 
+        $deliveryChargeInsideDhaka = setting('delivery_charge_inside_dhaka', 80);
+        $deliveryChargeOutsideDhaka = setting('delivery_charge_outside_dhaka', 150);
+
         // Determine delivery charge
-        $deliveryCharge = $request->delivery_area === 'inside_dhaka' ? 80 : 150;
+        $deliveryCharge = $request->delivery_area === 'inside_dhaka' ? $deliveryChargeInsideDhaka : $deliveryChargeOutsideDhaka;
 
         // Start transaction
         DB::beginTransaction();
@@ -120,41 +185,18 @@ class CheckoutController extends Controller
                 'delivery_area' => $request->delivery_area,
             ]);
 
-            // Determine order items
+            // Get cart items with attributes
             $cart = $this->getCart();
-            $items = $cart->items()->with('product')->get();
+            $cartItems = $cart->items()->with(['product', 'attributes'])->get();
 
-            if ($items->isEmpty() && !$request->has('product_id')) {
+            if ($cartItems->isEmpty()) {
                 return redirect()->route('public.products')->with('error', 'Your cart is empty.');
             }
 
             // Calculate subtotal
             $subtotal = 0;
-            $orderItemsData = [];
-
-            if ($items->count() > 0) {
-                // Cart checkout
-                foreach ($items as $item) {
-                    $subtotal += $item->total_price;
-                    $orderItemsData[] = [
-                        'product_id' => $item->product_id,
-                        'unit_price' => $item->product->final_price,
-                        'quantity' => $item->quantity,
-                        'total_price' => $item->total_price,
-                    ];
-                }
-            } else {
-                // Single product checkout
-                $product = Product::findOrFail($request->product_id);
-                $quantity = $request->quantity ?? 1;
-                $subtotal = $product->final_price * $quantity;
-
-                $orderItemsData[] = [
-                    'product_id' => $product->id,
-                    'unit_price' => $product->final_price,
-                    'quantity' => $quantity,
-                    'total_price' => $subtotal,
-                ];
+            foreach ($cartItems as $item) {
+                $subtotal += $item->total_price;
             }
 
             // Create Order
@@ -173,34 +215,46 @@ class CheckoutController extends Controller
                 'payment_status' => 'pending',
             ]);
 
-            // Create Order Items
-            foreach ($orderItemsData as $itemData) {
-                $order->items()->create($itemData);
+            // Create Order Items with Attributes
+            foreach ($cartItems as $cartItem) {
+                // Create the order item
+                $orderItem = $order->items()->create([
+                    'product_id' => $cartItem->product_id,
+                    'unit_price' => $cartItem->product->final_price,
+                    'quantity' => $cartItem->quantity,
+                    'total_price' => $cartItem->total_price,
+                ]);
+
+                // Copy attributes from cart item to order item
+                if ($cartItem->attributes->count() > 0) {
+                    foreach ($cartItem->attributes as $attribute) {
+                        $orderItem->attributes()->attach($attribute->id, [
+                            'value' => $attribute->pivot->value,
+                            'order' => $attribute->pivot->order
+                        ]);
+                    }
+                }
 
                 // Reduce stock
-                $product = Product::find($itemData['product_id']);
+                $product = Product::find($cartItem->product_id);
                 if ($product) {
-                    $product->decreaseStock($itemData['quantity']);
+                    $product->decreaseStock($cartItem->quantity);
                 }
             }
 
             // Clear cart after checkout
-            if ($items->count() > 0) {
-                $cart->clear();
-            }
+            $cart->items()->delete();
 
+            // Send email if email provided
             setMailConfigFromDB();
-
             if ($request->email) {
                 Mail::to($request->email)->send(new OrderPlaced($order));
             }
 
             DB::commit();
 
-            // After creating order
-            $eventId = fb_event_id(); // generate unique event ID
-
-            // Send Facebook CAPI Purchase event
+            // Facebook CAPI Purchase event
+            $eventId = fb_event_id();
             if (setting('fb_pixel_id') && setting('facebook_access_token')) {
                 $fbService->sendEvent('Purchase', $eventId, [
                     'em' => [hash('sha256', strtolower($order->customer_email))],
@@ -214,7 +268,6 @@ class CheckoutController extends Controller
                     'contents' => $order->items->map(fn($i) => ['id' => $i->product->sku, 'quantity' => $i->quantity])->toArray(),
                 ]);
 
-                // Pass eventId to view via session
                 session()->flash('fb_event_id', $eventId);
             }
 
@@ -230,7 +283,9 @@ class CheckoutController extends Controller
     public function orderComplete(Request $request)
     {
         $orderNumber = $request->query('order_number');
-        $order = Order::with('items.product', 'shippingAddress')->where('order_number', $orderNumber)->first();
+        $order = Order::with(['items.product', 'items.attributes', 'shippingAddress'])
+            ->where('order_number', $orderNumber)
+            ->first();
 
         if (!$order) {
             return redirect()->route('public.products')->with('error', 'Order not found.');
@@ -238,7 +293,6 @@ class CheckoutController extends Controller
 
         return view('public.order-complete', compact('order'));
     }
-
 
     // Show order tracking form
     public function orderTrack()
@@ -252,8 +306,8 @@ class CheckoutController extends Controller
             'tracking_number' => 'required|string|max:255'
         ]);
 
-        // Find order by tracking number
-        $order = Order::where('order_number', $request->tracking_number)
+        $order = Order::with(['items.product', 'items.attributes', 'shippingAddress'])
+            ->where('order_number', $request->tracking_number)
             ->first();
 
         if (!$order) {
@@ -262,5 +316,4 @@ class CheckoutController extends Controller
 
         return view('public.parcel-tracking', ['order' => $order]);
     }
-
 }

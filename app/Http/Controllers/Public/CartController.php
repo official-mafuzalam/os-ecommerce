@@ -5,10 +5,11 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\ShoppingCart;
 use App\Models\Product;
+use App\Models\Attribute;
+use App\Models\CartItem;
 use App\Services\FacebookCapiService;
 use Illuminate\Http\Request;
-
-use function Symfony\Component\String\b;
+use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
@@ -23,7 +24,7 @@ class CartController extends Controller
     public function index()
     {
         $cart = $this->getCart();
-        $items = $cart->items()->with('product')->get();
+        $items = $cart->items()->with(['product', 'attributes'])->get();
 
         return view('public.cart.index', [
             'cart' => $cart,
@@ -43,13 +44,58 @@ class CartController extends Controller
             ]);
 
             $cart = $this->getCart();
-            $cart->addItem($product->id, $request->quantity);
+
+            // Create or update cart item
+            $item = $cart->items()->where('product_id', $product->id)->first();
+
+            if ($item) {
+                $item->quantity += $request->quantity;
+                $item->save();
+            } else {
+                $item = $cart->items()->create([
+                    'product_id' => $product->id,
+                    'quantity' => $request->quantity
+                ]);
+            }
+
+            // Handle attributes if provided
+            $attributes = $request->input('attributes', []);
+            if (!empty($attributes)) {
+                // First, clear existing attributes for this cart item
+                $item->attributes()->detach();
+
+                // Add new attributes
+                foreach ($attributes as $attributeIdentifier => $value) {
+                    if ($value) {
+                        // Find attribute by ID, slug, or name
+                        $attribute = null;
+
+                        // First, try to find by ID (if numeric)
+                        if (is_numeric($attributeIdentifier)) {
+                            $attribute = Attribute::find($attributeIdentifier);
+                        }
+
+                        // If not found by ID, try slug or name
+                        if (!$attribute) {
+                            $attribute = Attribute::where('slug', $attributeIdentifier)
+                                ->orWhere('name', $attributeIdentifier)
+                                ->first();
+                        }
+
+                        if ($attribute) {
+                            $item->attributes()->attach($attribute->id, [
+                                'value' => $value,
+                                'order' => $attribute->order ?? 0
+                            ]);
+                        }
+                    }
+                }
+            }
 
             // 🔹 Facebook Pixel + CAPI AddToCart Event
             if (setting('fb_pixel_id') && setting('facebook_access_token')) {
                 $eventId = fb_event_id();
 
-                // Send to Facebook CAPI
                 $fbService->sendEvent('AddToCart', $eventId, [
                     'em' => [hash('sha256', strtolower(auth()->user()->email ?? ''))],
                     'ph' => [hash('sha256', auth()->user()->phone ?? '')],
@@ -68,16 +114,15 @@ class CartController extends Controller
                     ],
                 ]);
 
-                // Save eventId to flash session for Blade use
                 session()->flash('fb_event_id', $eventId);
             }
 
             return back()->with('success', 'Product added to cart!');
         } catch (\Exception $e) {
+            Log::error('Add to cart error: ' . $e->getMessage());
             return back()->with('error', 'Failed to add product to cart: ' . $e->getMessage());
         }
     }
-
 
     // Update quantity of a cart item
     public function update(Request $request, $itemId)
@@ -106,7 +151,8 @@ class CartController extends Controller
                 ], 422);
             }
 
-            $cart->updateItem($product->id, $request->quantity);
+            $item->quantity = $request->quantity;
+            $item->save();
 
             return response()->json([
                 'success' => true,
@@ -137,7 +183,7 @@ class CartController extends Controller
                 ], 404);
             }
 
-            $cart->removeItem($item->product_id);
+            $item->delete();
 
             return response()->json([
                 'success' => true,
@@ -159,7 +205,7 @@ class CartController extends Controller
     {
         try {
             $cart = $this->getCart();
-            $cart->clear();
+            $cart->items()->delete();
 
             return response()->json([
                 'success' => true,
@@ -175,6 +221,4 @@ class CartController extends Controller
             ], 500);
         }
     }
-
-
 }

@@ -191,8 +191,8 @@ class SettingsTableSeeder extends Seeder
             ['key' => 'order_form_bangla', 'value' => '0', 'type' => 'boolean', 'group' => 'order', 'label' => 'Order Form Language in Bangla?', 'order' => 1],
             ['key' => 'order_email_need', 'value' => '0', 'type' => 'boolean', 'group' => 'order', 'label' => 'Is Email Required in Order Form?', 'order' => 2],
             ['key' => 'order_notes_need', 'value' => '0', 'type' => 'boolean', 'group' => 'order', 'label' => 'Are Additional Notes Required in Order Form?', 'order' => 3],
-            ['key' => 'inside_dhaka_shipping_cost', 'value' => '80', 'type' => 'text', 'group' => 'order', 'label' => 'Inside Dhaka Shipping Cost (TK)', 'order' => 4],
-            ['key' => 'outside_dhaka_shipping_cost', 'value' => '150', 'type' => 'text', 'group' => 'order', 'label' => 'Outside Dhaka Shipping Cost (TK)', 'order' => 5],
+            ['key' => 'delivery_charge_inside_dhaka', 'value' => '80', 'type' => 'text', 'group' => 'order', 'label' => 'Inside Dhaka Shipping Cost (TK)', 'order' => 4],
+            ['key' => 'delivery_charge_outside_dhaka', 'value' => '150', 'type' => 'text', 'group' => 'order', 'label' => 'Outside Dhaka Shipping Cost (TK)', 'order' => 5],
             // ['key' => 'free_shipping_threshold', 'value' => '2000', 'type' => 'text', 'group' => 'order', 'label' => 'Free Shipping Threshold (TK)', 'order' => 6],
         ];
 

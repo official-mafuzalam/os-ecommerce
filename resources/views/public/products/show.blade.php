@@ -170,18 +170,33 @@
                         <div class="border-t border-gray-200 pt-4">
                             <div class="flex space-x-4">
                                 <form action="{{ route('public.products.buy-now', $product) }}" method="GET"
-                                    class="flex-1">
-                                    @csrf
+                                    id="buy-now-form">
                                     <input type="hidden" name="quantity" value="1">
+
+                                    @if ($groupedAttributes->count() > 0)
+                                        @foreach ($groupedAttributes as $attribute)
+                                            <input type="hidden" name="attributes[{{ $attribute['id'] }}]"
+                                                id="buy-now-attribute-{{ $attribute['id'] }}" value="">
+                                        @endforeach
+                                    @endif
+
                                     <button type="submit"
                                         class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-md transition-colors flex items-center justify-center">
                                         <i class="fas fa-shopping-bag mr-2"></i>
                                         Buy Now
                                     </button>
                                 </form>
-                                <form action="{{ route('cart.add', $product) }}" method="POST" class="flex-1">
+                                <form action="{{ route('cart.add', $product) }}" method="POST" id="add-to-cart-form">
                                     @csrf
                                     <input type="hidden" name="quantity" value="1" id="form-quantity">
+
+                                    @if ($groupedAttributes->count() > 0)
+                                        @foreach ($groupedAttributes as $attribute)
+                                            <input type="hidden" name="attributes[{{ $attribute['id'] }}]"
+                                                id="attribute-{{ $attribute['id'] }}" value="">
+                                        @endforeach
+                                    @endif
+
                                     <button type="submit"
                                         class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-md transition-colors flex items-center justify-center"
                                         {{ $product->stock_quantity == 0 ? 'disabled' : '' }}>
@@ -417,6 +432,62 @@
             function changeImage(src) {
                 document.getElementById('main-product-image').src = src;
             }
+            // Function to update attribute values in forms
+            function updateAttributeValues() {
+                // For Add to Cart form
+                const addToCartForm = document.getElementById('add-to-cart-form');
+                if (addToCartForm) {
+                    const attributeInputs = addToCartForm.querySelectorAll('input[name^="attributes["]');
+                    attributeInputs.forEach(input => {
+                        const name = input.getAttribute('name');
+                        const radio = document.querySelector(
+                            `input[name="${name.replace('attributes', 'attributes')}"]:checked`);
+                        if (radio) {
+                            input.value = radio.value;
+                        }
+                    });
+                }
+
+                // For Buy Now form
+                const buyNowForm = document.getElementById('buy-now-form');
+                if (buyNowForm) {
+                    const attributeInputs = buyNowForm.querySelectorAll('input[name^="attributes["]');
+                    attributeInputs.forEach(input => {
+                        const name = input.getAttribute('name');
+                        const radio = document.querySelector(
+                            `input[name="${name.replace('buy-now-attributes', 'attributes')}"]:checked`);
+                        if (radio) {
+                            input.value = radio.value;
+                        }
+                    });
+                }
+            }
+
+            // Add event listeners to attribute radios
+            document.addEventListener('DOMContentLoaded', function() {
+                const attributeRadios = document.querySelectorAll('input[name^="attributes["]');
+                attributeRadios.forEach(radio => {
+                    radio.addEventListener('change', updateAttributeValues);
+                });
+
+                // Update forms on page load
+                updateAttributeValues();
+
+                // Form submit handlers
+                const addToCartForm = document.getElementById('add-to-cart-form');
+                if (addToCartForm) {
+                    addToCartForm.addEventListener('submit', function(e) {
+                        updateAttributeValues();
+                    });
+                }
+
+                const buyNowForm = document.getElementById('buy-now-form');
+                if (buyNowForm) {
+                    buyNowForm.addEventListener('submit', function(e) {
+                        updateAttributeValues();
+                    });
+                }
+            });
 
             // Function to increase quantity
             function increaseQuantity() {

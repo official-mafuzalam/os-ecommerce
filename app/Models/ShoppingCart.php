@@ -40,13 +40,13 @@ class ShoppingCart extends Model
             $item->quantity += $quantity;
             $item->save();
         } else {
-            $this->items()->create([
+            $item = $this->items()->create([
                 'product_id' => $productId,
                 'quantity' => $quantity
             ]);
         }
 
-        return $this;
+        return $item;
     }
 
     public function updateItem($productId, $quantity)
