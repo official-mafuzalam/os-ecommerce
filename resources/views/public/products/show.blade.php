@@ -1,40 +1,6 @@
 <x-app-layout>
     @section('title', $product->name)
     <x-slot name="main">
-        {{-- <!-- Breadcrumb Navigation -->
-        <div class="bg-gray-100 py-4">
-            <div class="container mx-auto px-4">
-                <nav class="flex" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                        <li class="inline-flex items-center">
-                            <a href="{{ route('public.welcome') }}"
-                                class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-indigo-600">
-                                <i class="fas fa-home mr-2"></i>
-                                Home
-                            </a>
-                        </li>
-                        <li>
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                                <a href="{{ route('public.categories.show', $product->category->slug) }}"
-                                    class="ml-1 text-sm font-medium text-gray-500 hover:text-indigo-600 md:ml-2">
-                                    {{ $product->category->name }}
-                                </a>
-                            </div>
-                        </li>
-                        <li aria-current="page">
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                                <span class="ml-1 text-sm font-medium text-gray-400 md:ml-2">
-                                    {{ Str::limit($product->name, 80) }}
-                                </span>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
-            </div>
-        </div> --}}
-
         <!-- Product Section -->
         <div class="container mx-auto px-4 py-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -224,7 +190,7 @@
                                     </button>
                                 </form>
                             </div>
-                            {{-- <div class="flex space-x-4 mt-2">
+                            <div class="flex space-x-4 mt-2">
                                 @if (setting('site_phone'))
                                     <a href="tel:{{ setting('site_phone', '+8801621833839') }}"
                                         class="flex-1 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md transition-colors flex items-center justify-center">
@@ -240,7 +206,7 @@
                                         WhatsApp
                                     </a>
                                 @endif
-                            </div> --}}
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -76,7 +76,7 @@
                     <i class="fas fa-shopping-cart mr-1"></i>
                 </button>
             </form>
-            <a href="{{ route('public.products.buy-now', $product) }}"
+            <a href="{{ route('public.products.show', $product->slug) }}"
                 class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition duration-300 text-sm flex items-center justify-center">
                 Buy Now
             </a>
