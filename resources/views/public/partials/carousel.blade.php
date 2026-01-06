@@ -33,7 +33,7 @@
 
                         <div class="md:w-1/2 mt-6 md:mt-0">
                             <img src="{{ $carousel->image_url }}" alt="{{ $carousel->title }}"
-                                class="rounded-xl shadow-lg md:shadow-2xl h-[250px] md:h-[400px] lg:h-[500px] object-contain mx-auto">
+                                class="rounded-xl h-[250px] md:h-[400px] lg:h-[500px] object-contain mx-auto">
                         </div>
                     </div>
                 </div>

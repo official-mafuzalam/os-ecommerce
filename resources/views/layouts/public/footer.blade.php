@@ -55,7 +55,7 @@
          </div>
 
          <div class="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
-             <a href="{{ route('admin.index') }}" class="text-gray-400 text-sm mb-4 md:mb-0">© {{ date('Y') }}
+             <a href="{{ route('public.welcome') }}" class="text-gray-400 text-sm mb-4 md:mb-0">© {{ date('Y') }}
                  {{ config('app.name', 'OS Gadgets') }}.
                  All rights reserved.</a>
 
