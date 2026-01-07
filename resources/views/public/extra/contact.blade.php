@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'Contact Us')
+    @section('title', 'Contact Us - ' . setting('site_title', 'OS E-commerce'))
     <x-slot name="main">
         <!-- Fashion Contact Hero -->
         <div class="relative overflow-hidden">

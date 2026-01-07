@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'Return & Exchange Policy')
+    @section('title', 'Return & Exchange Policy - ' . setting('site_title', 'OS E-commerce'))
     <x-slot name="main">
         <!-- Fashion Return Policy Page -->
         <div class="container mx-auto px-4 py-8 md:py-12">

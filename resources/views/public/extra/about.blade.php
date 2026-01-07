@@ -1,13 +1,13 @@
 <x-app-layout>
-    @section('title', 'About Us')
+    @section('title', 'About Us - ' . setting('site_title', 'OS E-commerce'))
     <x-slot name="main">
         <!-- Fashion About Hero -->
         <div class="relative overflow-hidden">
             <!-- Background Image with Overlay -->
             <div class="absolute inset-0">
                 <img class="w-full h-full object-cover"
-                    src="https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2000&q=80"
-                    alt="Fashion Studio">
+                    src="https://cdn.octosyncsoftware.com//storage/files/2/Other-Site/public/360_F_860540980_ipoJAjRJBSeRBNXi4x34IcoP41hSqz3x.jpg"
+                    alt="About Us Hero Background">
                 <div class="absolute inset-0 bg-black/40"></div>
             </div>
 
@@ -18,15 +18,14 @@
                         <div class="mb-8">
                             <span
                                 class="inline-block bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium">
-                                Since {{ date('Y') - 3 }}
+                                Since {{ setting('business_start_year', date('Y') - 3) }}
                             </span>
                         </div>
                         <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 elegant-heading leading-tight">
-                            The Story Behind<br>
-                            Our Fashion
+                            {{ setting('about_hero_title', 'The Story Behind Our Business') }}
                         </h1>
                         <p class="text-xl text-white/90 mb-8 max-w-2xl">
-                            A journey of passion, craftsmanship, and style that redefines luxury fashion experiences
+                            {{ setting('about_hero_subtitle', 'A journey of passion, craftsmanship, and style that redefines luxury fashion experiences') }}
                         </p>
                         <a href="{{ route('public.products') }}"
                             class="fashion-btn inline-flex items-center justify-center gap-3 px-8 py-3 text-lg">
@@ -45,43 +44,44 @@
                     <!-- Content -->
                     <div>
                         <div class="mb-8">
-                            <span class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Our
-                                Journey</span>
                             <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mt-2 mb-4">
-                                Redefining Fashion Excellence
+                                {{ setting('journey_title', 'Our Journey') }}
                             </h2>
                         </div>
 
                         <div class="space-y-6">
                             <p class="text-lg text-gray-600 leading-relaxed">
-                                Founded in {{ date('Y') - 3 }}, we began as a small boutique with a big vision: to bring
-                                exceptional fashion to discerning customers worldwide. What started with curated
-                                collections from local artisans has evolved into a premier destination for luxury
-                                fashion.
+                                {{ setting('journey_description_1', 'Founded in ' . (date('Y') - 3) . ', we began as a small boutique with a big vision: to bring exceptional fashion to discerning customers worldwide. What started with curated collections from local artisans has evolved into a premier destination for luxury fashion.') }}
                             </p>
                             <p class="text-lg text-gray-600 leading-relaxed">
-                                Our commitment extends beyond just selling clothes; we're dedicated to creating
-                                memorable experiences. Each piece in our collection is selected for its quality,
-                                craftsmanship, and ability to inspire confidence and style.
+                                {{ setting('journey_description_2', 'Our commitment extends beyond just selling clothes; we\'re dedicated to creating memorable experiences. Each piece in our collection is selected for its quality, craftsmanship, and ability to inspire confidence and style.') }}
                             </p>
                         </div>
 
                         <!-- Stats -->
                         <div class="grid grid-cols-2 gap-6 mt-10">
                             <div class="text-center">
-                                <div class="text-3xl md:text-4xl font-bold text-gray-900 mb-1">50K+</div>
+                                <div class="text-3xl md:text-4xl font-bold text-gray-900 mb-1">
+                                    {{ setting('stat_customers', '50K+') }}
+                                </div>
                                 <div class="text-sm text-gray-600">Stylish Customers</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-3xl md:text-4xl font-bold text-gray-900 mb-1">5K+</div>
+                                <div class="text-3xl md:text-4xl font-bold text-gray-900 mb-1">
+                                    {{ setting('stat_products', '5K+') }}
+                                </div>
                                 <div class="text-sm text-gray-600">Premium Products</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-3xl md:text-4xl font-bold text-gray-900 mb-1">120+</div>
+                                <div class="text-3xl md:text-4xl font-bold text-gray-900 mb-1">
+                                    {{ setting('stat_brands', '120+') }}
+                                </div>
                                 <div class="text-sm text-gray-600">Designer Brands</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-3xl md:text-4xl font-bold text-gray-900 mb-1">15+</div>
+                                <div class="text-3xl md:text-4xl font-bold text-gray-900 mb-1">
+                                    {{ setting('stat_countries', '15+') }}
+                                </div>
                                 <div class="text-sm text-gray-600">Countries Served</div>
                             </div>
                         </div>
@@ -90,15 +90,22 @@
                     <!-- Image -->
                     <div class="relative">
                         <div class="aspect-[4/5] rounded-2xl overflow-hidden">
-                            <img class="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                                src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
-                                alt="Fashion Studio Interior">
+                            @if (setting('journey_image'))
+                                <img class="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                                    src="{{ setting('journey_image') }}"
+                                    alt="Fashion Studio Interior">
+                            @else
+                                <img class="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                                    src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+                                    alt="Fashion Studio Interior">
+                            @endif
                         </div>
                         <div
                             class="absolute -bottom-6 -right-6 w-48 h-48 bg-gradient-to-br from-gray-900 to-black 
                                     rounded-2xl flex items-center justify-center text-white p-6 shadow-xl">
                             <div class="text-center">
-                                <div class="text-2xl font-bold">{{ date('Y') - 3 }}</div>
+                                <div class="text-2xl font-bold">{{ setting('business_start_year', date('Y') - 3) }}
+                                </div>
                                 <div class="text-sm mt-1">Year Founded</div>
                             </div>
                         </div>
@@ -113,10 +120,10 @@
                 <div class="text-center mb-16">
                     <span class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Our Values</span>
                     <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mt-2 mb-4">
-                        The Principles That Define Us
+                        {{ setting('values_title', 'The Principles That Define Us') }}
                     </h2>
                     <p class="text-lg text-gray-600 max-w-3xl mx-auto">
-                        These core values guide every decision we make and every experience we create
+                        {{ setting('values_subtitle', 'These core values guide every decision we make and every experience we create') }}
                     </p>
                 </div>
 
@@ -130,9 +137,11 @@
                                     text-white flex items-center justify-center mx-auto mb-6">
                             <i class="fas fa-gem text-2xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Quality Craftsmanship</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">
+                            {{ setting('value_1_title', 'Quality Craftsmanship') }}
+                        </h3>
                         <p class="text-gray-600">
-                            Every product is meticulously crafted with attention to detail and premium materials
+                            {{ setting('value_1_description', 'Every product is meticulously crafted with attention to detail and premium materials') }}
                         </p>
                     </div>
 
@@ -145,9 +154,11 @@
                                     text-white flex items-center justify-center mx-auto mb-6">
                             <i class="fas fa-leaf text-2xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Sustainable Fashion</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">
+                            {{ setting('value_2_title', 'Sustainable Fashion') }}
+                        </h3>
                         <p class="text-gray-600">
-                            Committed to ethical sourcing and environmentally conscious practices
+                            {{ setting('value_2_description', 'Committed to ethical sourcing and environmentally conscious practices') }}
                         </p>
                     </div>
 
@@ -160,9 +171,11 @@
                                     text-white flex items-center justify-center mx-auto mb-6">
                             <i class="fas fa-user-tie text-2xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Personal Style</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">
+                            {{ setting('value_3_title', 'Personal Style') }}
+                        </h3>
                         <p class="text-gray-600">
-                            Helping you discover and express your unique personal style with confidence
+                            {{ setting('value_3_description', 'Helping you discover and express your unique personal style with confidence') }}
                         </p>
                     </div>
 
@@ -175,9 +188,11 @@
                                     text-white flex items-center justify-center mx-auto mb-6">
                             <i class="fas fa-headset text-2xl"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3">Exceptional Service</h3>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">
+                            {{ setting('value_4_title', 'Exceptional Service') }}
+                        </h3>
                         <p class="text-gray-600">
-                            Dedicated to providing personalized, attentive service at every touchpoint
+                            {{ setting('value_4_description', 'Dedicated to providing personalized, attentive service at every touchpoint') }}
                         </p>
                     </div>
                 </div>
@@ -190,7 +205,7 @@
                 <div class="text-center mb-16">
                     <span class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Our Process</span>
                     <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mt-2 mb-4">
-                        From Concept to Collection
+                        {{ setting('process_title', 'From Concept to Collection') }}
                     </h2>
                 </div>
 
@@ -209,7 +224,9 @@
                                     <div class="flex items-center justify-end gap-4 mb-4">
                                         <div>
                                             <span class="text-sm font-semibold text-gray-500">Step 01</span>
-                                            <h3 class="text-xl font-bold text-gray-900">Curated Selection</h3>
+                                            <h3 class="text-xl font-bold text-gray-900">
+                                                {{ setting('process_step_1_title', 'Curated Selection') }}
+                                            </h3>
                                         </div>
                                         <div
                                             class="w-12 h-12 rounded-full bg-gray-900 text-white 
@@ -218,8 +235,7 @@
                                         </div>
                                     </div>
                                     <p class="text-gray-600">
-                                        Our fashion experts travel globally to discover emerging designers and
-                                        established brands that align with our quality standards and aesthetic vision.
+                                        {{ setting('process_step_1_description', 'Our fashion experts travel globally to discover emerging designers and established brands that align with our quality standards and aesthetic vision.') }}
                                     </p>
                                 </div>
                             </div>
@@ -251,12 +267,13 @@
                                         </div>
                                         <div>
                                             <span class="text-sm font-semibold text-gray-500">Step 02</span>
-                                            <h3 class="text-xl font-bold text-gray-900">Quality Assurance</h3>
+                                            <h3 class="text-xl font-bold text-gray-900">
+                                                {{ setting('process_step_2_title', 'Quality Assurance') }}
+                                            </h3>
                                         </div>
                                     </div>
                                     <p class="text-gray-600">
-                                        Each product undergoes rigorous quality checks, from material inspection to
-                                        craftsmanship evaluation, ensuring only the finest items reach our customers.
+                                        {{ setting('process_step_2_description', 'Each product undergoes rigorous quality checks, from material inspection to craftsmanship evaluation, ensuring only the finest items reach our customers.') }}
                                     </p>
                                 </div>
                             </div>
@@ -269,7 +286,9 @@
                                     <div class="flex items-center justify-end gap-4 mb-4">
                                         <div>
                                             <span class="text-sm font-semibold text-gray-500">Step 03</span>
-                                            <h3 class="text-xl font-bold text-gray-900">Styling Expertise</h3>
+                                            <h3 class="text-xl font-bold text-gray-900">
+                                                {{ setting('process_step_3_title', 'Styling Expertise') }}
+                                            </h3>
                                         </div>
                                         <div
                                             class="w-12 h-12 rounded-full bg-gray-900 text-white 
@@ -278,8 +297,7 @@
                                         </div>
                                     </div>
                                     <p class="text-gray-600">
-                                        Our styling team creates curated looks and provides fashion advice to help
-                                        customers build cohesive wardrobes that reflect their personal style.
+                                        {{ setting('process_step_3_description', 'Our styling team creates curated looks and provides fashion advice to help customers build cohesive wardrobes that reflect their personal style.') }}
                                     </p>
                                 </div>
                             </div>
@@ -302,10 +320,10 @@
                 <div class="text-center mb-16">
                     <span class="text-sm font-semibold text-white/70 uppercase tracking-wider">Our Visionaries</span>
                     <h2 class="text-4xl md:text-5xl font-bold mt-2 mb-4">
-                        Meet Our Fashion Leaders
+                        {{ setting('team_title', 'Meet Our Fashion Leaders') }}
                     </h2>
                     <p class="text-lg text-white/80 max-w-3xl mx-auto">
-                        The creative minds shaping the future of fashion retail
+                        {{ setting('team_subtitle', 'The creative minds shaping the future of fashion retail') }}
                     </p>
                 </div>
 
@@ -313,48 +331,75 @@
                     <!-- Leader 1 -->
                     <div class="group">
                         <div class="relative overflow-hidden rounded-2xl mb-6">
-                            <img class="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
-                                src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"
-                                alt="Creative Director">
+                            @if (setting('team_member_1_image'))
+                                <img class="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
+                                    src="{{ Storage::url(setting('team_member_1_image')) }}"
+                                    alt="{{ setting('team_member_1_name', 'Isabella Rossi') }}">
+                            @else
+                                <img class="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
+                                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"
+                                    alt="{{ setting('team_member_1_name', 'Isabella Rossi') }}">
+                            @endif
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         </div>
-                        <h3 class="text-xl font-bold mb-1">Isabella Rossi</h3>
-                        <p class="text-white/60 text-sm mb-3">Creative Director & Founder</p>
+                        <h3 class="text-xl font-bold mb-1">
+                            {{ setting('team_member_1_name', 'Isabella Rossi') }}
+                        </h3>
+                        <p class="text-white/60 text-sm mb-3">
+                            {{ setting('team_member_1_position', 'Creative Director & Founder') }}
+                        </p>
                         <p class="text-white/80">
-                            With 15 years in luxury fashion, Isabella's vision shapes our aesthetic direction
-                            and brand identity.
+                            {{ setting('team_member_1_description', 'With 15 years in luxury fashion, Isabella\'s vision shapes our aesthetic direction and brand identity.') }}
                         </p>
                     </div>
 
                     <!-- Leader 2 -->
                     <div class="group">
                         <div class="relative overflow-hidden rounded-2xl mb-6">
-                            <img class="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
-                                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"
-                                alt="Head of Design">
+                            @if (setting('team_member_2_image'))
+                                <img class="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
+                                    src="{{ Storage::url(setting('team_member_2_image')) }}"
+                                    alt="{{ setting('team_member_2_name', 'Alexander Chen') }}">
+                            @else
+                                <img class="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
+                                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"
+                                    alt="{{ setting('team_member_2_name', 'Alexander Chen') }}">
+                            @endif
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         </div>
-                        <h3 class="text-xl font-bold mb-1">Alexander Chen</h3>
-                        <p class="text-white/60 text-sm mb-3">Head of Design & Merchandising</p>
+                        <h3 class="text-xl font-bold mb-1">
+                            {{ setting('team_member_2_name', 'Alexander Chen') }}
+                        </h3>
+                        <p class="text-white/60 text-sm mb-3">
+                            {{ setting('team_member_2_position', 'Head of Design & Merchandising') }}
+                        </p>
                         <p class="text-white/80">
-                            Alexander's expertise in global fashion trends ensures our collections remain
-                            contemporary and relevant.
+                            {{ setting('team_member_2_description', 'Alexander\'s expertise in global fashion trends ensures our collections remain contemporary and relevant.') }}
                         </p>
                     </div>
 
                     <!-- Leader 3 -->
                     <div class="group">
                         <div class="relative overflow-hidden rounded-2xl mb-6">
-                            <img class="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
-                                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"
-                                alt="Customer Experience Director">
+                            @if (setting('team_member_3_image'))
+                                <img class="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
+                                    src="{{ Storage::url(setting('team_member_3_image')) }}"
+                                    alt="{{ setting('team_member_3_name', 'Sophia Williams') }}">
+                            @else
+                                <img class="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
+                                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"
+                                    alt="{{ setting('team_member_3_name', 'Sophia Williams') }}">
+                            @endif
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         </div>
-                        <h3 class="text-xl font-bold mb-1">Sophia Williams</h3>
-                        <p class="text-white/60 text-sm mb-3">Customer Experience Director</p>
+                        <h3 class="text-xl font-bold mb-1">
+                            {{ setting('team_member_3_name', 'Sophia Williams') }}
+                        </h3>
+                        <p class="text-white/60 text-sm mb-3">
+                            {{ setting('team_member_3_position', 'Customer Experience Director') }}
+                        </p>
                         <p class="text-white/80">
-                            Sophia leads our commitment to exceptional service, ensuring every customer
-                            feels valued and understood.
+                            {{ setting('team_member_3_description', 'Sophia leads our commitment to exceptional service, ensuring every customer feels valued and understood.') }}
                         </p>
                     </div>
                 </div>
@@ -366,10 +411,10 @@
             <div class="container mx-auto px-4">
                 <div class="bg-gradient-to-r from-gray-900 to-black rounded-3xl p-12 md:p-16 text-center">
                     <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-                        Ready to Experience Premium Fashion?
+                        {{ setting('cta_title', 'Ready to Experience Premium Fashion?') }}
                     </h2>
                     <p class="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
-                        Join thousands of satisfied customers who trust us for their style journey
+                        {{ setting('cta_description', 'Join thousands of satisfied customers who trust us for their style journey') }}
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
                         <a href="{{ route('public.products') }}"

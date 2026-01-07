@@ -218,8 +218,8 @@ class ProductController extends Controller
                             $src = imagecreatefromjpeg($targetPath);
                             $origW = imagesx($src);
                             $origH = imagesy($src);
-                            $newW = (int)($origW * 0.9);
-                            $newH = (int)($origH * 0.9);
+                            $newW = (int) ($origW * 0.9);
+                            $newH = (int) ($origH * 0.9);
 
                             if ($newW < 400 || $newH < 400) {
                                 imagedestroy($src);
@@ -404,85 +404,91 @@ class ProductController extends Controller
                         mkdir($publicDir, 0755, true);
                     }
 
-                    try {
-                        switch ($mime) {
-                            case 'image/png':
-                                $src = imagecreatefrompng($image->getPathname());
-                                break;
-                            case 'image/gif':
-                                $src = imagecreatefromgif($image->getPathname());
-                                break;
-                            case 'image/webp':
-                                if (function_exists('imagecreatefromwebp')) {
-                                    $src = imagecreatefromwebp($image->getPathname());
-                                } else {
+                    // Check if GD functions are available
+                    if (function_exists('imagecreatefromjpeg') && function_exists('imagejpeg')) {
+                        try {
+                            switch ($mime) {
+                                case 'image/png':
+                                    $src = imagecreatefrompng($image->getPathname());
+                                    break;
+                                case 'image/gif':
+                                    $src = imagecreatefromgif($image->getPathname());
+                                    break;
+                                case 'image/webp':
+                                    if (function_exists('imagecreatefromwebp')) {
+                                        $src = imagecreatefromwebp($image->getPathname());
+                                    } else {
+                                        $src = imagecreatefromjpeg($image->getPathname());
+                                    }
+                                    break;
+                                default:
                                     $src = imagecreatefromjpeg($image->getPathname());
-                                }
-                                break;
-                            default:
-                                $src = imagecreatefromjpeg($image->getPathname());
-                                break;
-                        }
-
-                        $w = imagesx($src);
-                        $h = imagesy($src);
-
-                        $dst = imagecreatetruecolor($w, $h);
-                        $white = imagecolorallocate($dst, 255, 255, 255);
-                        imagefill($dst, 0, 0, $white);
-                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $w, $h);
-
-                        $quality = 85;
-                        imagejpeg($dst, $targetPath, $quality);
-
-                        imagedestroy($src);
-                        imagedestroy($dst);
-
-                        $maxBytes = 200 * 1024; // 200 KB
-
-                        while (filesize($targetPath) > $maxBytes && $quality > 30) {
-                            $quality -= 5;
-                            $src = imagecreatefromjpeg($targetPath);
-                            $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
-                            $white = imagecolorallocate($dst, 255, 255, 255);
-                            imagefill($dst, 0, 0, $white);
-                            imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src), imagesx($src), imagesy($src));
-                            imagejpeg($dst, $targetPath, $quality);
-                            imagedestroy($src);
-                            imagedestroy($dst);
-                        }
-
-                        while (filesize($targetPath) > $maxBytes) {
-                            $src = imagecreatefromjpeg($targetPath);
-                            $origW = imagesx($src);
-                            $origH = imagesy($src);
-                            $newW = (int)($origW * 0.9);
-                            $newH = (int)($origH * 0.9);
-
-                            if ($newW < 400 || $newH < 400) {
-                                imagedestroy($src);
-                                break;
+                                    break;
                             }
 
-                            $dst = imagecreatetruecolor($newW, $newH);
+                            $w = imagesx($src);
+                            $h = imagesy($src);
+
+                            $dst = imagecreatetruecolor($w, $h);
                             $white = imagecolorallocate($dst, 255, 255, 255);
                             imagefill($dst, 0, 0, $white);
-                            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                            imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $w, $h);
+
+                            $quality = 85;
                             imagejpeg($dst, $targetPath, $quality);
+
                             imagedestroy($src);
                             imagedestroy($dst);
-                        }
 
-                        $galleryPath = 'products/gallery/' . $filename;
-                    } catch (\Exception $e) {
-                        // fallback to storing original file
+                            $maxBytes = 200 * 1024; // 200 KB
+
+                            while (filesize($targetPath) > $maxBytes && $quality > 30) {
+                                $quality -= 5;
+                                $src = imagecreatefromjpeg($targetPath);
+                                $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
+                                $white = imagecolorallocate($dst, 255, 255, 255);
+                                imagefill($dst, 0, 0, $white);
+                                imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src), imagesx($src), imagesy($src));
+                                imagejpeg($dst, $targetPath, $quality);
+                                imagedestroy($src);
+                                imagedestroy($dst);
+                            }
+
+                            while (filesize($targetPath) > $maxBytes) {
+                                $src = imagecreatefromjpeg($targetPath);
+                                $origW = imagesx($src);
+                                $origH = imagesy($src);
+                                $newW = (int) ($origW * 0.9);
+                                $newH = (int) ($origH * 0.9);
+
+                                if ($newW < 400 || $newH < 400) {
+                                    imagedestroy($src);
+                                    break;
+                                }
+
+                                $dst = imagecreatetruecolor($newW, $newH);
+                                $white = imagecolorallocate($dst, 255, 255, 255);
+                                imagefill($dst, 0, 0, $white);
+                                imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                                imagejpeg($dst, $targetPath, $quality);
+                                imagedestroy($src);
+                                imagedestroy($dst);
+                            }
+
+                            $galleryPath = 'products/gallery/' . $filename;
+                        } catch (\Exception $e) {
+                            // fallback to storing original file
+                            $galleryPath = $image->store('products/gallery', 'public');
+                        }
+                    } else {
+                        // GD not available, store original file
                         $galleryPath = $image->store('products/gallery', 'public');
                     }
 
                     ProductImage::create([
                         'product_id' => $product->id,
                         'image_path' => $galleryPath,
-                        'is_primary' => $index === 0 && $product->images()->where('is_primary', true)->doesntExist(),
+                        'is_primary' => $index === 0,
                     ]);
                 }
             }

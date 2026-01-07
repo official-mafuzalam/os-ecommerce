@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'Terms of Service')
+    @section('title', 'Terms of Service - ' . setting('site_title', 'OS E-commerce'))
     <x-slot name="main">
         <!-- Fashion Terms of Service Page -->
         <div class="container mx-auto px-4 py-8 md:py-12">

@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'Privacy Policy')
+    @section('title', 'Privacy Policy - ' . setting('site_title', 'OS E-commerce'))
     <x-slot name="main">
         <!-- Fashion Privacy Policy Page -->
         <div class="container mx-auto px-4 py-8 md:py-12">
