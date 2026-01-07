@@ -1,63 +1,6 @@
 <x-app-layout>
     @section('title', 'Products')
     <x-slot name="main">
-        {{-- <!-- Breadcrumb -->
-        <div class="bg-gray-100 py-4">
-            <div class="container mx-auto px-4">
-                <nav class="flex" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                        <li class="inline-flex items-center">
-                            <a href="{{ route('public.welcome') }}" class="text-sm text-gray-700 hover:text-indigo-600">
-                                <i class="fas fa-home mr-1"></i>
-                                Home
-                            </a>
-                        </li>
-                        <li>
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                                <a href="{{ route('public.products') }}"
-                                    class="ml-3 text-sm text-gray-700 hover:text-indigo-600">
-                                    Products
-                                </a>
-                            </div>
-                        </li>
-                        @if (isset($category))
-                            <li>
-                                <div class="flex items-center">
-                                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                                    <span class="ml-3 text-sm font-medium text-gray-500">{{ $category->name }}</span>
-                                </div>
-                            </li>
-                        @endif
-                        @if (isset($brand))
-                            <li>
-                                <div class="flex items-center">
-                                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                                    <span class="ml-3 text-sm font-medium text-gray-500">{{ $brand->name }}</span>
-                                </div>
-                            </li>
-                        @endif
-                        @if (isset($is_featured) && $is_featured)
-                            <li>
-                                <div class="flex items-center">
-                                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                                    <span class="ml-3 text-sm font-medium text-gray-500">Featured</span>
-                                </div>
-                            </li>
-                        @endif
-                        @if (isset($deal))
-                            <li>
-                                <div class="flex items-center">
-                                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                                    <span class="ml-3 text-sm font-medium text-gray-500">{{ $deal->title }}</span>
-                                </div>
-                            </li>
-                        @endif
-                    </ol>
-                </nav>
-            </div>
-        </div> --}}
-
         <!-- Page Header -->
         <div class="container mx-auto px-4 py-8">
             <div class="bg-white rounded-lg shadow-md p-6 mb-8">

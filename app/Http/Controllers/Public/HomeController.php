@@ -55,7 +55,7 @@ class HomeController extends Controller
             $allDeals = Deal::featured()->ordered()->latest()->take(10)->get();
         }
 
-        return view('public.layout-2.index', compact(
+        return view('public.index', compact(
             'carousels',
             'deal',
             'allProducts',

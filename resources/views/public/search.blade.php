@@ -1,26 +1,5 @@
 <x-app-layout>
     <x-slot name="main">
-        <!-- Breadcrumb -->
-        {{-- <div class="bg-gray-100 py-4">
-            <div class="container mx-auto px-4">
-                <nav class="flex" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                        <li class="inline-flex items-center">
-                            <a href="{{ route('public.welcome') }}" class="text-sm text-gray-700 hover:text-indigo-600">
-                                <i class="fas fa-home mr-1"></i>
-                                Home
-                            </a>
-                        </li>
-                        <li aria-current="page">
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
-                                <span class="ml-3 text-sm font-medium text-gray-500">Search Results</span>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
-            </div>
-        </div> --}}
 
         <!-- Search Results -->
         <div class="container mx-auto px-4 py-8">

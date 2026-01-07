@@ -1,41 +1,62 @@
 <x-app-layout>
     @section('title', $product->name)
     <x-slot name="main">
-        <!-- Product Section -->
-        <div class="container mx-auto px-4 py-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Fashion Product Section -->
+        <div class="container mx-auto px-4 py-8 md:py-12">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                 <!-- Product Images -->
                 <div>
                     <!-- Main Image -->
-                    <div class="mb-4 bg-white rounded-lg shadow-md p-4">
-                        <div class="relative overflow-hidden rounded-lg">
+                    <div class="mb-4 bg-white rounded-2xl shadow-sm p-4 md:p-6">
+                        <div class="relative overflow-hidden rounded-xl">
                             @if ($product->images->count() > 0)
                                 <img id="main-product-image"
                                     src="{{ Storage::url($product->images->first()->image_path) }}"
-                                    alt="{{ $product->name }}" class="w-full h-96 object-contain">
+                                    alt="{{ $product->name }}" class="w-full h-80 md:h-96 object-contain bg-gray-50">
                             @else
-                                <div class="w-full h-96 bg-gray-200 flex items-center justify-center rounded-lg">
-                                    <i class="fas fa-image text-4xl text-gray-400"></i>
-                                </div>
-                            @endif
-                            @if ($product->discount > 0)
                                 <div
-                                    class="absolute top-4 left-4 bg-red-600 text-white text-sm font-bold px-3 py-1 rounded-full">
-                                    {{ number_format($product->discount) }} TK OFF
+                                    class="w-full h-80 md:h-96 bg-gray-100 flex items-center justify-center rounded-xl">
+                                    <i class="fas fa-image text-5xl text-gray-300"></i>
                                 </div>
                             @endif
+
+                            <!-- Fashion Badges -->
+                            <div class="absolute top-4 left-4 flex flex-col gap-2">
+                                @if ($product->discount > 0)
+                                    <span class="fashion-badge sale-badge">
+                                        {{ number_format(($product->discount / $product->price) * 100) }}% OFF
+                                    </span>
+                                @endif
+                                @if ($product->created_at->gt(now()->subDays(30)))
+                                    <span class="fashion-badge new-badge">
+                                        NEW
+                                    </span>
+                                @endif
+                            </div>
+
+                            <!-- Quick Actions -->
+                            {{-- <div class="absolute top-4 right-4 flex gap-2">
+                                <button class="quick-view-btn" title="Quick View">
+                                    <i class="fas fa-expand-arrows-alt"></i>
+                                </button>
+                                <button class="wishlist-btn" title="Add to Wishlist">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div> --}}
                         </div>
                     </div>
 
-                    <!-- Thumbnail Images -->
+                    <!-- Thumbnail Gallery -->
                     @if ($product->images->count() > 1)
-                        <div class="grid grid-cols-4 gap-2">
+                        <div class="grid grid-cols-4 gap-2 md:gap-3">
                             @foreach ($product->images as $image)
-                                <div class="border-2 border-transparent hover:border-indigo-500 rounded-lg p-1 cursor-pointer transition-all"
-                                    onclick="changeImage('{{ Storage::url($image->image_path) }}')">
+                                <button onclick="changeImage('{{ Storage::url($image->image_path) }}')"
+                                    class="group relative overflow-hidden rounded-lg border-2 border-transparent hover:border-gray-300 focus:border-gray-300 transition-all duration-200 p-1">
                                     <img src="{{ Storage::url($image->image_path) }}" alt="{{ $product->name }}"
-                                        class="w-full h-20 object-cover rounded-md">
-                                </div>
+                                        class="w-full h-16 md:h-20 object-cover rounded">
+                                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors">
+                                    </div>
+                                </button>
                             @endforeach
                         </div>
                     @endif
@@ -43,184 +64,235 @@
 
                 <!-- Product Details -->
                 <div>
-                    <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6 md:p-8">
                         <!-- Brand & Status -->
                         <div class="flex justify-between items-start mb-4">
                             @if ($product->brand)
-                                <span class="text-sm text-gray-500">By <a
-                                        href="{{ route('public.brands.show', $product->brand->slug) }}"
-                                        class="text-indigo-600 hover:underline">{{ $product->brand->name }}</a></span>
+                                <a href="{{ route('public.brands.show', $product->brand->slug) }}"
+                                    class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
+                                    <span>By {{ $product->brand->name }}</span>
+                                    <i class="fas fa-chevron-right text-xs"></i>
+                                </a>
                             @endif
+
                             @if ($product->stock_quantity > 0)
-                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">In
-                                    Stock</span>
+                                <div class="flex items-center gap-2 text-green-600">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span class="text-sm font-medium">In Stock</span>
+                                    @if ($product->stock_quantity <= 10)
+                                        <span class="text-xs bg-green-100 px-2 py-1 rounded-full">
+                                            Only {{ $product->stock_quantity }} left
+                                        </span>
+                                    @endif
+                                </div>
                             @else
-                                <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">Out of
-                                    Stock</span>
+                                <div class="flex items-center gap-2 text-red-600">
+                                    <i class="fas fa-times-circle"></i>
+                                    <span class="text-sm font-medium">Out of Stock</span>
+                                </div>
                             @endif
                         </div>
 
                         <!-- Product Title -->
-                        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{{ $product->name }}</h1>
+                        <h1
+                            class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 elegant-heading leading-tight">
+                            {{ $product->name }}
+                        </h1>
 
-                        <!-- Rating -->
-                        <div class="flex items-center mb-4">
-                            <div class="flex text-yellow-400">
-                                @for ($i = 1; $i <= 5; $i++)
-                                    @if ($i <= floor($product->average_rating))
-                                        <i class="fas fa-star"></i>
-                                    @elseif($i - 0.5 <= $product->average_rating)
-                                        <i class="fas fa-star-half-alt"></i>
-                                    @else
-                                        <i class="far fa-star"></i>
-                                    @endif
-                                @endfor
+                        <!-- Rating & Reviews -->
+                        <div class="flex items-center gap-4 mb-6">
+                            {{-- <div class="flex items-center gap-2">
+                                <div class="flex text-yellow-400">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        @if ($i <= floor($product->average_rating))
+                                            <i class="fas fa-star text-sm"></i>
+                                        @elseif($i - 0.5 <= $product->average_rating)
+                                            <i class="fas fa-star-half-alt text-sm"></i>
+                                        @else
+                                            <i class="far fa-star text-sm"></i>
+                                        @endif
+                                    @endfor
+                                </div>
+                                <span class="text-sm text-gray-600">({{ $product->reviews_count }} reviews)</span>
                             </div>
-                            <span class="ml-2 text-sm text-gray-600">({{ $product->reviews_count }} reviews)</span>
+                            <span class="text-gray-400">•</span> --}}
+                            <span class="text-sm text-gray-600">{{ $product->sku }}</span>
                         </div>
 
                         <!-- Price -->
-                        <div class="mb-6">
+                        <div class="mb-8">
                             @if ($product->discount > 0)
-                                <div class="flex items-center">
-                                    <span
-                                        class="text-3xl font-bold text-gray-900">{{ number_format($product->final_price) }}
-                                        TK</span>
-                                    <span
-                                        class="ml-3 text-xl text-gray-500 line-through">{{ number_format($product->price) }}
-                                        TK</span>
-                                    <span class="ml-3 bg-red-100 text-red-800 text-sm font-medium px-2 py-1 rounded">
+                                <div class="flex items-baseline gap-4">
+                                    <span class="text-3xl md:text-4xl font-bold text-gray-900">
+                                        {{ number_format($product->final_price) }} TK
+                                    </span>
+                                    <span class="text-xl text-gray-500 line-through">
+                                        {{ number_format($product->price) }} TK
+                                    </span>
+                                    <span class="text-sm font-semibold text-red-600 bg-red-50 px-3 py-1 rounded-full">
                                         Save {{ number_format($product->discount) }} TK
                                     </span>
                                 </div>
                             @else
-                                <span class="text-3xl font-bold text-gray-900">{{ number_format($product->price) }}
-                                    TK</span>
+                                <span class="text-3xl md:text-4xl font-bold text-gray-900">
+                                    {{ number_format($product->price) }} TK
+                                </span>
                             @endif
                         </div>
 
-                        <!-- Add to Cart -->
-                        <div class="mb-6">
-                            <div class="flex items-center space-x-4 mb-4">
-                                <div class="flex items-center border border-gray-300 rounded-md">
-                                    <button class="px-3 py-2 text-gray-600 hover:text-gray-800"
-                                        onclick="decreaseQuantity()">-</button>
-                                    <input type="number" id="quantity" value="1" min="1"
-                                        max="{{ $product->stock_quantity }}"
-                                        class="w-12 text-center border-0 focus:ring-0">
-                                    <button class="px-3 py-2 text-gray-600 hover:text-gray-800"
-                                        onclick="increaseQuantity()">+</button>
-                                </div>
-                                {{-- <span class="text-sm text-gray-500">{{ $product->stock_quantity }} available</span> --}}
-                            </div>
+                        <!-- Product Description -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-3">Description</h3>
+                            <p class="text-gray-700 leading-relaxed">
+                                {{ $product->short_description ?? Str::limit($product->description, 200) }}
+                            </p>
+                        </div>
 
-                            <!-- Categories -->
-                            <div class="mb-6">
-                                <h3 class="text-lg font-semibold text-gray-900 mb-2">Category</h3>
-                                <div class="flex flex-wrap gap-2">
-                                    <a href="{{ route('public.categories.show', $product->category->slug) }}"
-                                        class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm px-3 py-1 rounded-full transition-colors">
-                                        {{ $product->category->name }}
-                                    </a>
-                                </div>
-                            </div>
-
-                            @if ($groupedAttributes->count() > 0)
-                                <div class="md:col-span-2">
-                                    <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">Choose Options
-                                    </h3>
-                                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        @foreach ($groupedAttributes as $attribute)
-                                            <div>
-                                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                                                    {{ $attribute['name'] }}
-                                                </dt>
-                                                <dd class="text-sm text-gray-900 dark:text-gray-200 mt-1">
-                                                    <div class="flex flex-wrap gap-3">
-                                                        @foreach ($attribute['values'] as $value)
-                                                            @php
-                                                                $inputName = 'attributes[' . $attribute['id'] . ']';
-                                                                $valueId =
-                                                                    $attribute['id'] .
-                                                                    '_' .
-                                                                    \Illuminate\Support\Str::slug($value, '_');
-                                                            @endphp
-
-                                                            <label for="{{ $valueId }}" class="cursor-pointer">
-                                                                <input type="radio" id="{{ $valueId }}"
-                                                                    name="{{ $inputName }}"
-                                                                    value="{{ $value }}" class="peer hidden"
-                                                                    required>
-                                                                <span
-                                                                    class="inline-block px-3 py-1 rounded-md border border-gray-300 text-sm peer-checked:bg-indigo-600 peer-checked:text-white hover:bg-indigo-100 transition-colors">
-                                                                    {{ $value }}
-                                                                </span>
-                                                            </label>
-                                                        @endforeach
-                                                    </div>
-                                                </dd>
+                        <!-- Product Attributes -->
+                        @if ($groupedAttributes->count() > 0)
+                            <div class="mb-8">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">Select Options</h3>
+                                <div class="space-y-6">
+                                    @foreach ($groupedAttributes as $attribute)
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-3">
+                                                {{ $attribute['name'] }}
+                                            </label>
+                                            <div class="flex flex-wrap gap-2">
+                                                @foreach ($attribute['values'] as $value)
+                                                    @php
+                                                        $inputName = 'attributes[' . $attribute['id'] . ']';
+                                                        $valueId =
+                                                            $attribute['id'] .
+                                                            '_' .
+                                                            \Illuminate\Support\Str::slug($value, '_');
+                                                    @endphp
+                                                    <label for="{{ $valueId }}" class="cursor-pointer">
+                                                        <input type="radio" id="{{ $valueId }}"
+                                                            name="{{ $inputName }}" value="{{ $value }}"
+                                                            class="peer hidden" required>
+                                                        <span
+                                                            class="inline-block px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium
+                                                                   peer-checked:border-gray-900 peer-checked:bg-gray-900 peer-checked:text-white 
+                                                                   hover:border-gray-900 hover:bg-gray-50 transition-all duration-200">
+                                                            {{ $value }}
+                                                        </span>
+                                                    </label>
+                                                @endforeach
                                             </div>
-                                        @endforeach
-                                    </dl>
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endif
-                        </div>
+                            </div>
+                        @endif
 
-                        <!-- Product Details -->
-                        <div class="border-t border-gray-200 pt-4">
-                            <div class="flex space-x-4">
-                                <form action="{{ route('public.products.buy-now', $product) }}" method="GET"
-                                    id="buy-now-form">
-                                    <input type="hidden" name="quantity" value="1">
+                        <!-- Quantity & Actions -->
+                        <div class="space-y-6">
+                            <!-- Quantity Selector -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-3">Quantity</label>
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center border border-gray-300 rounded-lg">
+                                        <button type="button" onclick="decreaseQuantity()"
+                                            class="px-4 py-3 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" id="quantity" value="1" min="1"
+                                            max="{{ $product->stock_quantity }}"
+                                            class="w-16 text-center border-0 focus:ring-0 text-lg font-medium">
+                                        <button type="button" onclick="increaseQuantity()"
+                                            class="px-4 py-3 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <span class="text-sm text-gray-500">
+                                        {{ $product->stock_quantity }} items available
+                                    </span>
+                                </div>
+                            </div>
 
-                                    @if ($groupedAttributes->count() > 0)
-                                        @foreach ($groupedAttributes as $attribute)
-                                            <input type="hidden" name="attributes[{{ $attribute['id'] }}]"
-                                                id="buy-now-attribute-{{ $attribute['id'] }}" value="">
-                                        @endforeach
-                                    @endif
-
-                                    <button type="submit"
-                                        class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-md transition-colors flex items-center justify-center">
-                                        <i class="fas fa-shopping-bag mr-2"></i>
-                                        Buy Now
-                                    </button>
-                                </form>
-                                <form action="{{ route('cart.add', $product) }}" method="POST" id="add-to-cart-form">
+                            <!-- Action Buttons -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <!-- Add to Cart -->
+                                <form action="{{ route('cart.add', $product) }}" method="POST"
+                                    id="add-to-cart-form">
                                     @csrf
                                     <input type="hidden" name="quantity" value="1" id="form-quantity">
-
                                     @if ($groupedAttributes->count() > 0)
                                         @foreach ($groupedAttributes as $attribute)
                                             <input type="hidden" name="attributes[{{ $attribute['id'] }}]"
                                                 id="attribute-{{ $attribute['id'] }}" value="">
                                         @endforeach
                                     @endif
-
                                     <button type="submit"
-                                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-md transition-colors flex items-center justify-center"
+                                        class="w-full fashion-btn flex items-center justify-center gap-2 py-4"
                                         {{ $product->stock_quantity == 0 ? 'disabled' : '' }}>
-                                        <i class="fas fa-shopping-cart mr-2"></i>
+                                        <i class="fas fa-shopping-bag"></i>
                                         Add to Cart
                                     </button>
                                 </form>
+
+                                <!-- Buy Now -->
+                                <form action="{{ route('public.products.buy-now', $product) }}" method="GET"
+                                    id="buy-now-form">
+                                    <input type="hidden" name="quantity" value="1">
+                                    @if ($groupedAttributes->count() > 0)
+                                        @foreach ($groupedAttributes as $attribute)
+                                            <input type="hidden" name="attributes[{{ $attribute['id'] }}]"
+                                                id="buy-now-attribute-{{ $attribute['id'] }}" value="">
+                                        @endforeach
+                                    @endif
+                                    <button type="submit"
+                                        class="w-full fashion-btn fashion-btn-outline flex items-center justify-center gap-2 py-4">
+                                        <i class="fas fa-bolt"></i>
+                                        Buy Now
+                                    </button>
+                                </form>
                             </div>
-                            <div class="flex space-x-4 mt-2">
+
+                            <!-- Contact Options -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @if (setting('site_phone'))
                                     <a href="tel:{{ setting('site_phone', '+8801621833839') }}"
-                                        class="flex-1 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md transition-colors flex items-center justify-center">
-                                        <i class="fas fa-phone-alt mr-2"></i>
-                                        Call
+                                        class="flex items-center justify-center gap-2 py-3 px-4 bg-blue-50 text-blue-600 hover:bg-blue-100 
+                                              rounded-lg transition-colors font-medium">
+                                        <i class="fas fa-phone-alt"></i>
+                                        Call Now
                                     </a>
                                 @endif
                                 @if (setting('whatsapp_enabled', true))
                                     <a href="https://wa.me/{{ setting('whatsapp_number', '+8801621833839') }}?text={{ urlencode('I want to know about ' . $product->name) }}"
                                         target="_blank"
-                                        class="flex-1 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-md transition-colors flex items-center justify-center">
-                                        <i class="fab fa-whatsapp mr-2"></i>
+                                        class="flex items-center justify-center gap-2 py-3 px-4 bg-green-50 text-green-600 hover:bg-green-100 
+                                              rounded-lg transition-colors font-medium">
+                                        <i class="fab fa-whatsapp"></i>
                                         WhatsApp
                                     </a>
                                 @endif
+                            </div>
+                        </div>
+
+                        <!-- Additional Info -->
+                        <div class="mt-8 pt-8 border-t border-gray-200">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                        <i class="fas fa-truck text-gray-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">Free Shipping</p>
+                                        <p class="text-xs text-gray-600">On orders over ৳1000</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                        <i class="fas fa-sync-alt text-gray-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">30-Day Returns</p>
+                                        <p class="text-xs text-gray-600">Easy return policy</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -228,157 +300,256 @@
             </div>
 
             <!-- Product Tabs -->
-            <div class="mt-12 bg-white rounded-lg shadow-md">
+            <div class="mt-12 bg-white rounded-2xl shadow-sm overflow-hidden">
+                <!-- Tab Navigation -->
                 <div class="border-b border-gray-200">
-                    <nav class="flex flex-wrap -mb-px overflow-x-auto">
+                    <nav class="flex space-x-1 overflow-x-auto">
                         <button id="tab-description"
-                            class="py-3 px-4 md:py-4 md:px-6 text-sm font-medium border-b-2 border-indigo-500 text-indigo-600 whitespace-nowrap">Description</button>
+                            class="px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-gray-600 
+                                       hover:text-gray-900 transition-colors data-[active=true]:border-gray-900 data-[active=true]:text-gray-900"
+                            data-active="true">
+                            Description
+                        </button>
                         <button id="tab-specifications"
-                            class="py-3 px-4 md:py-4 md:px-6 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Specifications</button>
+                            class="px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-gray-600 
+                                       hover:text-gray-900 transition-colors data-[active=false]:border-gray-900 data-[active=false]:text-gray-900"
+                            data-active="false">
+                            Specifications
+                        </button>
                         <button id="tab-reviews"
-                            class="py-3 px-4 md:py-4 md:px-6 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Reviews
-                            ({{ $product->reviews_count }})</button>
+                            class="px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-gray-600 
+                                       hover:text-gray-900 transition-colors data-[active=false]:border-gray-900 data-[active=false]:text-gray-900"
+                            data-active="false">
+                            Reviews ({{ $product->reviews_count }})
+                        </button>
                         <button id="tab-shipping"
-                            class="py-3 px-4 md:py-4 md:px-6 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">Shipping
-                            & Returns</button>
+                            class="px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-gray-600 
+                                       hover:text-gray-900 transition-colors data-[active=false]:border-gray-900 data-[active=false]:text-gray-900"
+                            data-active="false">
+                            Shipping & Returns
+                        </button>
                     </nav>
                 </div>
-                <div class="p-6">
+
+                <!-- Tab Content -->
+                <div class="p-6 md:p-8">
                     <!-- Description Tab -->
-                    <div id="content-description" class="prose max-w-none">
-                        <p>
+                    <div id="content-description" class="space-y-4">
+                        <h3 class="text-xl font-bold text-gray-900">Product Description</h3>
+                        <div class="prose max-w-none text-gray-700 leading-relaxed">
                             {!! nl2br(e($product->description)) !!}
-                        </p>
+                        </div>
                     </div>
 
                     <!-- Specifications Tab -->
-                    <div id="content-specifications" class="prose max-w-none hidden">
+                    <div id="content-specifications" class="hidden space-y-6">
+                        <h3 class="text-xl font-bold text-gray-900">Product Specifications</h3>
                         @if ($product->specifications && count($product->specifications) > 0)
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 @foreach ($product->specifications as $key => $value)
-                                    <div class="border-b border-gray-100 pb-2">
-                                        <dt class="font-medium text-gray-900">{{ $key }}</dt>
+                                    <div class="border-b border-gray-100 pb-3">
+                                        <dt class="font-medium text-gray-900 mb-1">{{ $key }}</dt>
                                         <dd class="text-gray-700">{{ $value }}</dd>
                                     </div>
                                 @endforeach
                             </div>
                         @else
-                            <p class="text-gray-600">No specifications available.</p>
+                            <p class="text-gray-600">No specifications available for this product.</p>
                         @endif
                     </div>
 
                     <!-- Reviews Tab -->
                     <div id="content-reviews" class="hidden">
-                        <div class="flex items-center mb-6">
-                            <div class="mr-4">
-                                <span
-                                    class="text-5xl font-bold text-gray-900">{{ number_format($product->average_rating, 1) }}</span>
-                                <span class="text-gray-500">/5</span>
-                            </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <!-- Rating Overview -->
                             <div>
-                                <div class="flex items-center mb-1">
-                                    <div class="flex text-yellow-400 mr-2">
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            @if ($i <= floor($product->average_rating))
-                                                <i class="fas fa-star"></i>
-                                            @elseif($i - 0.5 <= $product->average_rating)
-                                                <i class="fas fa-star-half-alt"></i>
-                                            @else
-                                                <i class="far fa-star"></i>
-                                            @endif
-                                        @endfor
-                                    </div>
-                                </div>
-                                <p class="text-sm text-gray-600">Based on {{ $product->reviews_count }} reviews</p>
-                            </div>
-                        </div>
-
-                        <!-- Review List -->
-                        <div class="space-y-6">
-                            @forelse($product->reviews->where('is_approved', true) as $review)
-                                <div class="border-b border-gray-200 pb-6">
-                                    <div class="flex items-center mb-2">
-                                        <div class="flex text-yellow-400 mr-2">
+                                <h3 class="text-xl font-bold text-gray-900 mb-6">Customer Reviews</h3>
+                                <div class="bg-gray-50 rounded-xl p-6">
+                                    <div class="text-center mb-4">
+                                        <div class="text-5xl font-bold text-gray-900 mb-2">
+                                            {{ number_format($product->average_rating, 1) }}
+                                        </div>
+                                        <div class="flex justify-center text-yellow-400 mb-2">
                                             @for ($i = 1; $i <= 5; $i++)
-                                                @if ($i <= $review->rating)
+                                                @if ($i <= floor($product->average_rating))
                                                     <i class="fas fa-star"></i>
+                                                @elseif($i - 0.5 <= $product->average_rating)
+                                                    <i class="fas fa-star-half-alt"></i>
                                                 @else
                                                     <i class="far fa-star"></i>
                                                 @endif
                                             @endfor
                                         </div>
-                                        <h4 class="font-medium text-gray-900">{{ $review->user->name }}</h4>
+                                        <p class="text-sm text-gray-600">Based on {{ $product->reviews_count }}
+                                            reviews</p>
                                     </div>
-                                    <p class="text-gray-600 text-sm mb-2">{{ $review->created_at->format('M d, Y') }}
-                                    </p>
-                                    <p class="text-gray-700">{{ $review->comment }}</p>
                                 </div>
-                            @empty
-                                <p class="text-gray-600">No reviews yet. Be the first to review this product!</p>
-                            @endforelse
+                            </div>
+
+                            <!-- Reviews List -->
+                            <div class="lg:col-span-2">
+                                <div class="space-y-6 max-h-[500px] overflow-y-auto pr-4">
+                                    @forelse($product->reviews->where('is_approved', true) as $review)
+                                        <div class="border-b border-gray-200 pb-6 last:border-0">
+                                            <div class="flex items-start justify-between mb-2">
+                                                <div>
+                                                    <h4 class="font-medium text-gray-900">{{ $review->user->name }}
+                                                    </h4>
+                                                    <div class="flex items-center gap-2 mt-1">
+                                                        <div class="flex text-yellow-400">
+                                                            @for ($i = 1; $i <= 5; $i++)
+                                                                @if ($i <= $review->rating)
+                                                                    <i class="fas fa-star text-sm"></i>
+                                                                @else
+                                                                    <i class="far fa-star text-sm"></i>
+                                                                @endif
+                                                            @endfor
+                                                        </div>
+                                                        <span
+                                                            class="text-sm text-gray-600">{{ $review->created_at->format('M d, Y') }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="text-gray-700">{{ $review->comment }}</p>
+                                        </div>
+                                    @empty
+                                        <div class="text-center py-8">
+                                            <i class="fas fa-comment-alt text-4xl text-gray-300 mb-3"></i>
+                                            <p class="text-gray-600">No reviews yet. Be the first to review this
+                                                product!</p>
+                                        </div>
+                                    @endforelse
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Review Form -->
-                        <div class="mt-8">
-                            <h4 class="text-lg font-medium text-gray-900 mb-4">Write a Review</h4>
-                            <form action="{{ route('public.products.review.submit', $product) }}" method="POST">
+                        <div class="mt-12 pt-8 border-t border-gray-200">
+                            <h4 class="text-xl font-bold text-gray-900 mb-6">Write a Review</h4>
+                            <form action="{{ route('public.products.review.submit', $product) }}" method="POST"
+                                class="space-y-6">
                                 @csrf
-                                <div class="mb-4">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
-                                    <div class="flex items-center">
-                                        <div class="flex text-gray-300" id="rating-stars">
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                <i class="fas fa-star cursor-pointer hover:text-yellow-400 text-lg"
-                                                    onmouseover="highlightStars({{ $i }})"
-                                                    onclick="setRating({{ $i }})"></i>
-                                            @endfor
-                                        </div>
-                                        @error('order_number')
-                                            <p class="text-red-500 text-sm mt-1 ml-4">{{ $message }}</p>
-                                        @enderror
-                                        <input type="hidden" name="rating" id="rating-value" value="0">
+
+                                <!-- Rating -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">Your Rating *</label>
+                                    <div class="flex items-center gap-1" id="rating-stars">
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <button type="button" onclick="setRating({{ $i }})"
+                                                class="text-2xl text-gray-300 hover:text-yellow-400 transition-colors"
+                                                onmouseover="highlightStars({{ $i }})"
+                                                onmouseout="resetStars()">
+                                                <i class="far fa-star"></i>
+                                            </button>
+                                        @endfor
                                     </div>
+                                    <input type="hidden" name="rating" id="rating-value" value="0" required>
+                                    @error('rating')
+                                        <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
-                                <div class="mb-4">
-                                    <label for="order_number"
-                                        class="block text-sm font-medium text-gray-700 mb-2">Order ID *</label>
+                                <!-- Order ID -->
+                                <div>
+                                    <label for="order_number" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Order ID *
+                                    </label>
                                     <input type="text" id="order_number" name="order_number"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        class="w-full md:w-1/2 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                                        placeholder="Enter your order number" required>
+                                    @error('order_number')
+                                        <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                                    @enderror
                                 </div>
-                                @error('order_number')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                @enderror
 
-                                <div class="mb-4">
-                                    <label for="review-body"
-                                        class="block text-sm font-medium text-gray-700 mb-2">Review *</label>
+                                <!-- Review Comment -->
+                                <div>
+                                    <label for="review-body" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Your Review *
+                                    </label>
                                     <textarea id="review-body" name="comment" rows="4"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition"
+                                        placeholder="Share your experience with this product..." required></textarea>
+                                    @error('comment')
+                                        <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                                    @enderror
                                 </div>
-                                @error('comment')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                @enderror
-                                <button type="submit"
-                                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-md transition-colors">Submit
-                                    Review</button>
+
+                                <!-- Submit Button -->
+                                <button type="submit" class="fashion-btn px-8 py-3">
+                                    Submit Review
+                                </button>
                             </form>
                         </div>
                     </div>
 
                     <!-- Shipping Tab -->
-                    <div id="content-shipping" class="prose max-w-none hidden">
-                        <h3>Shipping Information</h3>
-                        <p>We offer standard shipping within 2-5 business days. Express shipping options are available
-                            at checkout for an additional fee.</p>
-                        <p>Free shipping on orders over ৳1000. All orders are processed within 24 hours of placement.
-                        </p>
+                    <div id="content-shipping" class="hidden space-y-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-4">Shipping Information</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-gray-50 rounded-xl p-6">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                                            <i class="fas fa-shipping-fast text-gray-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Standard Shipping</h4>
+                                            <p class="text-sm text-gray-600">2-5 business days</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-700">All orders are processed within 24 hours. Free shipping on
+                                        orders over ৳1000.</p>
+                                </div>
+                                <div class="bg-gray-50 rounded-xl p-6">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                                            <i class="fas fa-rocket text-gray-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Express Shipping</h4>
+                                            <p class="text-sm text-gray-600">1-2 business days</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-700">Available at checkout for an additional fee. Delivered to
+                                        your doorstep.</p>
+                                </div>
+                            </div>
+                        </div>
 
-                        <h3>Returns Policy</h3>
-                        <p>We offer a 30-day money-back guarantee on all products. If you're not completely satisfied
-                            with your purchase, you can return it for a full refund.</p>
-                        <p>To initiate a return, please contact our customer service team with your order number and
-                            reason for return.</p>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-4">Returns Policy</h3>
+                            <div class="bg-gray-50 rounded-xl p-6">
+                                <div class="space-y-4">
+                                    <div class="flex items-start gap-3">
+                                        <i class="fas fa-check text-green-500 mt-1"></i>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">30-Day Money-Back Guarantee</h4>
+                                            <p class="text-gray-700">If you're not completely satisfied with your
+                                                purchase, return it within 30 days for a full refund.</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <i class="fas fa-check text-green-500 mt-1"></i>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Easy Returns Process</h4>
+                                            <p class="text-gray-700">Contact our customer service team with your order
+                                                number to initiate a return.</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <i class="fas fa-check text-green-500 mt-1"></i>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Condition Requirements</h4>
+                                            <p class="text-gray-700">Products must be in original condition with all
+                                                tags attached for a full refund.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -386,85 +557,103 @@
 
         <!-- Related Products -->
         @if ($relatedProducts->count() > 0)
-            <div class="mt-12 p-4 container mx-auto">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">You May Also Like</h2>
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
-                    @foreach ($relatedProducts as $product)
-                        @include('public.products.partial.product-card', ['product' => $product])
-                    @endforeach
+            <div class="mt-16 bg-gray-50 py-12">
+                <div class="container mx-auto px-4">
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">You May Also Like</h2>
+                        <p class="text-gray-600">Discover similar products you might love</p>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                        @foreach ($relatedProducts as $relatedProduct)
+                            <div class="fashion-product-card">
+                                @include('public.products.partial.product-card', [
+                                    'product' => $relatedProduct,
+                                ])
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         @endif
+    </x-slot>
 
-        @if (setting('google_tag_manager_id'))
-            @push('scripts')
-                <script>
-                    window.dataLayer = window.dataLayer || [];
-                    window.dataLayer.push({
-                        event: 'view_item',
-                        ecommerce: {
-                            items: [{
-                                item_id: {{ $product->id }},
-                                item_name: '{{ $product->name }}',
-                                price: {{ $product->price }}
-                            }]
-                        }
-                    });
-                </script>
-            @endpush
-        @endif
-        @if (setting('fb_pixel_id') && !empty($eventId))
-            <script>
-                fbq('track', 'ViewContent', {
-                    content_ids: ['{{ $product->sku }}'],
-                    content_type: 'product',
-                    value: {{ $product->price }},
-                    currency: "USD"
-                }, {
-                    eventID: "{{ $eventId }}"
-                });
-            </script>
-        @endif
-
-
+    @push('scripts')
         <script>
             // Function to change the main product image
             function changeImage(src) {
                 document.getElementById('main-product-image').src = src;
             }
-            // Function to update attribute values in forms
-            function updateAttributeValues() {
-                // For Add to Cart form
-                const addToCartForm = document.getElementById('add-to-cart-form');
-                if (addToCartForm) {
-                    const attributeInputs = addToCartForm.querySelectorAll('input[name^="attributes["]');
-                    attributeInputs.forEach(input => {
-                        const name = input.getAttribute('name');
-                        const radio = document.querySelector(
-                            `input[name="${name.replace('attributes', 'attributes')}"]:checked`);
-                        if (radio) {
-                            input.value = radio.value;
-                        }
-                    });
-                }
 
-                // For Buy Now form
-                const buyNowForm = document.getElementById('buy-now-form');
-                if (buyNowForm) {
-                    const attributeInputs = buyNowForm.querySelectorAll('input[name^="attributes["]');
-                    attributeInputs.forEach(input => {
-                        const name = input.getAttribute('name');
-                        const radio = document.querySelector(
-                            `input[name="${name.replace('buy-now-attributes', 'attributes')}"]:checked`);
-                        if (radio) {
-                            input.value = radio.value;
-                        }
-                    });
+            // Quantity functions
+            function increaseQuantity() {
+                const quantityInput = document.getElementById('quantity');
+                const formQuantityInput = document.getElementById('form-quantity');
+                const max = parseInt(quantityInput.max);
+                let value = parseInt(quantityInput.value);
+                if (value < max) {
+                    quantityInput.value = value + 1;
+                    formQuantityInput.value = value + 1;
                 }
             }
 
-            // Add event listeners to attribute radios
+            function decreaseQuantity() {
+                const quantityInput = document.getElementById('quantity');
+                const formQuantityInput = document.getElementById('form-quantity');
+                let value = parseInt(quantityInput.value);
+                if (value > 1) {
+                    quantityInput.value = value - 1;
+                    formQuantityInput.value = value - 1;
+                }
+            }
+
+            // Tab functionality
             document.addEventListener('DOMContentLoaded', function() {
+                const tabs = document.querySelectorAll('[id^="tab-"]');
+                const contents = document.querySelectorAll('[id^="content-"]');
+
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', function() {
+                        const target = this.id.replace('tab-', 'content-');
+
+                        // Update active states
+                        tabs.forEach(t => {
+                            t.setAttribute('data-active', 'false');
+                            t.classList.remove('border-gray-900', 'text-gray-900');
+                            t.classList.add('border-transparent', 'text-gray-600');
+                        });
+
+                        this.setAttribute('data-active', 'true');
+                        this.classList.add('border-gray-900', 'text-gray-900');
+                        this.classList.remove('border-transparent', 'text-gray-600');
+
+                        // Show target content
+                        contents.forEach(content => content.classList.add('hidden'));
+                        document.getElementById(target).classList.remove('hidden');
+                    });
+                });
+
+                // Update attribute values in forms
+                function updateAttributeValues() {
+                    const forms = [document.getElementById('add-to-cart-form'),
+                        document.getElementById('buy-now-form')
+                    ];
+
+                    forms.forEach(form => {
+                        if (form) {
+                            const attributeInputs = form.querySelectorAll('input[name^="attributes["]');
+                            attributeInputs.forEach(input => {
+                                const attributeId = input.name.match(/\[(\d+)\]/)[1];
+                                const radio = document.querySelector(
+                                    `input[name="attributes[${attributeId}]"]:checked`);
+                                if (radio) {
+                                    input.value = radio.value;
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Add event listeners to attribute radios
                 const attributeRadios = document.querySelectorAll('input[name^="attributes["]');
                 attributeRadios.forEach(radio => {
                     radio.addEventListener('change', updateAttributeValues);
@@ -487,84 +676,64 @@
                         updateAttributeValues();
                     });
                 }
-            });
-
-            // Function to increase quantity
-            function increaseQuantity() {
-                const quantityInput = document.getElementById('quantity');
-                const formQuantityInput = document.getElementById('form-quantity');
-                const max = parseInt(quantityInput.max);
-                let value = parseInt(quantityInput.value);
-                if (value < max) {
-                    quantityInput.value = value + 1;
-                    formQuantityInput.value = value + 1;
-                }
-            }
-
-            // Function to decrease quantity
-            function decreaseQuantity() {
-                const quantityInput = document.getElementById('quantity');
-                const formQuantityInput = document.getElementById('form-quantity');
-                let value = parseInt(quantityInput.value);
-                if (value > 1) {
-                    quantityInput.value = value - 1;
-                    formQuantityInput.value = value - 1;
-                }
-            }
-
-            // Tab functionality
-            document.addEventListener('DOMContentLoaded', function() {
-                const tabs = document.querySelectorAll('[id^="tab-"]');
-                const contents = document.querySelectorAll('[id^="content-"]');
-
-                tabs.forEach(tab => {
-                    tab.addEventListener('click', function() {
-                        const target = this.id.replace('tab-', 'content-');
-
-                        // Update active tab
-                        tabs.forEach(t => {
-                            t.classList.remove('border-indigo-500', 'text-indigo-600');
-                            t.classList.add('border-transparent', 'text-gray-500');
-                        });
-                        this.classList.add('border-indigo-500', 'text-indigo-600');
-                        this.classList.remove('border-transparent', 'text-gray-500');
-
-                        // Show target content
-                        contents.forEach(content => {
-                            content.classList.add('hidden');
-                        });
-                        document.getElementById(target).classList.remove('hidden');
-                    });
-                });
 
                 // Rating stars functionality
+                window.currentRating = 0;
+
                 window.highlightStars = function(count) {
-                    const stars = document.querySelectorAll('#rating-stars i');
+                    const stars = document.querySelectorAll('#rating-stars button');
                     stars.forEach((star, index) => {
+                        const icon = star.querySelector('i');
                         if (index < count) {
-                            star.classList.add('text-yellow-400');
-                            star.classList.remove('text-gray-300');
+                            icon.classList.remove('far', 'text-gray-300');
+                            icon.classList.add('fas', 'text-yellow-400');
                         } else {
-                            star.classList.remove('text-yellow-400');
-                            star.classList.add('text-gray-300');
+                            icon.classList.remove('fas', 'text-yellow-400');
+                            icon.classList.add('far', 'text-gray-300');
                         }
                     });
+                };
+
+                window.resetStars = function() {
+                    highlightStars(window.currentRating);
                 };
 
                 window.setRating = function(count) {
+                    window.currentRating = count;
                     document.getElementById('rating-value').value = count;
-                    const stars = document.querySelectorAll('#rating-stars i');
-                    stars.forEach((star, index) => {
-                        if (index < count) {
-                            star.classList.add('text-yellow-400');
-                            star.classList.remove('text-gray-300');
-                        } else {
-                            star.classList.remove('text-yellow-400');
-                            star.classList.add('text-gray-300');
-                        }
-                    });
+                    highlightStars(count);
                 };
             });
+
+            // Facebook Pixel and Google Tag Manager
+            @if (setting('google_tag_manager_id'))
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                    event: 'view_item',
+                    ecommerce: {
+                        items: [{
+                            item_id: {{ $product->id }},
+                            item_name: '{{ addslashes($product->name) }}',
+                            price: {{ $product->price }},
+                            item_category: '{{ addslashes($product->category->name) }}',
+                            item_brand: '{{ $product->brand ? addslashes($product->brand->name) : '' }}'
+                        }]
+                    }
+                });
+            @endif
+
+            @if (setting('fb_pixel_id') && !empty($eventId))
+                fbq('track', 'ViewContent', {
+                    content_ids: ['{{ $product->sku }}'],
+                    content_type: 'product',
+                    value: {{ $product->price }},
+                    currency: 'BDT',
+                    content_name: '{{ addslashes($product->name) }}',
+                    content_category: '{{ addslashes($product->category->name) }}'
+                }, {
+                    eventID: "{{ $eventId }}"
+                });
+            @endif
         </script>
-    </x-slot>
+    @endpush
 </x-app-layout>
