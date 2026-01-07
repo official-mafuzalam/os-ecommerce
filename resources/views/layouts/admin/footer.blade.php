@@ -1,4 +1,15 @@
 <script>
+    // Auto-close notifications after 5 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            const notifications = document.querySelectorAll(
+                '[class*="fixed"][class*="bottom-4"][class*="right-4"]');
+            notifications.forEach(notification => {
+                notification.remove();
+            });
+        }, 5000);
+    });
+    
     const HSThemeAppearance = {
         init() {
             const defaultTheme = 'default'

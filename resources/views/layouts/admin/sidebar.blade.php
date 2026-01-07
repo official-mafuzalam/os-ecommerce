@@ -164,7 +164,7 @@
                             ? 'bg-gray-200 dark:bg-gray-900'
                             : 'text-slate-700' }}"
                                         href="{{ route('admin.products.index') }}">
-                                        All Products
+                                        Products
                                     </a>
                                 </li>
                             @endcan
