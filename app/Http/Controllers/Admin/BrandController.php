@@ -51,17 +51,99 @@ class BrandController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:brands,name',
             'description' => 'nullable|string',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:400',
+            // Allow up to 2 MB on upload; we'll compress to <= 200 KB after upload
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'is_active' => 'boolean'
         ]);
 
         // Generate slug from name
         $validated['slug'] = Str::slug($validated['name']);
 
-        // Handle logo upload
+        // Handle logo upload and compress to <= 200 KB when possible
         if ($request->hasFile('logo')) {
-            $logoPath = $request->file('logo')->store('brands', 'public');
-            $validated['logo'] = $logoPath;
+            $file = $request->file('logo');
+            $mime = $file->getMimeType();
+
+            // If SVG, just store it (GD can't process SVG)
+            if ($mime === 'image/svg+xml') {
+                $validated['logo'] = $file->store('brands', 'public');
+            } else {
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $filename = Str::slug($originalName) . '-' . time() . '.jpg';
+                $publicDir = storage_path('app/public/brands');
+                $targetPath = $publicDir . DIRECTORY_SEPARATOR . $filename;
+
+                if (!file_exists($publicDir)) {
+                    mkdir($publicDir, 0755, true);
+                }
+
+                try {
+                    switch ($mime) {
+                        case 'image/png':
+                            $src = imagecreatefrompng($file->getPathname());
+                            break;
+                        case 'image/gif':
+                            $src = imagecreatefromgif($file->getPathname());
+                            break;
+                        default:
+                            $src = imagecreatefromjpeg($file->getPathname());
+                            break;
+                    }
+
+                    $w = imagesx($src);
+                    $h = imagesy($src);
+
+                    $dst = imagecreatetruecolor($w, $h);
+                    $white = imagecolorallocate($dst, 255, 255, 255);
+                    imagefill($dst, 0, 0, $white);
+                    imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $w, $h);
+
+                    $quality = 85;
+                    imagejpeg($dst, $targetPath, $quality);
+                    imagedestroy($src);
+                    imagedestroy($dst);
+
+                    $maxBytes = 200 * 1024; // 200 KB
+
+                    while (filesize($targetPath) > $maxBytes && $quality > 30) {
+                        $quality -= 5;
+                        $src = imagecreatefromjpeg($targetPath);
+                        $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src), imagesx($src), imagesy($src));
+                        imagejpeg($dst, $targetPath, $quality);
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+
+                    while (filesize($targetPath) > $maxBytes) {
+                        $src = imagecreatefromjpeg($targetPath);
+                        $origW = imagesx($src);
+                        $origH = imagesy($src);
+                        $newW = (int)($origW * 0.9);
+                        $newH = (int)($origH * 0.9);
+
+                        if ($newW < 150 || $newH < 150) {
+                            imagedestroy($src);
+                            break;
+                        }
+
+                        $dst = imagecreatetruecolor($newW, $newH);
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                        imagejpeg($dst, $targetPath, $quality);
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+
+                    $validated['logo'] = 'brands/' . $filename;
+                } catch (\Exception $e) {
+                    // fallback
+                    $validated['logo'] = $file->store('brands', 'public');
+                }
+            }
         }
 
         // Set default active status if not provided
@@ -98,22 +180,109 @@ class BrandController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:brands,name,' . $brand->id,
             'description' => 'nullable|string',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:400',
+            // Allow up to 2 MB on upload; we'll compress to <= 200 KB after upload
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'is_active' => 'boolean'
         ]);
 
         // Generate slug from name
         $validated['slug'] = Str::slug($validated['name']);
 
-        // Handle logo upload
+        // Handle logo upload and compress to <= 200 KB when possible
         if ($request->hasFile('logo')) {
-            // Delete old logo if exists
-            if ($brand->logo) {
-                Storage::disk('public')->delete($brand->logo);
-            }
+            $file = $request->file('logo');
+            $mime = $file->getMimeType();
 
-            $logoPath = $request->file('logo')->store('brands', 'public');
-            $validated['logo'] = $logoPath;
+            if ($mime === 'image/svg+xml') {
+                // store svg as-is
+                $newPath = $file->store('brands', 'public');
+                // delete old after new stored
+                if ($brand->logo) {
+                    Storage::disk('public')->delete($brand->logo);
+                }
+                $validated['logo'] = $newPath;
+            } else {
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $filename = Str::slug($originalName) . '-' . time() . '.jpg';
+                $publicDir = storage_path('app/public/brands');
+                $targetPath = $publicDir . DIRECTORY_SEPARATOR . $filename;
+
+                if (!file_exists($publicDir)) {
+                    mkdir($publicDir, 0755, true);
+                }
+
+                try {
+                    switch ($mime) {
+                        case 'image/png':
+                            $src = imagecreatefrompng($file->getPathname());
+                            break;
+                        case 'image/gif':
+                            $src = imagecreatefromgif($file->getPathname());
+                            break;
+                        default:
+                            $src = imagecreatefromjpeg($file->getPathname());
+                            break;
+                    }
+
+                    $w = imagesx($src);
+                    $h = imagesy($src);
+
+                    $dst = imagecreatetruecolor($w, $h);
+                    $white = imagecolorallocate($dst, 255, 255, 255);
+                    imagefill($dst, 0, 0, $white);
+                    imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $w, $h);
+
+                    $quality = 85;
+                    imagejpeg($dst, $targetPath, $quality);
+                    imagedestroy($src);
+                    imagedestroy($dst);
+
+                    $maxBytes = 200 * 1024; // 200 KB
+
+                    while (filesize($targetPath) > $maxBytes && $quality > 30) {
+                        $quality -= 5;
+                        $src = imagecreatefromjpeg($targetPath);
+                        $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src), imagesx($src), imagesy($src));
+                        imagejpeg($dst, $targetPath, $quality);
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+
+                    while (filesize($targetPath) > $maxBytes) {
+                        $src = imagecreatefromjpeg($targetPath);
+                        $origW = imagesx($src);
+                        $origH = imagesy($src);
+                        $newW = (int)($origW * 0.9);
+                        $newH = (int)($origH * 0.9);
+
+                        if ($newW < 150 || $newH < 150) {
+                            imagedestroy($src);
+                            break;
+                        }
+
+                        $dst = imagecreatetruecolor($newW, $newH);
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                        imagejpeg($dst, $targetPath, $quality);
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+
+                    // delete old logo only after new one successfully created
+                    if ($brand->logo) {
+                        Storage::disk('public')->delete($brand->logo);
+                    }
+
+                    $validated['logo'] = 'brands/' . $filename;
+                } catch (\Exception $e) {
+                    // fallback
+                    $validated['logo'] = $file->store('brands', 'public');
+                }
+            }
         }
 
         // Set active status

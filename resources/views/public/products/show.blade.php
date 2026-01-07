@@ -101,7 +101,7 @@
 
                         <!-- Rating & Reviews -->
                         <div class="flex items-center gap-4 mb-6">
-                            {{-- <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2">
                                 <div class="flex text-yellow-400">
                                     @for ($i = 1; $i <= 5; $i++)
                                         @if ($i <= floor($product->average_rating))
@@ -115,7 +115,7 @@
                                 </div>
                                 <span class="text-sm text-gray-600">({{ $product->reviews_count }} reviews)</span>
                             </div>
-                            <span class="text-gray-400">•</span> --}}
+                            <span class="text-gray-400">•</span>
                             <span class="text-sm text-gray-600">{{ $product->sku }}</span>
                         </div>
 
@@ -393,7 +393,7 @@
                                         <div class="border-b border-gray-200 pb-6 last:border-0">
                                             <div class="flex items-start justify-between mb-2">
                                                 <div>
-                                                    <h4 class="font-medium text-gray-900">{{ $review->user->name }}
+                                                    <h4 class="font-medium text-gray-900">{{ $review->user->full_name }}
                                                     </h4>
                                                     <div class="flex items-center gap-2 mt-1">
                                                         <div class="flex text-yellow-400">

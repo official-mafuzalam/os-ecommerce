@@ -8,6 +8,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class DealController extends Controller
 {
@@ -63,7 +64,8 @@ class DealController extends Controller
             'discount_details' => 'nullable|string|max:255',
             'button_text' => 'required|string|max:50',
             'button_link' => 'required|url',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:400',
+            // Allow up to 2 MB on upload; we'll compress to <= 200 KB after upload
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'background_color' => 'required|string|max:100',
             'is_active' => 'boolean',
             'starts_at' => 'nullable|date',
@@ -77,10 +79,93 @@ class DealController extends Controller
                 ->withInput();
         }
 
-        // Handle image upload
+        // Handle image upload and compress to <= 200 KB when possible
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('deals', 'public');
+            $file = $request->file('image');
+            $mime = $file->getMimeType();
+
+            // If SVG, store as-is (GD can't handle SVG)
+            if ($mime === 'image/svg+xml') {
+                $imagePath = $file->store('deals', 'public');
+            } else {
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $filename = Str::slug($originalName) . '-' . time() . '.jpg';
+                $publicDir = storage_path('app/public/deals');
+                $targetPath = $publicDir . DIRECTORY_SEPARATOR . $filename;
+
+                if (!file_exists($publicDir)) {
+                    mkdir($publicDir, 0755, true);
+                }
+
+                try {
+                    switch ($mime) {
+                        case 'image/png':
+                            $src = imagecreatefrompng($file->getPathname());
+                            break;
+                        case 'image/gif':
+                            $src = imagecreatefromgif($file->getPathname());
+                            break;
+                        default:
+                            $src = imagecreatefromjpeg($file->getPathname());
+                            break;
+                    }
+
+                    $w = imagesx($src);
+                    $h = imagesy($src);
+
+                    $dst = imagecreatetruecolor($w, $h);
+                    $white = imagecolorallocate($dst, 255, 255, 255);
+                    imagefill($dst, 0, 0, $white);
+                    imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $w, $h);
+
+                    $quality = 85;
+                    imagejpeg($dst, $targetPath, $quality);
+
+                    imagedestroy($src);
+                    imagedestroy($dst);
+
+                    $maxBytes = 200 * 1024; // 200 KB
+
+                    while (filesize($targetPath) > $maxBytes && $quality > 30) {
+                        $quality -= 5;
+                        $src = imagecreatefromjpeg($targetPath);
+                        $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src), imagesx($src), imagesy($src));
+                        imagejpeg($dst, $targetPath, $quality);
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+
+                    while (filesize($targetPath) > $maxBytes) {
+                        $src = imagecreatefromjpeg($targetPath);
+                        $origW = imagesx($src);
+                        $origH = imagesy($src);
+                        $newW = (int)($origW * 0.9);
+                        $newH = (int)($origH * 0.9);
+
+                        if ($newW < 200 || $newH < 200) {
+                            imagedestroy($src);
+                            break;
+                        }
+
+                        $dst = imagecreatetruecolor($newW, $newH);
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                        imagejpeg($dst, $targetPath, $quality);
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+
+                    $imagePath = 'deals/' . $filename;
+                } catch (\Exception $e) {
+                    // fallback to storing original file
+                    $imagePath = $file->store('deals', 'public');
+                }
+            }
         }
 
         $deal = Deal::create([
@@ -132,7 +217,8 @@ class DealController extends Controller
             'discount_details' => 'nullable|string|max:255',
             'button_text' => 'required|string|max:50',
             'button_link' => 'required|url',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:400',
+            // Allow up to 2 MB on upload; we'll compress to <= 200 KB after upload
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'background_color' => 'required|string|max:100',
             'is_active' => 'boolean',
             'starts_at' => 'nullable|date',
@@ -146,16 +232,108 @@ class DealController extends Controller
                 ->withInput();
         }
 
-        // Handle image upload if a new image is provided
+        // Handle image upload if a new image is provided (compress to <= 200 KB when possible)
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($deal->image_url) {
-                $oldImagePath = str_replace('/storage/', '', $deal->image_url);
-                Storage::disk('public')->delete($oldImagePath);
-            }
+            $file = $request->file('image');
+            $mime = $file->getMimeType();
 
-            $imagePath = $request->file('image')->store('deals', 'public');
-            $deal->image_url = Storage::url($imagePath);
+            if ($mime === 'image/svg+xml') {
+                $newPath = $file->store('deals', 'public');
+                // delete old after new stored
+                if ($deal->image_url) {
+                    $oldImagePath = str_replace('/storage/', '', $deal->image_url);
+                    Storage::disk('public')->delete($oldImagePath);
+                }
+                $deal->image_url = Storage::url($newPath);
+            } else {
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $filename = Str::slug($originalName) . '-' . time() . '.jpg';
+                $publicDir = storage_path('app/public/deals');
+                $targetPath = $publicDir . DIRECTORY_SEPARATOR . $filename;
+
+                if (!file_exists($publicDir)) {
+                    mkdir($publicDir, 0755, true);
+                }
+
+                try {
+                    switch ($mime) {
+                        case 'image/png':
+                            $src = imagecreatefrompng($file->getPathname());
+                            break;
+                        case 'image/gif':
+                            $src = imagecreatefromgif($file->getPathname());
+                            break;
+                        default:
+                            $src = imagecreatefromjpeg($file->getPathname());
+                            break;
+                    }
+
+                    $w = imagesx($src);
+                    $h = imagesy($src);
+
+                    $dst = imagecreatetruecolor($w, $h);
+                    $white = imagecolorallocate($dst, 255, 255, 255);
+                    imagefill($dst, 0, 0, $white);
+                    imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $w, $h);
+
+                    $quality = 85;
+                    imagejpeg($dst, $targetPath, $quality);
+
+                    imagedestroy($src);
+                    imagedestroy($dst);
+
+                    $maxBytes = 200 * 1024; // 200 KB
+
+                    while (filesize($targetPath) > $maxBytes && $quality > 30) {
+                        $quality -= 5;
+                        $src = imagecreatefromjpeg($targetPath);
+                        $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src), imagesx($src), imagesy($src));
+                        imagejpeg($dst, $targetPath, $quality);
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+
+                    while (filesize($targetPath) > $maxBytes) {
+                        $src = imagecreatefromjpeg($targetPath);
+                        $origW = imagesx($src);
+                        $origH = imagesy($src);
+                        $newW = (int)($origW * 0.9);
+                        $newH = (int)($origH * 0.9);
+
+                        if ($newW < 200 || $newH < 200) {
+                            imagedestroy($src);
+                            break;
+                        }
+
+                        $dst = imagecreatetruecolor($newW, $newH);
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                        imagejpeg($dst, $targetPath, $quality);
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+
+                    // delete old image only after new one successfully created
+                    if ($deal->image_url) {
+                        $oldImagePath = str_replace('/storage/', '', $deal->image_url);
+                        Storage::disk('public')->delete($oldImagePath);
+                    }
+
+                    $deal->image_url = Storage::url('deals/' . $filename);
+                } catch (\Exception $e) {
+                    // fallback: store original
+                    $imagePath = $file->store('deals', 'public');
+                    if ($deal->image_url) {
+                        $oldImagePath = str_replace('/storage/', '', $deal->image_url);
+                        Storage::disk('public')->delete($oldImagePath);
+                    }
+                    $deal->image_url = Storage::url($imagePath);
+                }
+            }
         }
 
         $deal->update([

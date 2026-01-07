@@ -31,7 +31,7 @@ class AttributeController extends Controller
      */
     public function index()
     {
-        $attributes = Attribute::withCount('products')->orderBy('name')->get();
+        $attributes = Attribute::withCount('products')->orderBy('name')->paginate(15);
 
         return view('admin.attributes.index', compact('attributes'));
     }

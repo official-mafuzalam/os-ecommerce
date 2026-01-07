@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Deal;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Review;
 use App\Services\FacebookCapiService;
@@ -359,33 +360,31 @@ class ProductController extends Controller
     public function submitReview(Request $request, $productId)
     {
         try {
-            $request->validate([
-                'order_number' => 'required|exists:orders,order_number',
+            $validated = $request->validate([
+                'order_number' => 'required|string|exists:orders,order_number',
                 'rating' => 'required|integer|min:1|max:5',
-                'comment' => 'required|string|max:1000',
+                'comment' => 'required|string|min:5|max:1000',
             ]);
 
+            $order = Order::where('order_number', $validated['order_number'])->firstOrFail();
             $product = Product::findOrFail($productId);
 
-            $review = new Review();
-            $review->product_id = $product->id;
-            $review->rating = $request->rating;
-            $review->comment = $request->comment;
-
-            if (auth()->check()) {
-                // Logged-in user review
-                $review->user_id = auth()->id();
-            } else {
-                // Guest review
-                $review->guest_name = $request->guest_name ?? 'Anonymous';
-                $review->guest_email = $request->guest_email;
+            // Check if shipping address exists
+            if (!$order->shippingAddress) {
+                return redirect()->back()->with('error', 'Shipping address not found for this order.');
             }
 
-            // Default: require approval before showing
-            $review->is_approved = false;
-            $review->save();
+            $review = Review::create([
+                'product_id' => $product->id,
+                'rating' => $validated['rating'],
+                'comment' => $validated['comment'],
+                'user_id' => $order->shippingAddress->id,
+                'is_approved' => false,
+            ]);
 
             return redirect()->back()->with('success', 'Your review has been submitted and is pending approval.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to submit review: ' . $e->getMessage());
         }

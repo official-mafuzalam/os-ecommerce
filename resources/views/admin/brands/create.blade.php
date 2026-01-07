@@ -58,7 +58,7 @@
                             <div>
                                 <label for="logo"
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Brand
-                                    Logo (Max size: 400 KB) | (Recommended ratio 1:1)</label>
+                                    Logo (Max size: 2 MB) | (Recommended ratio 1:1)</label>
                                 <input type="file" id="logo" name="logo"
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
                                 @if ($brand->logo)

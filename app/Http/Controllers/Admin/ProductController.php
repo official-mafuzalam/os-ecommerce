@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+// use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 
 
@@ -113,7 +113,7 @@ class ProductController extends Controller
             'sku' => 'required|string|unique:products,sku',
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
-            'image_gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:400',
+            'image_gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'specifications' => 'nullable|json',
             'is_active' => 'sometimes|boolean',
             'is_featured' => 'sometimes|boolean',
@@ -153,10 +153,93 @@ class ProductController extends Controller
             }
 
 
-            // Handle gallery images
+            // Handle gallery images (compress to <= 200 KB when possible)
             if ($request->hasFile('image_gallery')) {
                 foreach ($request->file('image_gallery') as $index => $image) {
-                    $galleryPath = $image->store('products/gallery', 'public');
+                    $mime = $image->getMimeType();
+                    $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+                    $filename = Str::slug($originalName) . '-' . time() . '-' . $index . '.jpg';
+                    $publicDir = storage_path('app/public/products/gallery');
+                    $targetPath = $publicDir . DIRECTORY_SEPARATOR . $filename;
+
+                    if (!file_exists($publicDir)) {
+                        mkdir($publicDir, 0755, true);
+                    }
+
+                    try {
+                        switch ($mime) {
+                            case 'image/png':
+                                $src = imagecreatefrompng($image->getPathname());
+                                break;
+                            case 'image/gif':
+                                $src = imagecreatefromgif($image->getPathname());
+                                break;
+                            case 'image/webp':
+                                if (function_exists('imagecreatefromwebp')) {
+                                    $src = imagecreatefromwebp($image->getPathname());
+                                } else {
+                                    $src = imagecreatefromjpeg($image->getPathname());
+                                }
+                                break;
+                            default:
+                                $src = imagecreatefromjpeg($image->getPathname());
+                                break;
+                        }
+
+                        $w = imagesx($src);
+                        $h = imagesy($src);
+
+                        $dst = imagecreatetruecolor($w, $h);
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $w, $h);
+
+                        $quality = 85;
+                        imagejpeg($dst, $targetPath, $quality);
+
+                        imagedestroy($src);
+                        imagedestroy($dst);
+
+                        $maxBytes = 200 * 1024; // 200 KB
+
+                        while (filesize($targetPath) > $maxBytes && $quality > 30) {
+                            $quality -= 5;
+                            $src = imagecreatefromjpeg($targetPath);
+                            $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
+                            $white = imagecolorallocate($dst, 255, 255, 255);
+                            imagefill($dst, 0, 0, $white);
+                            imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src), imagesx($src), imagesy($src));
+                            imagejpeg($dst, $targetPath, $quality);
+                            imagedestroy($src);
+                            imagedestroy($dst);
+                        }
+
+                        while (filesize($targetPath) > $maxBytes) {
+                            $src = imagecreatefromjpeg($targetPath);
+                            $origW = imagesx($src);
+                            $origH = imagesy($src);
+                            $newW = (int)($origW * 0.9);
+                            $newH = (int)($origH * 0.9);
+
+                            if ($newW < 400 || $newH < 400) {
+                                imagedestroy($src);
+                                break;
+                            }
+
+                            $dst = imagecreatetruecolor($newW, $newH);
+                            $white = imagecolorallocate($dst, 255, 255, 255);
+                            imagefill($dst, 0, 0, $white);
+                            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                            imagejpeg($dst, $targetPath, $quality);
+                            imagedestroy($src);
+                            imagedestroy($dst);
+                        }
+
+                        $galleryPath = 'products/gallery/' . $filename;
+                    } catch (\Exception $e) {
+                        // fallback to storing original file
+                        $galleryPath = $image->store('products/gallery', 'public');
+                    }
 
                     ProductImage::create([
                         'product_id' => $product->id,
@@ -174,9 +257,9 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('Product creation failed: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
+            // Log::error('Product creation failed: ' . $e->getMessage(), [
+            //     'trace' => $e->getTraceAsString()
+            // ]);
 
             return back()
                 ->withInput()
@@ -192,7 +275,7 @@ class ProductController extends Controller
         $allDeals = Deal::active()->ordered()->get();
         $product->load(['category', 'brand', 'images']);
 
-        $groupedAttributes = $product->attributes
+        $groupedAttributes = collect($product->attributes)
             ->groupBy('id')
             ->map(function ($items) {
                 return [
@@ -217,7 +300,7 @@ class ProductController extends Controller
         $product->load('attributes');
 
         // Group attributes by attribute_id and collect values
-        $groupedAttributes = $product->attributes
+        $groupedAttributes = collect($product->attributes)
             ->groupBy('id')
             ->map(function ($items) {
                 return [
@@ -256,7 +339,7 @@ class ProductController extends Controller
             'sku' => 'required|string|unique:products,sku,' . $product->id,
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
-            'image_gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:400',
+            'image_gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'specifications' => 'nullable|json',
             'is_active' => 'sometimes|boolean',
             'is_featured' => 'sometimes|boolean',
@@ -302,16 +385,99 @@ class ProductController extends Controller
                     }
                 }
 
-                Log::info('Product attributes synced', [
-                    'product_id' => $product->id,
-                    'product_attributes' => $request->input('product_attributes', []) // Changed from attributes
-                ]);
+                // Log::info('Product attributes synced', [
+                //     'product_id' => $product->id,
+                //     'product_attributes' => $request->input('product_attributes', []) // Changed from attributes
+                // ]);
             }
 
-            // Handle gallery images
+            // Handle gallery images (compress to <= 200 KB when possible)
             if ($request->hasFile('image_gallery')) {
                 foreach ($request->file('image_gallery') as $index => $image) {
-                    $galleryPath = $image->store('products/gallery', 'public');
+                    $mime = $image->getMimeType();
+                    $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+                    $filename = Str::slug($originalName) . '-' . time() . '-' . $index . '.jpg';
+                    $publicDir = storage_path('app/public/products/gallery');
+                    $targetPath = $publicDir . DIRECTORY_SEPARATOR . $filename;
+
+                    if (!file_exists($publicDir)) {
+                        mkdir($publicDir, 0755, true);
+                    }
+
+                    try {
+                        switch ($mime) {
+                            case 'image/png':
+                                $src = imagecreatefrompng($image->getPathname());
+                                break;
+                            case 'image/gif':
+                                $src = imagecreatefromgif($image->getPathname());
+                                break;
+                            case 'image/webp':
+                                if (function_exists('imagecreatefromwebp')) {
+                                    $src = imagecreatefromwebp($image->getPathname());
+                                } else {
+                                    $src = imagecreatefromjpeg($image->getPathname());
+                                }
+                                break;
+                            default:
+                                $src = imagecreatefromjpeg($image->getPathname());
+                                break;
+                        }
+
+                        $w = imagesx($src);
+                        $h = imagesy($src);
+
+                        $dst = imagecreatetruecolor($w, $h);
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $w, $h);
+
+                        $quality = 85;
+                        imagejpeg($dst, $targetPath, $quality);
+
+                        imagedestroy($src);
+                        imagedestroy($dst);
+
+                        $maxBytes = 200 * 1024; // 200 KB
+
+                        while (filesize($targetPath) > $maxBytes && $quality > 30) {
+                            $quality -= 5;
+                            $src = imagecreatefromjpeg($targetPath);
+                            $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
+                            $white = imagecolorallocate($dst, 255, 255, 255);
+                            imagefill($dst, 0, 0, $white);
+                            imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src), imagesx($src), imagesy($src));
+                            imagejpeg($dst, $targetPath, $quality);
+                            imagedestroy($src);
+                            imagedestroy($dst);
+                        }
+
+                        while (filesize($targetPath) > $maxBytes) {
+                            $src = imagecreatefromjpeg($targetPath);
+                            $origW = imagesx($src);
+                            $origH = imagesy($src);
+                            $newW = (int)($origW * 0.9);
+                            $newH = (int)($origH * 0.9);
+
+                            if ($newW < 400 || $newH < 400) {
+                                imagedestroy($src);
+                                break;
+                            }
+
+                            $dst = imagecreatetruecolor($newW, $newH);
+                            $white = imagecolorallocate($dst, 255, 255, 255);
+                            imagefill($dst, 0, 0, $white);
+                            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                            imagejpeg($dst, $targetPath, $quality);
+                            imagedestroy($src);
+                            imagedestroy($dst);
+                        }
+
+                        $galleryPath = 'products/gallery/' . $filename;
+                    } catch (\Exception $e) {
+                        // fallback to storing original file
+                        $galleryPath = $image->store('products/gallery', 'public');
+                    }
 
                     ProductImage::create([
                         'product_id' => $product->id,
@@ -329,9 +495,9 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('Product update failed: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
+            // Log::error('Product update failed: ' . $e->getMessage(), [
+            //     'trace' => $e->getTraceAsString()
+            // ]);
 
             return back()
                 ->withInput()
@@ -522,7 +688,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('Failed to set primary image: ' . $e->getMessage());
+            // Log::error('Failed to set primary image: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -678,11 +844,11 @@ class ProductController extends Controller
                 ])
                 ->post($url, $postData);
 
-            Log::info("{$apiName} API Raw Response Status: " . $response->status());
-            Log::info("{$apiName} API Raw Response Body: " . $response->body());
+            // Log::info("{$apiName} API Raw Response Status: " . $response->status());
+            // Log::info("{$apiName} API Raw Response Body: " . $response->body());
 
             if ($response->failed()) {
-                Log::error("{$apiName} API HTTP error: " . $response->status(), ['response' => $response->json()]);
+                // Log::error("{$apiName} API HTTP error: " . $response->status(), ['response' => $response->json()]);
                 return response()->json([
                     'error' => 'API call failed with HTTP status ' . $response->status(),
                     'api_response' => $response->json()
@@ -697,17 +863,17 @@ class ProductController extends Controller
                     $description = trim($result['candidates'][0]['content']['parts'][0]['text']);
                 } elseif (isset($result['promptFeedback']['blockReason'])) {
                     // Check if content was blocked by safety settings
-                    Log::warning("Gemini API: Prompt or response blocked by safety settings.", [
-                        'blockReason' => $result['promptFeedback']['blockReason'],
-                        'safetyRatings' => $result['promptFeedback']['safetyRatings'],
-                        'prompt' => $prompt
-                    ]);
+                    // Log::warning("Gemini API: Prompt or response blocked by safety settings.", [
+                    //     'blockReason' => $result['promptFeedback']['blockReason'],
+                    //     'safetyRatings' => $result['promptFeedback']['safetyRatings'],
+                    //     'prompt' => $prompt
+                    // ]);
                     return response()->json([
                         'error' => 'Gemini API blocked content due to safety settings.',
                         'block_reason' => $result['promptFeedback']['blockReason']
                     ], 400); // 400 Bad Request is appropriate for content policy violation
                 } else {
-                    Log::error($apiName . ' API: No text or explicit block reason found in Gemini response.', ['response' => $result]);
+                    // Log::error($apiName . ' API: No text or explicit block reason found in Gemini response.', ['response' => $result]);
                     return response()->json(['error' => 'Failed to extract description from Gemini API response or no content generated.'], 500);
                 }
             } elseif (isset($result['choices'][0]['message']['content'])) {
@@ -717,11 +883,11 @@ class ProductController extends Controller
             if ($description) {
                 return response()->json(['description' => $description]);
             } else {
-                Log::error($apiName . ' API: Failed to extract description (final check).', ['response' => $result]);
+                // Log::error($apiName . ' API: Failed to extract description (final check).', ['response' => $result]);
                 return response()->json(['error' => 'Failed to generate description from ' . ucfirst($apiName) . ' API.'], 500);
             }
         } catch (\Exception $e) {
-            Log::error('API call failed: ' . $e->getMessage(), ['exception' => $e, 'apiName' => $apiName]);
+            // Log::error('API call failed: ' . $e->getMessage(), ['exception' => $e, 'apiName' => $apiName]);
             return response()->json(['error' => 'API call failed due to an exception: ' . $e->getMessage()], 500);
         }
     }

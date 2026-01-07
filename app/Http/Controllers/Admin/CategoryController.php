@@ -56,17 +56,98 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255|unique:categories,name',
             'description' => 'nullable|string',
             'parent_id' => 'nullable|exists:categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:400',
+            // Allow up to 2 MB on upload; we'll compress to <= 200 KB after upload
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean'
         ]);
 
         // Generate slug from name
         $validated['slug'] = Str::slug($validated['name']);
 
-        // Handle image upload
+        // Handle image upload and compress to <= 200 KB when possible
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('categories', 'public');
-            $validated['image'] = $imagePath;
+            $file = $request->file('image');
+            $mime = $file->getMimeType();
+
+            if ($mime === 'image/svg+xml') {
+                $validated['image'] = $file->store('categories', 'public');
+            } else {
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $filename = Str::slug($originalName) . '-' . time() . '.jpg';
+                $publicDir = storage_path('app/public/categories');
+                $targetPath = $publicDir . DIRECTORY_SEPARATOR . $filename;
+
+                if (!file_exists($publicDir)) {
+                    mkdir($publicDir, 0755, true);
+                }
+
+                try {
+                    switch ($mime) {
+                        case 'image/png':
+                            $src = imagecreatefrompng($file->getPathname());
+                            break;
+                        case 'image/gif':
+                            $src = imagecreatefromgif($file->getPathname());
+                            break;
+                        default:
+                            $src = imagecreatefromjpeg($file->getPathname());
+                            break;
+                    }
+
+                    $w = imagesx($src);
+                    $h = imagesy($src);
+
+                    $dst = imagecreatetruecolor($w, $h);
+                    $white = imagecolorallocate($dst, 255, 255, 255);
+                    imagefill($dst, 0, 0, $white);
+                    imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $w, $h);
+
+                    $quality = 85;
+                    imagejpeg($dst, $targetPath, $quality);
+                    imagedestroy($src);
+                    imagedestroy($dst);
+
+                    $maxBytes = 200 * 1024; // 200 KB
+
+                    while (filesize($targetPath) > $maxBytes && $quality > 30) {
+                        $quality -= 5;
+                        $src = imagecreatefromjpeg($targetPath);
+                        $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src), imagesx($src), imagesy($src));
+                        imagejpeg($dst, $targetPath, $quality);
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+
+                    while (filesize($targetPath) > $maxBytes) {
+                        $src = imagecreatefromjpeg($targetPath);
+                        $origW = imagesx($src);
+                        $origH = imagesy($src);
+                        $newW = (int)($origW * 0.9);
+                        $newH = (int)($origH * 0.9);
+
+                        if ($newW < 150 || $newH < 150) {
+                            imagedestroy($src);
+                            break;
+                        }
+
+                        $dst = imagecreatetruecolor($newW, $newH);
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                        imagejpeg($dst, $targetPath, $quality);
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+
+                    $validated['image'] = 'categories/' . $filename;
+                } catch (\Exception $e) {
+                    // fallback
+                    $validated['image'] = $file->store('categories', 'public');
+                }
+            }
         }
 
         // Set default active status if not provided
@@ -109,22 +190,108 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
             'description' => 'nullable|string',
             'parent_id' => 'nullable|exists:categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:400',
+            // Allow up to 2 MB on upload; we'll compress to <= 200 KB after upload
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean'
         ]);
 
         // Generate slug from name
         $validated['slug'] = Str::slug($validated['name']);
 
-        // Handle image upload
+        // Handle image upload and compress to <= 200 KB when possible
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($category->image) {
-                Storage::disk('public')->delete($category->image);
-            }
+            $file = $request->file('image');
+            $mime = $file->getMimeType();
 
-            $imagePath = $request->file('image')->store('categories', 'public');
-            $validated['image'] = $imagePath;
+            if ($mime === 'image/svg+xml') {
+                // store svg as-is
+                $newPath = $file->store('categories', 'public');
+                if ($category->image) {
+                    Storage::disk('public')->delete($category->image);
+                }
+                $validated['image'] = $newPath;
+            } else {
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $filename = Str::slug($originalName) . '-' . time() . '.jpg';
+                $publicDir = storage_path('app/public/categories');
+                $targetPath = $publicDir . DIRECTORY_SEPARATOR . $filename;
+
+                if (!file_exists($publicDir)) {
+                    mkdir($publicDir, 0755, true);
+                }
+
+                try {
+                    switch ($mime) {
+                        case 'image/png':
+                            $src = imagecreatefrompng($file->getPathname());
+                            break;
+                        case 'image/gif':
+                            $src = imagecreatefromgif($file->getPathname());
+                            break;
+                        default:
+                            $src = imagecreatefromjpeg($file->getPathname());
+                            break;
+                    }
+
+                    $w = imagesx($src);
+                    $h = imagesy($src);
+
+                    $dst = imagecreatetruecolor($w, $h);
+                    $white = imagecolorallocate($dst, 255, 255, 255);
+                    imagefill($dst, 0, 0, $white);
+                    imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $w, $h);
+
+                    $quality = 85;
+                    imagejpeg($dst, $targetPath, $quality);
+                    imagedestroy($src);
+                    imagedestroy($dst);
+
+                    $maxBytes = 200 * 1024; // 200 KB
+
+                    while (filesize($targetPath) > $maxBytes && $quality > 30) {
+                        $quality -= 5;
+                        $src = imagecreatefromjpeg($targetPath);
+                        $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src), imagesx($src), imagesy($src));
+                        imagejpeg($dst, $targetPath, $quality);
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+
+                    while (filesize($targetPath) > $maxBytes) {
+                        $src = imagecreatefromjpeg($targetPath);
+                        $origW = imagesx($src);
+                        $origH = imagesy($src);
+                        $newW = (int)($origW * 0.9);
+                        $newH = (int)($origH * 0.9);
+
+                        if ($newW < 150 || $newH < 150) {
+                            imagedestroy($src);
+                            break;
+                        }
+
+                        $dst = imagecreatetruecolor($newW, $newH);
+                        $white = imagecolorallocate($dst, 255, 255, 255);
+                        imagefill($dst, 0, 0, $white);
+                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                        imagejpeg($dst, $targetPath, $quality);
+                        imagedestroy($src);
+                        imagedestroy($dst);
+                    }
+
+                    // delete old image only after new one successfully created
+                    if ($category->image) {
+                        Storage::disk('public')->delete($category->image);
+                    }
+
+                    $validated['image'] = 'categories/' . $filename;
+                } catch (\Exception $e) {
+                    // fallback
+                    $validated['image'] = $file->store('categories', 'public');
+                }
+            }
         }
 
         // Set active status

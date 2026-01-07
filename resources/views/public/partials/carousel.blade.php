@@ -163,7 +163,7 @@
             function startSlideShow() {
                 // Only start if more than one slide
                 if (slides.length > 1) {
-                    slideInterval = setInterval(nextSlide, 5000);
+                    slideInterval = setInterval(nextSlide, 2000);
                 }
             }
 

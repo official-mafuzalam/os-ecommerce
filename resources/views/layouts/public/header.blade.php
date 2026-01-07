@@ -80,7 +80,7 @@
         h4,
         h5,
         h6 {
-            font-family: var(--font-heading);
+            font-family: var(--font-elegant);
             font-weight: 600;
             letter-spacing: -0.025em;
         }
@@ -111,6 +111,7 @@
         }
 
         .nav-link {
+            font-family: var(--font-elegant);
             position: relative;
             padding: 0.5rem 0;
             margin: 0 1rem;
@@ -590,7 +591,7 @@
                             @endphp
                             @foreach ($categories as $category)
                                 <a href="{{ route('public.categories.show', $category->slug) }}"
-                                    class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b last:border-b-0">
+                                    class="nav-link flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b last:border-b-0">
                                     @if ($category->image)
                                         <img src="{{ Storage::url($category->image) }}" alt="{{ $category->name }}"
                                             class="w-6 h-6 rounded">
@@ -604,7 +605,7 @@
                             @endforeach
                             <div class="p-4 border-t">
                                 <a href="{{ route('public.categories') }}"
-                                    class="text-sm font-medium text-gray-700 hover:text-gray-900 flex items-center gap-2">
+                                    class="nav-link text-sm font-medium text-gray-700 hover:text-gray-900 flex items-center gap-2">
                                     View All Categories <i class="fas fa-arrow-right text-xs"></i>
                                 </a>
                             </div>
@@ -625,9 +626,9 @@
                     </button>
 
                     <!-- User Account -->
-                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-gray-900 transition-colors">
+                    {{-- <a href="{{ route('login') }}" class="text-gray-700 hover:text-gray-900 transition-colors">
                         <i class="far fa-user text-lg"></i>
-                    </a>
+                    </a> --}}
 
                     <!-- Cart -->
                     @php
@@ -655,7 +656,7 @@
         <div id="fashionSearch" class="absolute top-full left-0 right-0 bg-white shadow-xl hidden">
             <div class="container mx-auto px-4 py-6">
                 <div class="relative">
-                    <input type="text" placeholder="Search for luxury fashion, brands, and styles..."
+                    <input type="text" placeholder="Search for products, brands, and many more..."
                         class="w-full px-6 py-4 text-lg border-0 focus:ring-0 focus:outline-none"
                         onkeyup="performFashionSearch(event)">
                     <button onclick="closeFashionSearch()"
