@@ -13,25 +13,25 @@ class SettingsTableSeeder extends Seeder
         // API Settings (dynamic)
         // --------------------
         $apis = [
-            'openai' => [
-                'key' => env('OPENAI_API_KEY', null),
-                'enabled' => true,
-                'model' => 'gpt-3.5-turbo',
-            ],
-            'mistral' => [
-                'key' => env('MISTRAL_API_KEY', null),
-                'enabled' => false,
-                'model' => 'open-mistral-8x22b',
-            ],
-            'deepseek' => [
-                'key' => env('DEEPSEEK_API_KEY', null),
-                'enabled' => false,
-                'model' => 'deepseek-chat',
-            ],
+            // 'openai' => [
+            //     'key' => env('OPENAI_API_KEY', null),
+            //     'enabled' => true,
+            //     'model' => 'gpt-3.5-turbo',
+            // ],
+            // 'mistral' => [
+            //     'key' => env('MISTRAL_API_KEY', null),
+            //     'enabled' => false,
+            //     'model' => 'open-mistral-8x22b',
+            // ],
+            // 'deepseek' => [
+            //     'key' => env('DEEPSEEK_API_KEY', null),
+            //     'enabled' => false,
+            //     'model' => 'deepseek-chat',
+            // ],
             'gemini' => [
                 'key' => env('GOOGLE_API_KEY', null),
                 'enabled' => false,
-                'model' => 'gemini-1.5-pro',
+                'model' => 'gemini-3-flash-preview',
             ],
         ];
 

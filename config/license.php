@@ -8,7 +8,7 @@ return [
     */
 
     'api_url' => env('LICENSE_API_URL', 'https://octosyncsoftware.com/api'),
-    'license_key' => setting('license_key', env('LICENSE_KEY')),
+    'license_key' => env('LICENSE_KEY'),
 
     'cache' => [
         'duration' => 6, // hours

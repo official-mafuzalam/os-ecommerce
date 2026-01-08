@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SubscriberController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Public\CartController;
 use App\Http\Controllers\Public\CheckoutController;
 use App\Http\Controllers\Public\HomeController as PublicHomeController;
@@ -104,8 +105,6 @@ Route::middleware('web')->group(function () {
 Route::middleware(['auth', 'license.check', 'role:super_admin|admin|user'])->group(function () {
     Route::prefix('admin')->group(function () {
         Route::get('/', [HomeController::class, 'index'])->name('admin.index');
-
-        Route::post('/generate-description', [ProductController::class, 'generateDescription'])->name('admin.products.generate-description');
 
         // Admin Order Routes
         Route::prefix('/orders')->name('admin.orders.')->group(function () {
