@@ -52,7 +52,7 @@
     <div class="p-3">
         <!-- Category -->
         @if ($product->category)
-            <a href="{{ route('public.categories.show', $product->category->slug) }}"
+            <a href="{{ route('public.products', ['category' => $product->category->slug]) }}"
                 class="inline-block text-[11px] text-gray-500 hover:text-indigo-600 font-medium mb-0.5 truncate w-full">
                 {{ $product->category->name }}
             </a>

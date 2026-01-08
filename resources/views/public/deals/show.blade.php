@@ -72,7 +72,7 @@
                             </a>
 
                             <button onclick="shareDeal()"
-                                class="fashion-btn-outline text-white border-white hover:bg-white/10 inline-flex items-center justify-center gap-3 px-6 py-4">
+                                class="fashion-btn text-white border-white hover:bg-white/10 inline-flex items-center justify-center gap-3 px-6 py-4">
                                 <i class="fas fa-share-alt"></i>
                                 Share Deal
                             </button>

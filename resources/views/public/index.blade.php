@@ -69,7 +69,7 @@
                     </div>
                     <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 md:gap-6">
                         @foreach ($categories as $category)
-                            <a href="{{ route('public.categories.show', $category->slug) }}"
+                            <a href="{{ route('public.products', parameters: ['category' => $category->slug]) }}"
                                 class="group relative bg-white rounded-2xl p-4 text-center transition-all duration-300 hover:scale-105 hover:shadow-xl border border-gray-100">
                                 <div class="relative w-16 h-16 mx-auto mb-3">
                                     @if ($category->image)
@@ -117,7 +117,7 @@
                     </div>
 
                     <div class="relative">
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                             @foreach ($featuredProducts as $product)
                                 @include('public.products.partial.product-card', ['product' => $product])
                             @endforeach
@@ -152,7 +152,7 @@
                         </a>
                     </div>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                         @foreach ($allProducts as $product)
                             @include('public.products.partial.product-card', ['product' => $product])
                         @endforeach

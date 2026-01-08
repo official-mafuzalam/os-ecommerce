@@ -46,7 +46,7 @@ class CheckLicense
         if ((!$isValid && !$isInGracePeriod) || $isBlockedStatus) {
             // If API is unreachable, show warning but allow access
             if ($apiUnreachable) {
-                $request->session()->flash('license.warning', 'Unable to verify license. Using cached data.');
+                session()->flash('license.warning', 'Unable to verify license. Using cached data.');
                 return $next($request);
             }
 
@@ -60,7 +60,7 @@ class CheckLicense
                 ];
 
                 $message = $statusMessages[$status] ?? "License status: $status";
-                $request->session()->flash('license.danger', $message);
+                session()->flash('license.danger', $message);
 
             } elseif ($isExpired) {
                 $expiryDate = $licenseStatus['client']['license_expires_at'] ?? 'unknown';
@@ -73,9 +73,9 @@ class CheckLicense
                     $message .= "The grace period has ended.";
                 }
 
-                $request->session()->flash('license.danger', $message);
+                session()->flash('license.danger', $message);
             } else {
-                $request->session()->flash(
+                session()->flash(
                     'license.danger',
                     'License is invalid. Status: ' . $status
                 );
@@ -90,7 +90,7 @@ class CheckLicense
             $graceDays = config('license.grace_period.days', 7);
             $daysRemaining = $graceDays + $daysLeft; // daysLeft is negative
 
-            $request->session()->flash(
+            session()->flash(
                 'license.warning',
                 "License expired. You're in a grace period. $daysRemaining days remaining to renew."
             );

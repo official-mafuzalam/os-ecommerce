@@ -58,7 +58,7 @@ class SettingsTableSeeder extends Seeder
         $generalSettings = [
             [
                 'key' => 'site_name',
-                'value' => 'Octosync Software',
+                'value' => 'Octosync Ecommerce',
                 'type' => 'text',
                 'group' => 'general',
                 'label' => 'Site Name',
@@ -66,7 +66,7 @@ class SettingsTableSeeder extends Seeder
             ],
             [
                 'key' => 'site_title',
-                'value' => 'Octosync Software - AI Powered Solutions',
+                'value' => 'Octosync Ecommerce - Premium AI Powered Ecommerce Solution',
                 'type' => 'text',
                 'group' => 'general',
                 'label' => 'Site Title',

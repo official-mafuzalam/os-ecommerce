@@ -68,7 +68,7 @@
                         <!-- Brand & Status -->
                         <div class="flex justify-between items-start mb-4">
                             @if ($product->brand)
-                                <a href="{{ route('public.brands.show', $product->brand->slug) }}"
+                                <a href="{{ route('public.products', parameters: ['brand' => $product->brand->slug]) }}"
                                     class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
                                     <span>By {{ $product->brand->name }}</span>
                                     <i class="fas fa-chevron-right text-xs"></i>

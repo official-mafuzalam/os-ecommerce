@@ -15,6 +15,7 @@ class LicenseService
 
     public function __construct()
     {
+        setLicenseConfigFromDB();
         $this->apiUrl = config('license.api_url');
         $this->licenseKey = config('license.license_key');
         $this->cacheDuration = config('license.cache.duration', 6);
@@ -40,10 +41,10 @@ class LicenseService
                 ]);
 
             // Log the full response for debugging
-            Log::info('License API Response', [
-                'status' => $response->status(),
-                'body' => $response->body()
-            ]);
+            // Log::info('License API Response', [
+            //     'status' => $response->status(),
+            //     'body' => $response->body()
+            // ]);
 
             if ($response->successful()) {
                 $data = $response->json();

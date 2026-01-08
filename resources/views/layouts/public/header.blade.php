@@ -42,7 +42,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- Fashion E-commerce Critical CSS -->
-    <style>
+    {{-- <style>
         :root {
             --font-elegant: 'Playfair Display', serif;
             --font-heading: 'Montserrat', sans-serif;
@@ -458,7 +458,7 @@
             color: var(--color-primary);
             transform: translateY(-3px);
         }
-    </style>
+    </style> --}}
 
     @stack('styles')
 
