@@ -101,7 +101,7 @@
                                         </div>
                                     @endif
 
-                                    <a href="{{ $deal->button_link }}"
+                                    <a href="{{ route('public.deals.show', ['deal'=>$deal->id]) }}"
                                         class="w-full fashion-btn flex items-center justify-center gap-2 py-3">
                                         {{ $deal->button_text }}
                                         <i

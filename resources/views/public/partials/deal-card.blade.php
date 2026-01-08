@@ -33,9 +33,9 @@
             <h3 class="font-semibold text-gray-900 mb-1 line-clamp-1 group-hover:text-indigo-600 transition-colors">
                 {{ $deal->title }}
             </h3>
-            <p class="text-sm text-gray-600 mb-3 line-clamp-2">
+            {{-- <p class="text-sm text-gray-600 mb-3 line-clamp-2">
                 {{ $deal->description }}
-            </p>
+            </p> --}}
             <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-indigo-600">
                     {{ $deal->button_text }}

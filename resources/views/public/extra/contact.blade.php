@@ -402,8 +402,7 @@
 
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="h-96">
-                        <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d116833.97303520302!2d90.3372882621096!3d23.78081863555724!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91cd1fe921603f7%3A0x80cf27fdb71760a!2sOctosync%20Software%20Ltd!5e0!3m2!1sen!2sbd!4v1767770431563!5m2!1sen!2sbd"
+                        <iframe src="https://www.google.com/maps/embed?pb={{ setting('google_map_embed_code') }}"
                             width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
                             referrerpolicy="no-referrer-when-downgrade">
                         </iframe>
@@ -411,7 +410,8 @@
                     <div class="p-6 border-t border-gray-100">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
-                                <h3 class="font-semibold text-gray-900 mb-1">{{ setting('site_name', 'Octosync Ecommerce') }}</h3>
+                                <h3 class="font-semibold text-gray-900 mb-1">
+                                    {{ setting('site_name', 'Octosync Ecommerce') }}</h3>
                                 <p class="text-gray-600">{{ setting('site_address', 'Mirpur 2, Dhaka 1216') }}</p>
                             </div>
                             <a href="https://maps.google.com/?q={{ urlencode(setting('site_address', 'Mirpur 2, Dhaka 1216')) }}"

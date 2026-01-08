@@ -1,4 +1,5 @@
 <x-app-layout>
+    @section('title', setting('site_title', 'OS E-commerce'))
     <x-slot name="main">
         @php
             $layoutSetting = setting('default_layout_type');

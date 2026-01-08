@@ -44,16 +44,7 @@ class HomeController extends Controller
             ->take(9)
             ->get();
 
-        // Initialize deal variables to prevent undefined variable error
-        $leftDeals = collect();
-        $rightDeals = collect();
-        $bottomDeals = collect();
-
-        if (setting('default_layout_type') === 'layout1') {
-            $allDeals = Deal::featured()->ordered()->latest()->take(10)->get();
-        } elseif (setting('default_layout_type') === 'layout2') {
-            $allDeals = Deal::featured()->ordered()->latest()->take(10)->get();
-        }
+        $allDeals = Deal::featured()->ordered()->latest()->take(10)->get();
 
         return view('public.index', compact(
             'carousels',
