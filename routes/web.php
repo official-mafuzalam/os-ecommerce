@@ -111,6 +111,7 @@ Route::middleware(['auth', 'license.check', 'role:super_admin|admin|user'])->gro
             Route::get('/{id}', [OrderController::class, 'show'])->name('show');
             Route::get('/{id}/edit', [OrderController::class, 'edit'])->name('edit');
             Route::put('/{id}', [OrderController::class, 'update'])->name('update');
+            Route::delete('/{id}/delete', [OrderController::class, 'delete'])->name('delete');
             Route::patch('/{id}/status', [OrderController::class, 'updateStatus'])->name('update-status');
             Route::patch('/{id}/mark-paid', [OrderController::class, 'markAsPaid'])->name('mark-paid');
             Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');

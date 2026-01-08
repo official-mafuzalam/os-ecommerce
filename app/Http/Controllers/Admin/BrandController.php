@@ -121,8 +121,8 @@ class BrandController extends Controller
                         $src = imagecreatefromjpeg($targetPath);
                         $origW = imagesx($src);
                         $origH = imagesy($src);
-                        $newW = (int)($origW * 0.9);
-                        $newH = (int)($origH * 0.9);
+                        $newW = (int) ($origW * 0.9);
+                        $newH = (int) ($origH * 0.9);
 
                         if ($newW < 150 || $newH < 150) {
                             imagedestroy($src);
@@ -160,8 +160,20 @@ class BrandController extends Controller
      */
     public function show(Brand $brand)
     {
-        $brand->load('products');
-        return view('admin.brands.show', compact('brand'));
+        // Load product count
+        $brand->loadCount('products');
+
+        // Get paginated products with relationships
+        $products = $brand->products()
+            ->with(['category', 'images'])
+            ->latest()
+            ->paginate(10);
+
+        // Get additional statistics
+        $activeProductsCount = $brand->products()->where('is_active', true)->count();
+        $outOfStockCount = $brand->products()->where('stock_quantity', '<=', 0)->count();
+
+        return view('admin.brands.show', compact('brand', 'products', 'activeProductsCount', 'outOfStockCount'));
     }
 
     /**
@@ -255,8 +267,8 @@ class BrandController extends Controller
                         $src = imagecreatefromjpeg($targetPath);
                         $origW = imagesx($src);
                         $origH = imagesy($src);
-                        $newW = (int)($origW * 0.9);
-                        $newH = (int)($origH * 0.9);
+                        $newW = (int) ($origW * 0.9);
+                        $newH = (int) ($origH * 0.9);
 
                         if ($newW < 150 || $newH < 150) {
                             imagedestroy($src);

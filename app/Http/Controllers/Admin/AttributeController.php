@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Attribute;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -77,13 +78,31 @@ class AttributeController extends Controller
      */
     public function show($id)
     {
-        $attribute = Attribute::with([
-            'products' => function ($query) {
-                $query->select('products.id', 'products.name');
-            }
-        ])->findOrFail($id);
+        $attribute = Attribute::findOrFail($id);
 
-        return view('admin.attributes.show', compact('attribute'));
+        // Get unique values used for this attribute
+        $uniqueValues = DB::table('product_attributes')
+            ->where('attribute_id', $id)
+            ->select('value')
+            ->distinct()
+            ->pluck('value')
+            ->sort();
+
+        // Get paginated products with this attribute
+        $products = $attribute->products()
+            ->with(['images'])
+            ->orderBy('product_attributes.order')
+            ->paginate(10);
+
+        // Count unique values
+        $uniqueValuesCount = $uniqueValues->count();
+
+        return view('admin.attributes.show', compact(
+            'attribute',
+            'products',
+            'uniqueValues',
+            'uniqueValuesCount'
+        ));
     }
 
     /**

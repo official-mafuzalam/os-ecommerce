@@ -590,7 +590,7 @@
                                 $categories = App\Models\Category::where('is_active', true)->take(8)->get();
                             @endphp
                             @foreach ($categories as $category)
-                                <a href="{{ route('public.categories.show', $category->slug) }}"
+                                <a href="{{ route('public.products', ['category' => $category->slug]) }}"
                                     class="nav-link flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b last:border-b-0">
                                     @if ($category->image)
                                         <img src="{{ Storage::url($category->image) }}" alt="{{ $category->name }}"
@@ -683,7 +683,7 @@
                     </button>
                     <div id="mobileFashionCategories" class="hidden">
                         @foreach ($categories as $category)
-                            <a href="{{ route('public.categories.show', $category->slug) }}"
+                            <a href="{{ route('public.products', ['category' => $category->slug]) }}"
                                 class="block px-10 py-2 hover:bg-gray-50 text-sm">
                                 {{ $category->name }}
                             </a>

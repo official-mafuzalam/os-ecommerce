@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -125,8 +126,8 @@ class CategoryController extends Controller
                         $src = imagecreatefromjpeg($targetPath);
                         $origW = imagesx($src);
                         $origH = imagesy($src);
-                        $newW = (int)($origW * 0.9);
-                        $newH = (int)($origH * 0.9);
+                        $newW = (int) ($origW * 0.9);
+                        $newH = (int) ($origH * 0.9);
 
                         if ($newW < 150 || $newH < 150) {
                             imagedestroy($src);
@@ -165,7 +166,12 @@ class CategoryController extends Controller
     public function show(Category $category)
     {
         $category->load(['parent', 'children', 'products']);
-        return view('admin.categories.show', compact('category'));
+        $products = $category->products()
+            ->with(['brand', 'images'])
+            ->latest()
+            ->paginate(10);
+        
+        return view('admin.categories.show', compact('category', 'products'));
     }
 
     /**
@@ -264,8 +270,8 @@ class CategoryController extends Controller
                         $src = imagecreatefromjpeg($targetPath);
                         $origW = imagesx($src);
                         $origH = imagesy($src);
-                        $newW = (int)($origW * 0.9);
-                        $newH = (int)($origH * 0.9);
+                        $newW = (int) ($origW * 0.9);
+                        $newH = (int) ($origH * 0.9);
 
                         if ($newW < 150 || $newH < 150) {
                             imagedestroy($src);

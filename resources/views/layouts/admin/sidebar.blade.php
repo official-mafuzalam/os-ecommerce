@@ -142,6 +142,7 @@
                             'admin.deals.index',
                             'admin.deals.create',
                             'admin.deals.edit',
+                            'admin.deals.show',
                             'admin.deals.products.show',
                             'admin.attributes.index',
                             'admin.attributes.create',
@@ -209,6 +210,7 @@
                                         'admin.deals.index',
                                         'admin.deals.create',
                                         'admin.deals.edit',
+                                        'admin.deals.show',
                                         'admin.deals.products.show',
                                     ])
                                         ? 'bg-gray-200 dark:bg-gray-900'

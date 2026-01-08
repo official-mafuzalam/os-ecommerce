@@ -143,8 +143,8 @@ class DealController extends Controller
                         $src = imagecreatefromjpeg($targetPath);
                         $origW = imagesx($src);
                         $origH = imagesy($src);
-                        $newW = (int)($origW * 0.9);
-                        $newH = (int)($origH * 0.9);
+                        $newW = (int) ($origW * 0.9);
+                        $newH = (int) ($origH * 0.9);
 
                         if ($newW < 200 || $newH < 200) {
                             imagedestroy($src);
@@ -193,6 +193,15 @@ class DealController extends Controller
      */
     public function show(Deal $deal)
     {
+        // Load products with their images and pivot data
+        $deal->load([
+            'products' => function ($query) {
+                $query->with(['images', 'category'])
+                    ->orderBy('deal_product.order');
+            },
+            'featuredProducts'
+        ]);
+
         return view('admin.deals.show', compact('deal'));
     }
 
@@ -300,8 +309,8 @@ class DealController extends Controller
                         $src = imagecreatefromjpeg($targetPath);
                         $origW = imagesx($src);
                         $origH = imagesy($src);
-                        $newW = (int)($origW * 0.9);
-                        $newH = (int)($origH * 0.9);
+                        $newW = (int) ($origW * 0.9);
+                        $newH = (int) ($origH * 0.9);
 
                         if ($newW < 200 || $newH < 200) {
                             imagedestroy($src);
