@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 // use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -764,45 +764,14 @@ class ProductController extends Controller
         $apiName = null;
         $postData = [];
 
-        if (setting('api_openai_enabled') === '1') {
-            $apiKey = setting('api_openai_key');
-            $model = setting('api_openai_model');
-            $url = 'https://api.openai.com/v1/chat/completions';
-            $apiName = 'openai';
-            $postData = [
-                'model' => $model,
-                'messages' => [['role' => 'user', 'content' => $prompt]],
-                'max_tokens' => 250, // Added for OpenAI compatibility
-                'temperature' => 0.7,
-            ];
-        } elseif (setting('api_mistral_enabled') === '1') {
-            $apiKey = setting('api_mistral_key');
-            $model = setting('api_mistral_model');
-            $url = 'https://api.mistral.ai/v1/chat/completions';
-            $apiName = 'mistral';
-            $postData = [
-                'model' => $model,
-                'messages' => [['role' => 'user', 'content' => $prompt]],
-                'max_tokens' => 250, // Added for Mistral compatibility
-                'temperature' => 0.7,
-            ];
-        } elseif (setting('api_deepseek_enabled') === '1') {
-            $apiKey = setting('api_deepseek_key');
-            $model = setting('api_deepseek_model');
-            $url = 'https://api.deepseek.com/v1/chat/completions';
-            $apiName = 'deepseek';
-            $postData = [
-                'model' => $model,
-                'messages' => [['role' => 'user', 'content' => $prompt]],
-                'max_tokens' => 250, // Added for DeepSeek compatibility
-                'temperature' => 0.7,
-            ];
-        } elseif (setting('api_gemini_enabled') === '1') {
+        if (setting('api_gemini_enabled') === '1') {
             $apiKey = setting('api_gemini_key');
             $model = setting('api_gemini_model', 'gemini-1.5-flash');
-            // Use the correct endpoint for Gemini with API key in URL
-            $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . $model . ':generateContent?key=' . $apiKey;
+
+            // 1. Correct URL structure for Gemini
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
             $apiName = 'gemini';
+
             $postData = [
                 'contents' => [
                     [
@@ -812,89 +781,70 @@ class ProductController extends Controller
                     ]
                 ],
                 'generationConfig' => [
-                    'maxOutputTokens' => 500, // Increased token limit
-                    'temperature' => 0.8,     // Slightly higher temperature for more varied output
-                    'topP' => 0.95,           // Add topP for more control
+                    'maxOutputTokens' => 500,
+                    'temperature' => 0.8,
+                    'topP' => 0.95,
                 ],
-                // **Crucial: Explicitly set safety settings to BLOCK_NONE for testing if needed**
-                // WARNING: Adjust these based on your application's actual safety requirements.
-                // Setting to BLOCK_NONE will allow potentially unsafe content.
+                // Note: BLOCK_NONE is only available for certain regions/projects. 
+                // BLOCK_ONLY_HIGH is safer for general free-tier use.
                 'safetySettings' => [
-                    ['category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_NONE'],
-                    ['category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'threshold' => 'BLOCK_NONE'],
-                    ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_NONE'],
-                    ['category' => 'HARM_CATEGORY_DANGEROUS_CONTENT', 'threshold' => 'BLOCK_NONE'],
+                    ['category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_ONLY_HIGH'],
+                    ['category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'threshold' => 'BLOCK_ONLY_HIGH'],
+                    ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_ONLY_HIGH'],
+                    ['category' => 'HARM_CATEGORY_DANGEROUS_CONTENT', 'threshold' => 'BLOCK_ONLY_HIGH'],
                 ]
             ];
-            $apiKey = null; // Unset it for the header if using URL param
         } else {
             return response()->json(['error' => 'No API is enabled in settings'], 500);
         }
 
-        if (!$apiKey && $apiName !== 'gemini') {
-            return response()->json(['error' => ucfirst($apiName) . ' API key is not configured.'], 500);
-        }
-        if ($apiName === 'gemini' && !setting('api_gemini_key')) {
+        // 2. FIXED: Removed the conflicting $apiKey = null logic. 
+        // For Gemini AI Studio, we don't use the Authorization header.
+        if (!$apiKey) {
+            Log::error('Gemini API key is not configured.');
             return response()->json(['error' => 'Gemini API key is not configured.'], 500);
         }
 
         try {
-            $headers = ['Content-Type' => 'application/json'];
-            if ($apiKey) {
-                $headers['Authorization'] = 'Bearer ' . $apiKey;
-            }
-
-            $response = Http::withHeaders($headers)
+            // 3. CLEANED: Headers should only contain Content-Type. 
+            // Do NOT send 'Authorization: Bearer' for the Google AI Studio free key.
+            $response = Http::withHeaders(['Content-Type' => 'application/json'])
                 ->withOptions([
                     'verify' => !app()->environment('local'),
                 ])
                 ->post($url, $postData);
 
-            // Log::info("{$apiName} API Raw Response Status: " . $response->status());
-            // Log::info("{$apiName} API Raw Response Body: " . $response->body());
-
             if ($response->failed()) {
-                // Log::error("{$apiName} API HTTP error: " . $response->status(), ['response' => $response->json()]);
                 return response()->json([
-                    'error' => 'API call failed with HTTP status ' . $response->status(),
-                    'api_response' => $response->json()
+                    'error' => 'API call failed',
+                    'details' => $response->json()['error']['message'] ?? 'Unknown error'
                 ], $response->status());
             }
 
             $result = $response->json();
             $description = null;
 
-            if ($apiName === 'gemini') {
-                if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-                    $description = trim($result['candidates'][0]['content']['parts'][0]['text']);
-                } elseif (isset($result['promptFeedback']['blockReason'])) {
-                    // Check if content was blocked by safety settings
-                    // Log::warning("Gemini API: Prompt or response blocked by safety settings.", [
-                    //     'blockReason' => $result['promptFeedback']['blockReason'],
-                    //     'safetyRatings' => $result['promptFeedback']['safetyRatings'],
-                    //     'prompt' => $prompt
-                    // ]);
-                    return response()->json([
-                        'error' => 'Gemini API blocked content due to safety settings.',
-                        'block_reason' => $result['promptFeedback']['blockReason']
-                    ], 400); // 400 Bad Request is appropriate for content policy violation
-                } else {
-                    // Log::error($apiName . ' API: No text or explicit block reason found in Gemini response.', ['response' => $result]);
-                    return response()->json(['error' => 'Failed to extract description from Gemini API response or no content generated.'], 500);
-                }
-            } elseif (isset($result['choices'][0]['message']['content'])) {
-                $description = trim($result['choices'][0]['message']['content']);
+            // 4. IMPROVED: Safer extraction of text
+            if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                $description = trim($result['candidates'][0]['content']['parts'][0]['text']);
             }
-
-            if ($description) {
-                return response()->json(['description' => $description]);
+            // Handle specific Finish Reasons (like Safety)
+            elseif (isset($result['candidates'][0]['finishReason']) && $result['candidates'][0]['finishReason'] === 'SAFETY') {
+                return response()->json(['error' => 'Content blocked by safety filters.'], 400);
             } else {
-                // Log::error($apiName . ' API: Failed to extract description (final check).', ['response' => $result]);
-                return response()->json(['error' => 'Failed to generate description from ' . ucfirst($apiName) . ' API.'], 500);
+                return response()->json(['error' => 'Unexpected API response format.'], 500);
             }
+            Log::info('AI Description Generated', [
+                'product_name' => $productName,
+                'api' => $apiName,
+                'model' => $model,
+                'description' => $description
+            ]);
+            return response()->json(['description' => $description]);
+
         } catch (\Exception $e) {
-            // Log::error('API call failed: ' . $e->getMessage(), ['exception' => $e, 'apiName' => $apiName]);
-            return response()->json(['error' => 'API call failed due to an exception: ' . $e->getMessage()], 500);
+            Log::error('AI Description Generation Failed: ' . $e->getMessage());
+            return response()->json(['error' => 'Exception: ' . $e->getMessage()], 500);
         }
     }
 

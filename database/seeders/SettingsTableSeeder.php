@@ -122,7 +122,7 @@ class SettingsTableSeeder extends Seeder
             ],
             [
                 'key' => 'license_key',
-                'value' => null,
+                'value' => '508c4dd9-2e3e-40d6-bbdd-872b28c1ea49',
                 'type' => 'text',
                 'group' => 'general',
                 'label' => 'License Key',

@@ -105,6 +105,8 @@ Route::middleware(['auth', 'license.check', 'role:super_admin|admin|user'])->gro
     Route::prefix('admin')->group(function () {
         Route::get('/', [HomeController::class, 'index'])->name('admin.index');
 
+        Route::post('/generate-description', [ProductController::class, 'generateDescription'])->name('admin.products.generate-description');
+
         // Admin Order Routes
         Route::prefix('/orders')->name('admin.orders.')->group(function () {
             Route::get('/', [OrderController::class, 'index'])->name('index');
@@ -243,6 +245,5 @@ Route::middleware(['auth', 'license.check', 'role:super_admin'])->group(function
 // =====================================================================
 // AI Product Description Generator (Separate Route)
 // =====================================================================
-Route::middleware(['auth', 'license.warning'])->post('/generate-description', [ProductController::class, 'generateDescription']);
 
 require __DIR__ . '/auth.php';
