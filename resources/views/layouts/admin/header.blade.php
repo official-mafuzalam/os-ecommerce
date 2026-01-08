@@ -23,8 +23,8 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- <link rel="preload" as="style" href="{{ asset('build/assets/app-e64e5c60.css') }}" />
-    <link rel="stylesheet" href="{{ asset('build/assets/app-e64e5c60.css') }}" />
+    {{-- <link rel="preload" as="style" href="{{ asset('build/assets/app-da813afd.css') }}" />
+    <link rel="stylesheet" href="{{ asset('build/assets/app-da813afd.css') }}" />
     <link rel="modulepreload" href="{{ asset('build/assets/app-37a11075.js') }}" />
     <script type="module" src="{{ asset('build/assets/app-37a11075.js') }}"></script> --}}
 
