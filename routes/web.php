@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ArtisanController;
+use App\Http\Controllers\Admin\CustomerController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AttributeController;
@@ -172,6 +173,22 @@ Route::middleware(['auth', 'license.check', 'role:super_admin|admin|user'])->gro
 
         // Expenses Routes
         Route::resource('expenses', ExpenseController::class)->names('admin.expenses');
+
+        // admin.php routes
+        Route::prefix('/customers')->name('admin.customers.')->group(function () {
+            Route::get('/', [CustomerController::class, 'index'])->name('index');
+            Route::get('/export', [CustomerController::class, 'export'])->name('export');
+            Route::get('/{customer}', [CustomerController::class, 'show'])->name('show');
+            Route::get('/{customer}/edit', [CustomerController::class, 'edit'])->name('edit');
+            Route::put('/{customer}', [CustomerController::class, 'update'])->name('update');
+            Route::delete('/{customer}', [CustomerController::class, 'destroy'])->name('destroy');
+            Route::get('/{customer}/activity', [CustomerController::class, 'activity'])->name('activity');
+            Route::get('/{customer}/abandoned-carts', [CustomerController::class, 'abandonedCarts'])->name('abandoned-carts');
+            Route::get('/{customer}/wishlist', [CustomerController::class, 'wishlist'])->name('wishlist');
+            Route::patch('/{customer}/toggle-status', [CustomerController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/{customer}/send-email', [CustomerController::class, 'sendEmail'])->name('send-email');
+            Route::post('/merge', [CustomerController::class, 'merge'])->name('merge');
+        });
 
         // Settings Routes
         Route::get('settings', [SettingController::class, 'index'])->name('admin.settings.index');

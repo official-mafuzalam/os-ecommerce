@@ -78,13 +78,13 @@ class Customer extends Model
     {
         $names = explode(' ', $this->full_name);
         $initials = '';
-        
+
         if (count($names) >= 2) {
             $initials = strtoupper(substr($names[0], 0, 1) . substr($names[1], 0, 1));
         } elseif (!empty($this->full_name)) {
             $initials = strtoupper(substr($this->full_name, 0, 2));
         }
-        
+
         return $initials;
     }
 
@@ -114,8 +114,9 @@ class Customer extends Model
     public function getAverageOrderValueAttribute()
     {
         $count = $this->orders()->where('status', 'delivered')->count();
-        if ($count === 0) return 0;
-        
+        if ($count === 0)
+            return 0;
+
         return $this->total_spent / $count;
     }
 
@@ -144,5 +145,25 @@ class Customer extends Model
     {
         $this->update($data);
         return $this;
+    }
+    
+    // Accessors for better display
+    public function getStatusBadgeAttribute()
+    {
+        return $this->is_active
+            ? '<span class="px-2 py-1 text-xs font-medium rounded-md bg-green-100 text-green-800">Active</span>'
+            : '<span class="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800">Inactive</span>';
+    }
+
+    public function getTypeBadgeAttribute()
+    {
+        return $this->type === 'registered'
+            ? '<span class="px-2 py-1 text-xs font-medium rounded-md bg-blue-100 text-blue-800">Registered</span>'
+            : '<span class="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800">Guest</span>';
+    }
+
+    public function getLastOrderAttribute()
+    {
+        return $this->orders()->latest()->first();
     }
 }
