@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Mail\OrderPlaced;
+use App\Models\CartItem;
+use App\Models\CustomerAddress;
+use App\Models\Payment;
 use App\Models\ShoppingCart;
 use App\Models\Product;
 use App\Models\ShippingAddress;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Attribute;
+use App\Models\Customer;
 use App\Models\OrderItemAttribute;
 use App\Services\FacebookCapiService;
 use Illuminate\Http\Request;
@@ -162,28 +166,35 @@ class CheckoutController extends Controller
             'phone' => 'required|string|size:11',
             'full_address' => 'required|string|max:500',
             'delivery_area' => 'required|in:inside_dhaka,outside_dhaka',
-            'payment_method' => 'nullable|in:cash_on_delivery,bkash,nagad,sslcommerz',
+            'payment_method' => 'nullable|in:cash_on_delivery,bkash,nagad,rocket,sslcommerz,bank_transfer,card',
             'notes' => 'nullable|string|max:1000',
+            'save_address' => 'nullable|boolean',
         ]);
 
+        // Get delivery charges from settings
         $deliveryChargeInsideDhaka = setting('delivery_charge_inside_dhaka', 80);
         $deliveryChargeOutsideDhaka = setting('delivery_charge_outside_dhaka', 150);
 
+        // Get tax rate if applicable
+        $taxRate = setting('tax_rate', 0);
+
         // Determine delivery charge
-        $deliveryCharge = $request->delivery_area === 'inside_dhaka' ? $deliveryChargeInsideDhaka : $deliveryChargeOutsideDhaka;
+        $deliveryCharge = $request->delivery_area === 'inside_dhaka'
+            ? $deliveryChargeInsideDhaka
+            : $deliveryChargeOutsideDhaka;
+
+        // Get or create customer
+        $customer = $this->getOrCreateCustomer($request);
 
         // Start transaction
         DB::beginTransaction();
 
         try {
-            // Create Shipping Address
-            $shippingAddress = ShippingAddress::create([
-                'full_name' => $request->full_name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'full_address' => $request->full_address,
-                'delivery_area' => $request->delivery_area,
-            ]);
+            // Create or get shipping address
+            $shippingAddress = $this->createShippingAddress($request, $customer);
+
+            // Get billing address (same as shipping for now, can be separate if needed)
+            $billingAddress = $shippingAddress;
 
             // Get cart items with attributes
             $cart = $this->getCart();
@@ -193,89 +204,230 @@ class CheckoutController extends Controller
                 return redirect()->route('public.products')->with('error', 'Your cart is empty.');
             }
 
-            // Calculate subtotal
-            $subtotal = 0;
-            foreach ($cartItems as $item) {
-                $subtotal += $item->total_price;
-            }
+            // Calculate totals
+            $totals = $this->calculateCartTotals($cartItems, $deliveryCharge, $taxRate);
 
             // Create Order
             $order = Order::create([
                 'order_number' => Order::generateOrderNumber(),
+                'customer_id' => $customer->id,
                 'customer_email' => $request->email,
                 'customer_phone' => $request->phone,
-                'subtotal' => $subtotal,
-                'shipping_cost' => $deliveryCharge,
-                'discount_amount' => 0,
-                'total_amount' => $subtotal + $deliveryCharge,
                 'shipping_address_id' => $shippingAddress->id,
+                'billing_address_id' => $billingAddress->id,
+                'subtotal' => $totals['subtotal'],
+                'shipping_cost' => $deliveryCharge,
+                'tax_amount' => $totals['tax_amount'],
+                'discount_amount' => $totals['discount_amount'] ?? 0,
+                'discount_code' => $request->discount_code ?? null,
+                'total_amount' => $totals['total'],
                 'payment_method' => $request->payment_method ?? 'cash_on_delivery',
+                'shipping_method' => 'standard',
                 'status' => 'pending',
-                'notes' => $request->notes,
                 'payment_status' => 'pending',
+                'customer_notes' => $request->notes,
+                'ip_address' => $request->ip(),
+                'referral_source' => $request->header('referer'),
             ]);
 
             // Create Order Items with Attributes
             foreach ($cartItems as $cartItem) {
+                $product = $cartItem->product;
+
+                // Get attribute values from cart item
+                $attributeValues = $this->getAttributeValues($cartItem);
+
                 // Create the order item
-                $orderItem = $order->items()->create([
-                    'product_id' => $cartItem->product_id,
-                    'unit_price' => $cartItem->product->final_price,
+                $orderItem = OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'product_sku' => $product->sku,
+                    'unit_price' => $product->final_price,
+                    'original_price' => $product->original_price,
+                    'discount_price' => $product->final_price < $product->original_price ? $product->final_price : null,
                     'quantity' => $cartItem->quantity,
                     'total_price' => $cartItem->total_price,
+                    'tax_amount' => ($cartItem->total_price * $taxRate) / 100,
+                    'variant_options' => $attributeValues, // Store attributes as variant_options
+                    'metadata' => [
+                        'cart_item_id' => $cartItem->id,
+                        'attributes' => $attributeValues,
+                    ],
                 ]);
 
-                // Copy attributes from cart item to order item
-                if ($cartItem->attributes->count() > 0) {
-                    foreach ($cartItem->attributes as $attribute) {
-                        $orderItem->attributes()->attach($attribute->id, [
-                            'value' => $attribute->pivot->value,
-                            'order' => $attribute->pivot->order
-                        ]);
-                    }
-                }
+                // Store attribute values in a separate pivot table if needed
+                $this->storeOrderItemAttributes($orderItem, $cartItem);
 
                 // Reduce stock
-                $product = Product::find($cartItem->product_id);
-                if ($product) {
-                    $product->decreaseStock($cartItem->quantity);
-                }
+                $this->reduceStock($product, $cartItem->quantity);
             }
 
-            // Clear cart after checkout
+            // Create Payment Record if not COD
+            if ($order->payment_method !== 'cash_on_delivery') {
+                $this->createPayment($order);
+            }
+
+            // Clear cart after successful checkout
             $cart->items()->delete();
 
-            // Send email if email provided
-            setMailConfigFromDB();
+            // Send confirmation email
             if ($request->email) {
-                Mail::to($request->email)->send(new OrderPlaced($order));
+                $this->sendOrderConfirmation($order);
+            }
+
+            // Send SMS notification
+            if (setting('sms_enabled')) {
+                $this->sendOrderSMS($order);
             }
 
             DB::commit();
 
             // Facebook CAPI Purchase event
+            $this->sendFacebookEvent($fbService, $order);
+
+            // Dispatch order created event
+            // event(new OrderCreated($order));
+
+            // Clear cart session
+            $this->clearCartSession();
+
+            return redirect()->route('public.order.complete', ['order_number' => $order->order_number])
+                ->with('success', 'Order placed successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Order processing failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Failed to place order. Please try again.')
+                ->withInput();
+        }
+    }
+
+    /**
+     * Get attribute values from cart item
+     */
+    private function getAttributeValues(CartItem $cartItem): ?array
+    {
+        if ($cartItem->attributes->isEmpty()) {
+            return null;
+        }
+
+        $attributes = [];
+        foreach ($cartItem->attributes as $attribute) {
+            $attributes[] = [
+                'attribute_id' => $attribute->id,
+                'attribute_name' => $attribute->name,
+                'value' => $attribute->pivot->value,
+                'order' => $attribute->pivot->order,
+            ];
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Store order item attributes in pivot table
+     */
+    private function storeOrderItemAttributes(OrderItem $orderItem, CartItem $cartItem): void
+    {
+        if ($cartItem->attributes->isEmpty()) {
+            return;
+        }
+
+        $attributeData = [];
+        foreach ($cartItem->attributes as $attribute) {
+            $attributeData[$attribute->id] = [
+                'value' => $attribute->pivot->value,
+                'order' => $attribute->pivot->order,
+            ];
+        }
+
+        // If you have an order_item_attributes pivot table
+        if (method_exists($orderItem, 'attributes')) {
+            $orderItem->attributes()->attach($attributeData);
+        }
+    }
+
+    /**
+     * Reduce product stock
+     */
+    private function reduceStock(Product $product, int $quantity): void
+    {
+        $product->decrement('stock', $quantity);
+
+        // Update low stock notification if needed
+        if ($product->stock <= setting('low_stock_threshold', 10)) {
+            // event(new LowStockAlert($product));
+        }
+    }
+
+    /**
+     * Calculate cart totals
+     */
+    private function calculateCartTotals($cartItems, $deliveryCharge, $taxRate): array
+    {
+        $subtotal = 0;
+        $taxAmount = 0;
+        $discountAmount = 0;
+
+        foreach ($cartItems as $item) {
+            $subtotal += $item->total_price;
+
+            // Calculate tax for this item
+            $taxAmount += ($item->total_price * $taxRate) / 100;
+
+            // Calculate discount if any
+            $product = $item->product;
+
+            if ($product->original_price && $product->final_price < $product->original_price) {
+                $discountAmount += ($product->original_price - $product->final_price) * $item->quantity;
+            }
+        }
+
+        $total = $subtotal + $deliveryCharge + $taxAmount - $discountAmount;
+
+        return [
+            'subtotal' => $subtotal,
+            'tax_amount' => $taxAmount,
+            'discount_amount' => $discountAmount,
+            'total' => $total,
+        ];
+    }
+
+    /**
+     * Send Facebook CAPI event
+     */
+    private function sendFacebookEvent(FacebookCapiService $fbService, Order $order): void
+    {
+        try {
             $eventId = fb_event_id();
             if (setting('fb_pixel_id') && setting('facebook_access_token')) {
                 $fbService->sendEvent('Purchase', $eventId, [
-                    'em' => [hash('sha256', strtolower($order->customer_email))],
+                    'em' => $order->customer_email ? [hash('sha256', strtolower($order->customer_email))] : [],
                     'ph' => [hash('sha256', $order->customer_phone)],
                     'client_ip_address' => request()->ip(),
                     'client_user_agent' => request()->userAgent(),
                 ], [
-                    'currency' => 'USD',
+                    'currency' => 'BDT',
                     'value' => $order->total_amount,
-                    'content_ids' => $order->items->pluck('product.sku')->toArray(),
-                    'contents' => $order->items->map(fn($i) => ['id' => $i->product->sku, 'quantity' => $i->quantity])->toArray(),
+                    'content_ids' => $order->items->pluck('product_sku')->filter()->toArray(),
+                    'contents' => $order->items->map(fn($i) => [
+                        'id' => $i->product_sku,
+                        'quantity' => $i->quantity,
+                        'item_price' => $i->unit_price
+                    ])->toArray(),
+                    'num_items' => $order->items->sum('quantity'),
                 ]);
 
                 session()->flash('fb_event_id', $eventId);
             }
-
-            return redirect()->route('public.order.complete', ['order_number' => $order->order_number]);
-
         } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Failed to place order: ' . $e->getMessage());
+            Log::error('Facebook CAPI event failed: ' . $e->getMessage());
         }
     }
 
