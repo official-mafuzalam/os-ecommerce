@@ -47,6 +47,18 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+    public function attributes()
+    {
+        return $this->belongsToMany(Attribute::class, 'order_item_attributes')
+            ->withPivot('value', 'order')
+            ->withTimestamps();
+    }
+
+    // Or if you're using OrderItemAttribute model
+    public function orderItemAttributes()
+    {
+        return $this->hasMany(OrderItemAttribute::class);
+    }
 
     // Accessors
     public function getHasDiscountAttribute(): bool

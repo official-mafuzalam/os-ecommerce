@@ -137,17 +137,17 @@ class Order extends Model
     public function scopeThisMonth($query)
     {
         return $query->whereMonth('created_at', now()->month)
-                     ->whereYear('created_at', now()->year);
+            ->whereYear('created_at', now()->year);
     }
 
     public function scopeNeedsAttention($query)
     {
         return $query->whereIn('status', ['pending', 'confirmed', 'processing'])
-                     ->orWhere(function ($q) {
-                         $q->where('status', 'shipped')
-                           ->where('delivered_at', null)
-                           ->where('estimated_delivery_date', '<', now());
-                     });
+            ->orWhere(function ($q) {
+                $q->where('status', 'shipped')
+                    ->where('delivered_at', null)
+                    ->where('estimated_delivery_date', '<', now());
+            });
     }
 
     // Accessors
@@ -189,9 +189,9 @@ class Order extends Model
 
     public function getIsOverdueAttribute(): bool
     {
-        return $this->estimated_delivery_date && 
-               $this->estimated_delivery_date < now() && 
-               $this->status !== 'delivered';
+        return $this->estimated_delivery_date &&
+            $this->estimated_delivery_date < now() &&
+            $this->status !== 'delivered';
     }
 
     public function getDaysSinceCreatedAttribute(): int
@@ -236,23 +236,29 @@ class Order extends Model
     public function updateStatus(string $status, ?string $notes = null): self
     {
         $validStatuses = [
-            'pending', 'confirmed', 'processing', 'shipped',
-            'delivered', 'returned', 'refunded', 'cancelled'
+            'pending',
+            'confirmed',
+            'processing',
+            'shipped',
+            'delivered',
+            'returned',
+            'refunded',
+            'cancelled'
         ];
 
         if (in_array($status, $validStatuses)) {
             $oldStatus = $this->status;
             $this->status = $status;
-            
+
             // Set timestamps for specific statuses
             if ($status === 'shipped' && !$this->shipped_at) {
                 $this->shipped_at = now();
             } elseif ($status === 'delivered' && !$this->delivered_at) {
                 $this->delivered_at = now();
             }
-            
+
             $this->save();
-            
+
             // Create status history record
             if ($oldStatus !== $status) {
                 $this->createStatusHistory($oldStatus, $status, $notes);
@@ -294,7 +300,7 @@ class Order extends Model
     public function recalculateTotals(): self
     {
         $totals = $this->calculateTotals();
-        
+
         $this->subtotal = $totals['subtotal'];
         $this->total_amount = $totals['total'];
         $this->save();
@@ -306,7 +312,7 @@ class Order extends Model
     {
         $item = $this->items()->create($itemData);
         $this->recalculateTotals();
-        
+
         return $item;
     }
 

@@ -105,13 +105,13 @@ Route::middleware(['auth', 'license.check', 'role:super_admin|admin|user'])->gro
         // Admin Order Routes
         Route::prefix('/orders')->name('admin.orders.')->group(function () {
             Route::get('/', [OrderController::class, 'index'])->name('index');
-            Route::get('/{id}', [OrderController::class, 'show'])->name('show');
-            Route::get('/{id}/edit', [OrderController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [OrderController::class, 'update'])->name('update');
-            Route::delete('/{id}/delete', [OrderController::class, 'delete'])->name('delete');
-            Route::patch('/{id}/status', [OrderController::class, 'updateStatus'])->name('update-status');
-            Route::patch('/{id}/mark-paid', [OrderController::class, 'markAsPaid'])->name('mark-paid');
-            Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
+            Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+            Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('edit');
+            Route::put('/{order}', [OrderController::class, 'update'])->name('update');
+            Route::delete('/{order}/delete', [OrderController::class, 'delete'])->name('delete');
+            Route::patch('/{order}/status', [OrderController::class, 'updateStatus'])->name('update-status');
+            Route::patch('/{order}/mark-paid', [OrderController::class, 'markAsPaid'])->name('mark-paid');
+            Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
             Route::get('/{order}/invoice/pdf', [OrderController::class, 'downloadInvoice'])->name('invoice.pdf');
             Route::get('/{order}/invoice/email', [OrderController::class, 'emailInvoice'])->name('invoice.email');
         });
