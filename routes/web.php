@@ -65,7 +65,6 @@ Route::middleware(['web'])->group(function () {
     Route::get('/product/{product}', [PublicProductController::class, 'productShow'])->name('public.products.show');
     Route::get('/brands', [PublicProductController::class, 'brands'])->name('public.brands');
     Route::get('/categories', [PublicProductController::class, 'categories'])->name('public.categories');
-    Route::get('/featured-products', [PublicProductController::class, 'featuredProducts'])->name('public.featured.products');
     Route::get('/deals', [PublicProductController::class, 'deals'])->name('public.deals');
     Route::get('/deals/{deal}', [PublicProductController::class, 'dealShow'])->name('public.deals.show');
 

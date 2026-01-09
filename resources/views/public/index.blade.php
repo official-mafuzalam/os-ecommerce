@@ -109,7 +109,7 @@
                             <h2 class="text-3xl font-bold text-gray-900">✨ Featured Products</h2>
                             <p class="text-gray-600 mt-2">Handpicked items just for you</p>
                         </div>
-                        <a href="{{ route('public.featured.products') }}"
+                        <a href="{{ route('public.products',['featured' => true]) }}"
                             class="mt-4 sm:mt-0 inline-flex items-center text-indigo-600 hover:text-indigo-800 font-semibold group">
                             View All Products
                             <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>

@@ -12,7 +12,6 @@ use App\Models\Review;
 use App\Services\FacebookCapiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -348,41 +347,6 @@ class ProductController extends Controller
             ->get();
         return view('public.brands.index', compact('brands', 'featuredBrands'));
     }
-    public function brandShow($brand)
-    {
-        $brand = Brand::where('slug', $brand)->firstOrFail();
-
-        $query = Product::with(['category', 'brand', 'reviews'])
-            ->withCount('reviews')
-            ->withAvg('reviews', 'rating')
-            ->active()
-            ->where('brand_id', $brand->id);
-
-        // Sorting
-        switch (request()->get('sort', 'newest')) {
-            case 'price_low_high':
-                $query->orderBy('price', 'asc');
-                break;
-            case 'price_high_low':
-                $query->orderBy('price', 'desc');
-                break;
-            case 'name_asc':
-                $query->orderBy('name', 'asc');
-                break;
-            case 'name_desc':
-                $query->orderBy('name', 'desc');
-                break;
-            default:
-                $query->latest();
-                break;
-        }
-
-        $products = $query->paginate($this->perPageProducts);
-        $categories = Category::withCount('products')->active()->get();
-        $brands = Brand::withCount('products')->active()->get();
-
-        return view('public.products.index', compact('products', 'categories', 'brands', 'brand'));
-    }
 
     public function categories()
     {
@@ -397,77 +361,6 @@ class ProductController extends Controller
             ->get();
 
         return view('public.categories.index', compact('categories', 'featuredCategories'));
-    }
-
-    public function categoryShow($category)
-    {
-        $category = Category::where('slug', $category)->firstOrFail();
-
-        $query = Product::with(['category', 'brand', 'reviews'])
-            ->withCount('reviews')
-            ->withAvg('reviews', 'rating')
-            ->active()
-            ->where('category_id', $category->id);
-
-        // Sorting
-        switch (request()->get('sort', 'newest')) {
-            case 'price_low_high':
-                $query->orderBy('price', 'asc');
-                break;
-            case 'price_high_low':
-                $query->orderBy('price', 'desc');
-                break;
-            case 'name_asc':
-                $query->orderBy('name', 'asc');
-                break;
-            case 'name_desc':
-                $query->orderBy('name', 'desc');
-                break;
-            default:
-                $query->latest();
-                break;
-        }
-
-        $products = $query->paginate(20);
-        $categories = Category::withCount('products')->active()->get();
-        $brands = Brand::withCount('products')->active()->get();
-
-        return view('public.products.index', compact('products', 'categories', 'brands', 'category'));
-    }
-
-    public function featuredProducts(Request $request)
-    {
-        $query = Product::with(['category', 'brand', 'reviews'])
-            ->withCount('reviews')
-            ->withAvg('reviews', 'rating')
-            ->active()
-            ->where('is_featured', true);
-
-        // Sorting
-        switch ($request->get('sort', 'newest')) {
-            case 'price_low_high':
-                $query->orderBy('price', 'asc');
-                break;
-            case 'price_high_low':
-                $query->orderBy('price', 'desc');
-                break;
-            case 'name_asc':
-                $query->orderBy('name', 'asc');
-                break;
-            case 'name_desc':
-                $query->orderBy('name', 'desc');
-                break;
-            default:
-                $query->latest();
-                break;
-        }
-
-        $products = $query->paginate($this->perPageProducts);
-
-        $categories = Category::withCount('products')->active()->get();
-        $brands = Brand::withCount('products')->active()->get();
-
-        return view('public.products.index', compact('products', 'categories', 'brands'))->with('is_featured', true);
     }
 
     public function deals()
