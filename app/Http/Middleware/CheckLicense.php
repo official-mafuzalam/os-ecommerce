@@ -63,11 +63,21 @@ class CheckLicense
                 session()->flash('license.danger', $message);
 
             } elseif ($isExpired) {
-                $expiryDate = $licenseStatus['client']['license_expires_at'] ?? 'unknown';
-                $daysAgo = abs($licenseStatus['days_until_expiry'] ?? 0);
 
-                $message = "Your license expired " . ($daysAgo > 1 ? "$daysAgo days ago" : "1 day ago") .
-                    " (on " . Carbon::parse($expiryDate)->format('F j, Y') . "). ";
+                $daysAgo = abs($licenseStatus['days_until_expiry']
+                    ?? $licenseStatus['expires_in_days']
+                    ?? 0);
+
+                $human = $licenseStatus['expires_at_human'] ?? null;
+
+                $message = "Your license expired " .
+                    ($daysAgo > 1 ? "$daysAgo days ago" : "recently");
+
+                if ($human) {
+                    $message .= " ($human). ";
+                } else {
+                    $message .= ". ";
+                }
 
                 if (!$isInGracePeriod) {
                     $message .= "The grace period has ended.";
