@@ -93,16 +93,16 @@
                 @csrf
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit"
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg transition duration-200 text-xs font-medium flex items-center justify-center group/cart">
-                    <i
-                        class="fas fa-shopping-cart mr-1.5 text-xs group-hover/cart:translate-x-0.5 transition-transform"></i>
-                    Cart
+                    class="w-full border border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white py-2 rounded-lg transition duration-200 text-xs font-medium flex items-center justify-center">
+                    <i class="fas fa-shopping-cart text-sm"></i>
                 </button>
             </form>
+
             <a href="{{ route('public.products.show', $product->slug) }}"
-                class="bg-gray-800 hover:bg-black text-white py-2 px-3 rounded-lg transition duration-200 text-xs font-medium flex items-center justify-center">
-                Buy Now
+                class="flex-1 border border-gray-800 text-gray-800 hover:bg-gray-800 hover:text-white py-2 px-3 rounded-lg transition duration-200 text-xs font-medium flex items-center justify-center">
+                <i class="fas fa-bolt text-sm"></i>
             </a>
+
         </div>
     </div>
 </div>
