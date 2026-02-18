@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Setting;
+use App\Services\AnalyticsService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 
@@ -49,5 +50,52 @@ if (!function_exists('isLicenseValid')) {
         $licenseStatus = Cache::get(config('license.cache.key'));
 
         return $licenseStatus === 'valid';
+    }
+}
+
+if (!function_exists('track_event')) {
+    /**
+     * Professional Hybrid Tracker
+     * @param string $eventName Facebook Event Name (Purchase, AddToCart, etc)
+     * @param array $params Custom Data (value, items, currency)
+     */
+    function track_event($eventName, $params = [])
+    {
+        $eventId = 'ev_' . time() . '_' . uniqid();
+
+        // 1. Identify User (Priority: Passed Data > Auth User)
+        $userData = $params['user_data'] ?? [];
+        if (empty($userData) && auth()->check()) {
+            $user = auth()->user();
+            $userData = [
+                'em' => $user->email,
+                'ph' => $user->phone,
+                'external_id' => (string) $user->id,
+            ];
+        }
+
+        // Clean up params so 'user_data' isn't sent as a custom property to FB
+        unset($params['user_data']);
+
+        // 2. Fire Server-Side (CAPI)
+        app(AnalyticsService::class)->dispatchEvent($eventName, $eventId, $params, $userData);
+
+        // 3. Fire Browser-Side (Pixel/GTM) via Session
+        $ga4Mapping = [
+            'ViewContent' => 'view_item',
+            'AddToCart' => 'add_to_cart',
+            'InitiateCheckout' => 'begin_checkout',
+            'Purchase' => 'purchase'
+        ];
+        $gtmEventName = $ga4Mapping[$eventName] ?? $eventName;
+
+        $queuedEvents = session()->get('analytics_events', []);
+        $queuedEvents[] = [
+            'fb_name' => $eventName,
+            'gtm_name' => $gtmEventName,
+            'event_id' => $eventId,
+            'params' => $params
+        ];
+        session()->put('analytics_events', $queuedEvents);
     }
 }

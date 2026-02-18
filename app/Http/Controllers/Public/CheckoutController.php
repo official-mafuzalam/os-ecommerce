@@ -26,7 +26,7 @@ class CheckoutController extends Controller
     }
 
     // Show checkout page for cart items
-    public function index(FacebookCapiService $fbService)
+    public function index()
     {
         $cart = $this->getCart();
         $items = $cart->items()->with(['product', 'attributes'])->get();
@@ -35,31 +35,25 @@ class CheckoutController extends Controller
             return redirect()->route('public.products')->with('error', 'Your cart is empty.');
         }
 
-        // 🔹 Facebook Pixel + CAPI InitiateCheckout Event
-        if (setting('fb_pixel_id') && setting('facebook_access_token')) {
-            $eventId = fb_event_id();
-
-            $fbService->sendEvent('InitiateCheckout', $eventId, [
-                'em' => [hash('sha256', strtolower(auth()->user()->email ?? ''))],
-                'ph' => [hash('sha256', auth()->user()->phone ?? '')],
-                'client_ip_address' => request()->ip(),
-                'client_user_agent' => request()->userAgent(),
-            ], [
-                'currency' => 'USD',
-                'value' => $cart->subtotal,
-                'content_type' => 'product',
-                'num_items' => $items->sum('quantity'),
-                'content_ids' => $items->pluck('product.sku')->toArray(),
-                'contents' => $items->map(function ($item) {
-                    return [
-                        'id' => $item->product->sku,
-                        'quantity' => $item->quantity,
-                    ];
-                })->toArray(),
-            ]);
-
-            session()->flash('fb_event_id', $eventId);
-        }
+        // 🔹 Professional Hybrid Tracking (FB CAPI + GTM + Pixel)
+        // The helper automatically handles Hashing, IP, User Agent, and Deduplication IDs.
+        track_event('InitiateCheckout', [
+            'currency' => 'BDT',
+            'value' => $cart->subtotal,
+            'content_type' => 'product',
+            // Standard GA4 Item Schema (used by both GTM and FB)
+            'items' => $items->map(function ($item) {
+                return [
+                    'item_id' => $item->product->sku,
+                    'item_name' => $item->product->name,
+                    'price' => $item->product->price,
+                    'quantity' => $item->quantity,
+                ];
+            })->toArray(),
+            // FB Specifics (The helper/service extracts these into 'contents')
+            'content_ids' => $items->pluck('product.sku')->toArray(),
+            'num_items' => $items->sum('quantity'),
+        ]);
 
         return view('public.checkout', [
             'cart' => $cart,
@@ -154,7 +148,7 @@ class CheckoutController extends Controller
     }
 
     // Process checkout
-    public function process(Request $request, FacebookCapiService $fbService)
+    public function process(Request $request)
     {
         $request->validate([
             'full_name' => 'required|string|max:255',
@@ -166,17 +160,13 @@ class CheckoutController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        $deliveryChargeInsideDhaka = setting('delivery_charge_inside_dhaka', 80);
-        $deliveryChargeOutsideDhaka = setting('delivery_charge_outside_dhaka', 150);
+        $deliveryCharge = $request->delivery_area === 'inside_dhaka'
+            ? setting('delivery_charge_inside_dhaka', 80)
+            : setting('delivery_charge_outside_dhaka', 150);
 
-        // Determine delivery charge
-        $deliveryCharge = $request->delivery_area === 'inside_dhaka' ? $deliveryChargeInsideDhaka : $deliveryChargeOutsideDhaka;
-
-        // Start transaction
         DB::beginTransaction();
 
         try {
-            // Create Shipping Address
             $shippingAddress = ShippingAddress::create([
                 'full_name' => $request->full_name,
                 'email' => $request->email,
@@ -185,21 +175,15 @@ class CheckoutController extends Controller
                 'delivery_area' => $request->delivery_area,
             ]);
 
-            // Get cart items with attributes
             $cart = $this->getCart();
-            $cartItems = $cart->items()->with(['product', 'attributes'])->get();
+            $cartItems = $cart->items()->with(['product.category', 'product.brand', 'attributes'])->get();
 
             if ($cartItems->isEmpty()) {
                 return redirect()->route('public.products')->with('error', 'Your cart is empty.');
             }
 
-            // Calculate subtotal
-            $subtotal = 0;
-            foreach ($cartItems as $item) {
-                $subtotal += $item->total_price;
-            }
+            $subtotal = $cartItems->sum('total_price');
 
-            // Create Order
             $order = Order::create([
                 'order_number' => Order::generateOrderNumber(),
                 'customer_email' => $request->email,
@@ -215,9 +199,7 @@ class CheckoutController extends Controller
                 'payment_status' => 'pending',
             ]);
 
-            // Create Order Items with Attributes
             foreach ($cartItems as $cartItem) {
-                // Create the order item
                 $orderItem = $order->items()->create([
                     'product_id' => $cartItem->product_id,
                     'unit_price' => $cartItem->product->final_price,
@@ -225,7 +207,6 @@ class CheckoutController extends Controller
                     'total_price' => $cartItem->total_price,
                 ]);
 
-                // Copy attributes from cart item to order item
                 if ($cartItem->attributes->count() > 0) {
                     foreach ($cartItem->attributes as $attribute) {
                         $orderItem->attributes()->attach($attribute->id, [
@@ -235,17 +216,11 @@ class CheckoutController extends Controller
                     }
                 }
 
-                // Reduce stock
-                $product = Product::find($cartItem->product_id);
-                if ($product) {
-                    $product->decreaseStock($cartItem->quantity);
-                }
+                $cartItem->product->decreaseStock($cartItem->quantity);
             }
 
-            // Clear cart after checkout
             $cart->items()->delete();
 
-            // Send email if email provided
             setMailConfigFromDB();
             if ($request->email) {
                 Mail::to($request->email)->send(new OrderPlaced($order));
@@ -253,29 +228,36 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            // Facebook CAPI Purchase event
-            $eventId = fb_event_id();
-            if (setting('fb_pixel_id') && setting('facebook_access_token')) {
-                $fbService->sendEvent('Purchase', $eventId, [
-                    'em' => [hash('sha256', strtolower($order->customer_email))],
-                    'ph' => [hash('sha256', $order->customer_phone)],
-                    'client_ip_address' => request()->ip(),
-                    'client_user_agent' => request()->userAgent(),
-                ], [
-                    'currency' => 'USD',
-                    'value' => $order->total_amount,
-                    'content_ids' => $order->items->pluck('product.sku')->toArray(),
-                    'contents' => $order->items->map(fn($i) => ['id' => $i->product->sku, 'quantity' => $i->quantity])->toArray(),
-                ]);
-
-                session()->flash('fb_event_id', $eventId);
-            }
+            // 🔹 PROFESSIONAL HYBRID TRACKING: Purchase
+            // We pass the email/phone from the order to ensure even guest checkouts are tracked accurately.
+            track_event('Purchase', [
+                'transaction_id' => $order->order_number,
+                'value' => $order->total_amount,
+                'currency' => 'BDT', // Or your specific currency
+                'tax' => 0,
+                'shipping' => $deliveryCharge,
+                'items' => $order->items->map(fn($item) => [
+                    'item_id' => $item->product->sku,
+                    'item_name' => $item->product->name,
+                    'price' => $item->unit_price,
+                    'quantity' => $item->quantity,
+                    'item_category' => $item->product->category->name ?? '',
+                    'item_brand' => $item->product->brand->name ?? '',
+                ])->toArray(),
+                // Pass user data for CAPI hashing
+                'user_data' => [
+                    'em' => $order->customer_email,
+                    'ph' => $order->customer_phone,
+                    'fn' => $request->full_name,
+                ]
+            ]);
 
             return redirect()->route('public.order.complete', ['order_number' => $order->order_number]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Failed to place order: ' . $e->getMessage());
+            Log::error('Order Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to place order.');
         }
     }
 

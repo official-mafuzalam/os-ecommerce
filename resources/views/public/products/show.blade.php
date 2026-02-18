@@ -704,36 +704,6 @@
                     highlightStars(count);
                 };
             });
-
-            // Facebook Pixel and Google Tag Manager
-            @if (setting('google_tag_manager_id'))
-                window.dataLayer = window.dataLayer || [];
-                window.dataLayer.push({
-                    event: 'view_item',
-                    ecommerce: {
-                        items: [{
-                            item_id: {{ $product->id }},
-                            item_name: '{{ addslashes($product->name) }}',
-                            price: {{ $product->price }},
-                            item_category: '{{ addslashes($product->category->name) }}',
-                            item_brand: '{{ $product->brand ? addslashes($product->brand->name) : '' }}'
-                        }]
-                    }
-                });
-            @endif
-
-            @if (setting('fb_pixel_id') && !empty($eventId))
-                fbq('track', 'ViewContent', {
-                    content_ids: ['{{ $product->sku }}'],
-                    content_type: 'product',
-                    value: {{ $product->price }},
-                    currency: 'BDT',
-                    content_name: '{{ addslashes($product->name) }}',
-                    content_category: '{{ addslashes($product->category->name) }}'
-                }, {
-                    eventID: "{{ $eventId }}"
-                });
-            @endif
         </script>
     @endpush
 </x-app-layout>

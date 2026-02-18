@@ -537,6 +537,7 @@
         ]
     }
     </script>
+    @include('layouts.public.tracking-scripts')
 
     <!-- Performance Optimizations -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
