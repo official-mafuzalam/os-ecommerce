@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Setting;
 
-class SettingsTableSeeder extends Seeder
+class SettingsSeeder extends Seeder
 {
     public function run()
     {
@@ -58,7 +58,7 @@ class SettingsTableSeeder extends Seeder
         $generalSettings = [
             [
                 'key' => 'site_name',
-                'value' => 'Octosync Ecommerce',
+                'value' => 'OS Ecommerce',
                 'type' => 'text',
                 'group' => 'general',
                 'label' => 'Site Name',
@@ -66,7 +66,7 @@ class SettingsTableSeeder extends Seeder
             ],
             [
                 'key' => 'site_title',
-                'value' => 'Octosync Ecommerce - Premium AI Powered Ecommerce Solution',
+                'value' => 'OS Ecommerce - Premium AI Powered Ecommerce Solution',
                 'type' => 'text',
                 'group' => 'general',
                 'label' => 'Site Title',
@@ -74,7 +74,7 @@ class SettingsTableSeeder extends Seeder
             ],
             [
                 'key' => 'site_url',
-                'value' => 'https://www.octosyncsoftware.com',
+                'value' => 'https://e-commerce.octosyncsoftware.com',
                 'type' => 'text',
                 'group' => 'general',
                 'label' => 'Site URL',

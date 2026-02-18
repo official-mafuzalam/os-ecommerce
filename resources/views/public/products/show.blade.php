@@ -1,6 +1,9 @@
 <x-app-layout>
     @section('title', $product->name)
     <x-slot name="main">
+        @php
+            $lang = setting('order_form_bangla') ? '1' : '0';
+        @endphp
         <!-- Fashion Product Section -->
         <div class="container mx-auto px-4 py-8 md:py-12">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -14,35 +17,29 @@
                                     src="{{ Storage::url($product->images->first()->image_path) }}"
                                     alt="{{ $product->name }}" class="w-full h-80 md:h-96 object-contain bg-gray-50">
                             @else
-                                <div
-                                    class="w-full h-80 md:h-96 bg-gray-100 flex items-center justify-center rounded-xl">
+                                <div class="w-full h-80 md:h-96 bg-gray-100 flex items-center justify-center rounded-xl">
                                     <i class="fas fa-image text-5xl text-gray-300"></i>
                                 </div>
                             @endif
 
-                            <!-- Fashion Badges -->
-                            <div class="absolute top-4 left-4 flex flex-col gap-2">
-                                @if ($product->discount > 0)
-                                    <span class="fashion-badge sale-badge">
-                                        {{ number_format(($product->discount / $product->price) * 100) }}% OFF
-                                    </span>
-                                @endif
-                                @if ($product->created_at->gt(now()->subDays(30)))
-                                    <span class="fashion-badge new-badge">
+                            <div class="absolute top-2 left-2 flex flex-col gap-1">
+                                @if ($product->created_at->gt(now()->subDays(7)))
+                                    <span
+                                        class="bg-green-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
                                         NEW
                                     </span>
                                 @endif
-                            </div>
 
-                            <!-- Quick Actions -->
-                            {{-- <div class="absolute top-4 right-4 flex gap-2">
-                                <button class="quick-view-btn" title="Quick View">
-                                    <i class="fas fa-expand-arrows-alt"></i>
-                                </button>
-                                <button class="wishlist-btn" title="Add to Wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div> --}}
+                                @if ($product->discount > 0)
+                                    @php
+                                        $discountPercent = round(($product->discount / $product->price) * 100);
+                                    @endphp
+                                    <span
+                                        class="bg-red-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                                        -{{ $discountPercent }}%
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
@@ -214,8 +211,7 @@
                             <!-- Action Buttons -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <!-- Add to Cart -->
-                                <form action="{{ route('cart.add', $product) }}" method="POST"
-                                    id="add-to-cart-form">
+                                <form action="{{ route('cart.add', $product) }}" method="POST" id="add-to-cart-form">
                                     @csrf
                                     <input type="hidden" name="quantity" value="1" id="form-quantity">
                                     @if ($groupedAttributes->count() > 0)
@@ -228,7 +224,11 @@
                                         class="w-full fashion-btn flex items-center justify-center gap-2 py-4"
                                         {{ $product->stock_quantity == 0 ? 'disabled' : '' }}>
                                         <i class="fas fa-shopping-bag"></i>
-                                        Add to Cart
+                                        @if ($lang === '1')
+                                            কার্টে যোগ করুন
+                                        @else
+                                            Add to Cart
+                                        @endif
                                     </button>
                                 </form>
 
@@ -245,7 +245,11 @@
                                     <button type="submit"
                                         class="w-full fashion-btn fashion-btn-outline flex items-center justify-center gap-2 py-4">
                                         <i class="fas fa-bolt"></i>
-                                        Buy Now
+                                        @if ($lang === '1')
+                                            বিক্রয় করুন
+                                        @else
+                                            Buy Now
+                                        @endif
                                     </button>
                                 </form>
                             </div>
@@ -257,7 +261,11 @@
                                         class="flex items-center justify-center gap-2 py-3 px-4 bg-blue-50 text-blue-600 hover:bg-blue-100 
                                               rounded-lg transition-colors font-medium">
                                         <i class="fas fa-phone-alt"></i>
-                                        Call Now
+                                        @if ($lang === '1')
+                                            কল করুন
+                                        @else
+                                            Call Now
+                                        @endif
                                     </a>
                                 @endif
                                 @if (setting('whatsapp_enabled', true))
@@ -266,14 +274,18 @@
                                         class="flex items-center justify-center gap-2 py-3 px-4 bg-green-50 text-green-600 hover:bg-green-100 
                                               rounded-lg transition-colors font-medium">
                                         <i class="fab fa-whatsapp"></i>
-                                        WhatsApp
+                                        @if ($lang === '1')
+                                            হোয়াটসঅ্যাপ যোগাযোগ
+                                        @else
+                                            WhatsApp Contact
+                                        @endif
                                     </a>
                                 @endif
                             </div>
                         </div>
 
                         <!-- Additional Info -->
-                        <div class="mt-8 pt-8 border-t border-gray-200">
+                        {{-- <div class="mt-8 pt-8 border-t border-gray-200">
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
@@ -294,7 +306,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>
@@ -393,7 +405,8 @@
                                         <div class="border-b border-gray-200 pb-6 last:border-0">
                                             <div class="flex items-start justify-between mb-2">
                                                 <div>
-                                                    <h4 class="font-medium text-gray-900">{{ $review->user->full_name }}
+                                                    <h4 class="font-medium text-gray-900">
+                                                        {{ $review->user->full_name }}
                                                     </h4>
                                                     <div class="flex items-center gap-2 mt-1">
                                                         <div class="flex text-yellow-400">
@@ -704,36 +717,6 @@
                     highlightStars(count);
                 };
             });
-
-            // Facebook Pixel and Google Tag Manager
-            @if (setting('google_tag_manager_id'))
-                window.dataLayer = window.dataLayer || [];
-                window.dataLayer.push({
-                    event: 'view_item',
-                    ecommerce: {
-                        items: [{
-                            item_id: {{ $product->id }},
-                            item_name: '{{ addslashes($product->name) }}',
-                            price: {{ $product->price }},
-                            item_category: '{{ addslashes($product->category->name) }}',
-                            item_brand: '{{ $product->brand ? addslashes($product->brand->name) : '' }}'
-                        }]
-                    }
-                });
-            @endif
-
-            @if (setting('fb_pixel_id') && !empty($eventId))
-                fbq('track', 'ViewContent', {
-                    content_ids: ['{{ $product->sku }}'],
-                    content_type: 'product',
-                    value: {{ $product->price }},
-                    currency: 'BDT',
-                    content_name: '{{ addslashes($product->name) }}',
-                    content_category: '{{ addslashes($product->category->name) }}'
-                }, {
-                    eventID: "{{ $eventId }}"
-                });
-            @endif
         </script>
     @endpush
 </x-app-layout>

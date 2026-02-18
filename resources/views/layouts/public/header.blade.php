@@ -237,29 +237,6 @@
             transform: translateY(-2px);
         }
 
-        /* Fashion Badge */
-        .fashion-badge {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            padding: 4px 12px;
-            background: var(--color-accent);
-            color: white;
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            border-radius: 4px;
-            z-index: 2;
-        }
-
-        .sale-badge {
-            background: #EF4444;
-        }
-
-        .new-badge {
-            background: #10B981;
-        }
-
         /* Fashion Category Card */
         .fashion-category-card {
             position: relative;
@@ -537,6 +514,7 @@
         ]
     }
     </script>
+    @include('layouts.public.tracking-scripts')
 
     <!-- Performance Optimizations -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">

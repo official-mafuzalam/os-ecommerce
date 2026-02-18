@@ -29,7 +29,7 @@ use App\Http\Controllers\Public\SearchController;
 
 // Debug routes
 Route::get('/session', function () {
-    $session = session()->all();
+    $session = session()->get('analytics_events', []);
     dd($session);
 });
 

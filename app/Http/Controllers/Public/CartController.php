@@ -6,14 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\ShoppingCart;
 use App\Models\Product;
 use App\Models\Attribute;
-use App\Models\CartItem;
-use App\Services\FacebookCapiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
-    // Get or create the current session cart
     protected function getCart()
     {
         $sessionId = session()->getId();
@@ -26,6 +23,22 @@ class CartController extends Controller
         $cart = $this->getCart();
         $items = $cart->items()->with(['product', 'attributes'])->get();
 
+        // 🔹 PROFESSIONAL TRACKING: ViewCart (GA4 + FB)
+        if ($items->isNotEmpty()) {
+            track_event('ViewCart', [
+                'currency' => 'BDT',
+                'value' => $cart->subtotal,
+                'content_type' => 'product',
+                'content_ids' => $items->pluck('product.sku')->toArray(),
+                'items' => $items->map(fn($item) => [
+                    'item_id' => $item->product->sku,
+                    'item_name' => $item->product->name,
+                    'price' => $item->product->price,
+                    'quantity' => $item->quantity,
+                ])->toArray()
+            ]);
+        }
+
         return view('public.cart.index', [
             'cart' => $cart,
             'cartItems' => $items,
@@ -36,16 +49,14 @@ class CartController extends Controller
     }
 
     // Add product to cart
-    public function add(Request $request, Product $product, FacebookCapiService $fbService)
+    public function add(Request $request, Product $product)
     {
         try {
             $request->validate([
-                'quantity' => 'required|integer|min:1|max:' . $product->stock_quantity
+                'quantity' => 'required|integer|min:1|max:' . ($product->stock_quantity ?? 100)
             ]);
 
             $cart = $this->getCart();
-
-            // Create or update cart item
             $item = $cart->items()->where('product_id', $product->id)->first();
 
             if ($item) {
@@ -58,167 +69,95 @@ class CartController extends Controller
                 ]);
             }
 
-            // Handle attributes if provided
+            // Handle attributes
             $attributes = $request->input('attributes', []);
             if (!empty($attributes)) {
-                // First, clear existing attributes for this cart item
                 $item->attributes()->detach();
-
-                // Add new attributes
                 foreach ($attributes as $attributeIdentifier => $value) {
                     if ($value) {
-                        // Find attribute by ID, slug, or name
-                        $attribute = null;
-
-                        // First, try to find by ID (if numeric)
-                        if (is_numeric($attributeIdentifier)) {
-                            $attribute = Attribute::find($attributeIdentifier);
-                        }
-
-                        // If not found by ID, try slug or name
-                        if (!$attribute) {
-                            $attribute = Attribute::where('slug', $attributeIdentifier)
-                                ->orWhere('name', $attributeIdentifier)
-                                ->first();
-                        }
+                        $attribute = is_numeric($attributeIdentifier)
+                            ? Attribute::find($attributeIdentifier)
+                            : Attribute::where('slug', $attributeIdentifier)->orWhere('name', $attributeIdentifier)->first();
 
                         if ($attribute) {
-                            $item->attributes()->attach($attribute->id, [
-                                'value' => $value,
-                                'order' => $attribute->order ?? 0
-                            ]);
+                            $item->attributes()->attach($attribute->id, ['value' => $value, 'order' => $attribute->order ?? 0]);
                         }
                     }
                 }
             }
 
-            // 🔹 Facebook Pixel + CAPI AddToCart Event
-            if (setting('fb_pixel_id') && setting('facebook_access_token')) {
-                $eventId = fb_event_id();
-
-                $fbService->sendEvent('AddToCart', $eventId, [
-                    'em' => [hash('sha256', strtolower(auth()->user()->email ?? ''))],
-                    'ph' => [hash('sha256', auth()->user()->phone ?? '')],
-                    'client_ip_address' => request()->ip(),
-                    'client_user_agent' => request()->userAgent(),
-                ], [
-                    'currency' => 'USD',
-                    'value' => $product->price * $request->quantity,
-                    'content_type' => 'product',
-                    'content_ids' => [$product->sku],
-                    'contents' => [
-                        [
-                            'id' => $product->sku,
-                            'quantity' => $request->quantity,
-                        ]
-                    ],
-                ]);
-
-                session()->flash('fb_event_id', $eventId);
-            }
+            // 🔹 PROFESSIONAL HYBRID TRACKING: AddToCart
+            track_event('AddToCart', [
+                'currency' => 'BDT',
+                'value' => $product->price * $request->quantity,
+                'content_type' => 'product',
+                'content_ids' => [$product->sku],
+                'items' => [
+                    [
+                        'item_id' => $product->sku,
+                        'item_name' => $product->name,
+                        'price' => $product->price,
+                        'quantity' => (int) $request->quantity,
+                        'item_category' => $product->category->name ?? '',
+                    ]
+                ]
+            ]);
 
             return back()->with('success', 'Product added to cart!');
+
         } catch (\Exception $e) {
             Log::error('Add to cart error: ' . $e->getMessage());
-            return back()->with('error', 'Failed to add product to cart: ' . $e->getMessage());
+            return back()->with('error', 'Failed to add product to cart.');
         }
     }
 
-    // Update quantity of a cart item
+    // Update quantity (Usually for AJAX)
     public function update(Request $request, $itemId)
     {
         try {
-            $request->validate([
-                'quantity' => 'required|integer|min:1'
-            ]);
+            $request->validate(['quantity' => 'required|integer|min:1']);
 
             $cart = $this->getCart();
             $item = $cart->items()->find($itemId);
 
-            if (!$item) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cart item not found'
-                ], 404);
-            }
-
-            $product = $item->product;
-
-            if ($request->quantity > $product->stock_quantity) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Requested quantity exceeds available stock'
-                ], 422);
-            }
+            if (!$item)
+                return response()->json(['success' => false, 'message' => 'Not found'], 404);
 
             $item->quantity = $request->quantity;
             $item->save();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Cart updated successfully',
                 'cart_count' => $cart->total_quantity,
                 'subtotal' => $cart->subtotal,
-                'total' => $cart->subtotal,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update cart: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    // Remove a cart item
+    // Remove item (Usually for AJAX)
     public function remove($itemId)
     {
         try {
             $cart = $this->getCart();
             $item = $cart->items()->find($itemId);
-
-            if (!$item) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cart item not found'
-                ], 404);
-            }
-
-            $item->delete();
+            if ($item)
+                $item->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Item removed from cart',
                 'cart_count' => $cart->total_quantity,
                 'subtotal' => $cart->subtotal,
-                'total' => $cart->subtotal,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to remove item: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false], 500);
         }
     }
 
-    // Clear the cart
     public function clear()
     {
-        try {
-            $cart = $this->getCart();
-            $cart->items()->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Cart cleared successfully',
-                'cart_count' => 0,
-                'subtotal' => 0,
-                'total' => 0,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to clear cart: ' . $e->getMessage()
-            ], 500);
-        }
+        $this->getCart()->items()->delete();
+        return response()->json(['success' => true]);
     }
 }

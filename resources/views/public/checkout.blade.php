@@ -577,56 +577,5 @@
                 transition-duration: 200ms;
             }
         </style>
-
-        @if (setting('google_tag_manager_id'))
-            @push('scripts')
-                <script>
-                    window.dataLayer = window.dataLayer || [];
-                    window.dataLayer.push({
-                        event: "begin_checkout",
-                        ecommerce: {
-                            currency: "BDT",
-                            value: {{ $subtotal }},
-                            items: [
-                                @foreach ($cartItems as $item)
-                                    {
-                                        item_id: "{{ $item->product->id }}",
-                                        item_name: "{{ addslashes($item->product->name) }}",
-                                        price: {{ $item->unit_price }},
-                                        quantity: {{ $item->quantity }},
-                                        item_category: "{{ addslashes($item->product->category->name) }}",
-                                        item_brand: "{{ $item->product->brand ? addslashes($item->product->brand->name) : '' }}"
-                                    },
-                                @endforeach
-                            ]
-                        }
-                    });
-                </script>
-            @endpush
-        @endif
-
-        @if (session()->has('fb_event_id'))
-            <script>
-                fbq('track', 'InitiateCheckout', {
-                    value: {{ $subtotal }},
-                    currency: "BDT",
-                    content_ids: {!! json_encode($cartItems->pluck('product.sku')->toArray()) !!},
-                    contents: {!! json_encode(
-                        $cartItems->map(function ($item) {
-                                return [
-                                    'id' => $item->product->sku,
-                                    'quantity' => $item->quantity,
-                                    'item_price' => $item->unit_price,
-                                ];
-                            })->toArray(),
-                    ) !!},
-                    num_items: {{ $cartItems->sum('quantity') }},
-                    content_type: 'product'
-                }, {
-                    eventID: "{{ session('fb_event_id') }}"
-                });
-            </script>
-        @endif
-
     </x-slot>
 </x-app-layout>

@@ -104,7 +104,7 @@
                                                         <div class="mt-2">
                                                             <span class="text-sm text-gray-600">Unit Price: </span>
                                                             <span class="text-sm font-medium text-gray-900">
-                                                                {{ number_format($item->unit_price, 2) }} TK
+                                                                {{ number_format($item->product->final_price, 2) }} TK
                                                             </span>
                                                             @if ($item->product->discount > 0)
                                                                 <span class="text-xs text-red-600 ml-2 line-through">
@@ -156,12 +156,12 @@
                                                         </span>
                                                     </div>
                                                     <div class="flex items-center gap-3">
-                                                        <button onclick="saveForLater('{{ $item->id }}')"
+                                                        {{-- <button onclick="saveForLater('{{ $item->id }}')"
                                                             class="text-gray-600 hover:text-gray-900 text-xs font-medium inline-flex items-center 
                                                                        gap-1 transition-colors"
                                                             title="Save for Later">
                                                             <i class="far fa-bookmark"></i>
-                                                        </button>
+                                                        </button> --}}
                                                         <button onclick="removeItem('{{ $item->id }}')"
                                                             class="text-red-600 hover:text-red-800 text-xs font-medium inline-flex items-center 
                                                                        gap-1 transition-colors">
@@ -561,19 +561,5 @@
                 }
             }
         </style>
-
-        @if (session()->has('fb_event_id'))
-            <script>
-                fbq('track', 'AddToCart', {
-                    content_ids: ['{{ $product->sku ?? '' }}'],
-                    content_type: 'product',
-                    value: {{ $product->price ?? 0 }},
-                    currency: "BDT"
-                }, {
-                    eventID: "{{ session('fb_event_id') }}"
-                });
-            </script>
-        @endif
-
     </x-slot>
 </x-app-layout>

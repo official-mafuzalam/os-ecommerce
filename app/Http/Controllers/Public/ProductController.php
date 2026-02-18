@@ -9,7 +9,6 @@ use App\Models\Deal;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Review;
-use App\Services\FacebookCapiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -269,14 +268,14 @@ class ProductController extends Controller
         return view('public.products.index', $viewData);
     }
 
-    public function productShow($slug, FacebookCapiService $fbService)
+    public function productShow($slug)
     {
         $product = Product::where('slug', $slug)->firstOrFail();
 
         // Eager load relationships
         $product->load(['category', 'brand', 'attributes', 'reviews.user']);
 
-        // Related products
+        // Related products logic
         $relatedProducts = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('is_active', true)
@@ -285,7 +284,7 @@ class ProductController extends Controller
             ->take(4)
             ->get();
 
-        // Group attributes
+        // Group attributes logic
         $groupedAttributes = $product->attributes
             ->groupBy('id')
             ->map(function ($items) {
@@ -297,39 +296,30 @@ class ProductController extends Controller
             })
             ->values();
 
-        // 🔹 Initialize eventId to avoid undefined variable error
-        $eventId = null;
-
-        // 🔹 Facebook Pixel + CAPI Event
-        if (setting('fb_pixel_id') && setting('facebook_access_token')) {
-            $eventId = fb_event_id();
-
-            // Fire Pixel in Blade view (pass eventId to JS)
-            // and fire CAPI from backend
-            $fbService->sendEvent('ViewContent', $eventId, [
-                'em' => [hash('sha256', strtolower(auth()->user()->email ?? ''))],
-                'ph' => [hash('sha256', auth()->user()->phone ?? '')],
-                'client_ip_address' => request()->ip(),
-                'client_user_agent' => request()->userAgent(),
-            ], [
-                'currency' => 'USD',
-                'value' => $product->price,
-                'content_type' => 'product',
-                'content_ids' => [$product->sku],
-                'contents' => [
-                    [
-                        'id' => $product->sku,
-                        'quantity' => 1,
-                    ]
-                ],
-            ]);
-        }
+        // 🔹 PROFESSIONAL HYBRID TRACKING
+        // Fires FB CAPI (Background), GTM (Browser), and FB Pixel (Browser)
+        track_event('ViewContent', [
+            'currency' => 'BDT',
+            'value' => $product->price,
+            'content_type' => 'product',
+            'content_ids' => [$product->sku],
+            // GA4 Standard Items Schema
+            'items' => [
+                [
+                    'item_id' => $product->sku,
+                    'item_name' => $product->name,
+                    'price' => $product->price,
+                    'item_category' => $product->category->name ?? '',
+                    'item_brand' => $product->brand->name ?? '',
+                    'quantity' => 1,
+                ]
+            ],
+        ]);
 
         return view('public.products.show', compact(
             'product',
             'relatedProducts',
-            'groupedAttributes',
-            'eventId'
+            'groupedAttributes'
         ));
     }
 

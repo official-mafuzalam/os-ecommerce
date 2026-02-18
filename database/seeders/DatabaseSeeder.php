@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        $this->call(SettingsTableSeeder::class);
+        $this->call(SettingsSeeder::class);
         $this->call(CarouselSeeder::class);
         $this->call(RoleSeeder::class);
         $this->call(AdminSeeder::class);
