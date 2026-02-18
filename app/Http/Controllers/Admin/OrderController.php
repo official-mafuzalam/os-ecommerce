@@ -10,6 +10,9 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use SteadFast\SteadFastCourierLaravelPackage\Facades\SteadfastCourier;
 
 class OrderController extends Controller
 {
@@ -318,4 +321,88 @@ class OrderController extends Controller
 
         return redirect()->back()->with('success', 'Invoice sent to customer successfully.');
     }
+    
+    public function sendCourier($id)
+    {
+        $order = Order::with(['shippingAddress', 'items'])->findOrFail($id);
+
+        /* -----------------------------
+           Basic Validation
+        ------------------------------*/
+
+        if (!$order->shippingAddress) {
+            return back()->with('error', 'Shipping address not found.');
+        }
+
+        if (!preg_match('/^01[0-9]{9}$/', $order->customer_phone)) {
+            return back()->with('error', 'Recipient phone must be 11 digits.');
+        }
+
+        if ($order->total_amount < 0) {
+            return back()->with('error', 'COD amount cannot be negative.');
+        }
+
+        if ($order->tracking_number) {
+            return back()->with('error', 'Order already sent to courier.');
+        }
+
+        /* -----------------------------
+           Prepare Items
+        ------------------------------*/
+
+        $items = $order->items;
+
+        $itemDescription = $items->isNotEmpty()
+            ? $items->pluck('product_name')->implode(', ')
+            : 'Products';
+
+        $totalLot = $items->sum('quantity') ?: 1;
+
+        /* -----------------------------
+           Prepare API Payload
+        ------------------------------*/
+
+        $orderData = [
+            'invoice' => $order->order_number,
+            'recipient_name' => substr($order->shippingAddress->full_name, 0, 100),
+            'recipient_phone' => $order->customer_phone,
+            'alternative_phone' => $order->shippingAddress->phone ?? null,
+            'recipient_email' => $order->shippingAddress->email ?? null,
+            'recipient_address' => substr($order->shippingAddress->full_address, 0, 250),
+            'cod_amount' => (float) $order->total_amount,
+            'note' => $order->notes ?? "Order #{$order->order_number}",
+            'item_description' => $itemDescription,
+            'total_lot' => $totalLot,
+            'delivery_type' => 0,
+        ];
+
+        try {
+
+            $response = SteadfastCourier::placeOrder($orderData);
+
+            if (isset($response['status']) && $response['status'] == 200) {
+
+                DB::transaction(function () use ($order, $response) {
+                    $order->tracking_number = $response['consignment']['tracking_code'];
+                    $order->status = 'processing';
+                    $order->save();
+                });
+
+                return back()->with(
+                    'success',
+                    'Consignment created. Tracking Code: ' .
+                    $response['consignment']['tracking_code']
+                );
+            }
+
+            return back()->with('error', $response['message'] ?? 'Courier API failed.');
+
+        } catch (\Exception $e) {
+
+            Log::error('Steadfast API Error: ' . $e->getMessage());
+
+            return back()->with('error', 'Courier service unavailable.');
+        }
+    }
+
 }

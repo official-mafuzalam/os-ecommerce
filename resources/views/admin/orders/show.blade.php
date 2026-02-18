@@ -23,6 +23,37 @@
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open"
                             class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                aria-hidden="true">
+                                <rect x="1" y="3" width="15" height="13" rx="2" ry="2"
+                                    stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></rect>
+                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" stroke-linecap="round"
+                                    stroke-linejoin="round" stroke-width="1.5"></polygon>
+                                <circle cx="5.5" cy="18.5" r="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" stroke-width="1.5"></circle>
+                                <circle cx="18.5" cy="18.5" r="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" stroke-width="1.5"></circle>
+                            </svg>
+                            Courier
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-cloak
+                            class="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-10 py-1">
+                            <form action="{{ route('admin.orders.send-courier', ['id' => $order->id]) }}" method="post">
+                                @csrf
+                                <button type="submit"
+                                    class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center">
+                                    Stead Fast
+                                </button>
+                            </form>
+                            <a href="{{ route('admin.orders.invoice.pdf', $order->id) }}"
+                                class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center">
+                                Pathao Courier
+                            </a>
+                        </div>
+                    </div>
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open"
+                            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center">
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -104,7 +135,8 @@
                                     <select name="status"
                                         class="text-xs rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                                         <option value="">Update Status</option>
-                                        <option value="confirmed" {{ $order->status == 'confirmed' ? 'selected' : '' }}>
+                                        <option value="confirmed"
+                                            {{ $order->status == 'confirmed' ? 'selected' : '' }}>
                                             Confirmed</option>
                                         <option value="processing"
                                             {{ $order->status == 'processing' ? 'selected' : '' }}>Processing</option>

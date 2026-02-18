@@ -114,6 +114,7 @@ Route::middleware(['auth', 'license.check', 'role:super_admin|admin|user'])->gro
             Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
             Route::get('/{order}/invoice/pdf', [OrderController::class, 'downloadInvoice'])->name('invoice.pdf');
             Route::get('/{order}/invoice/email', [OrderController::class, 'emailInvoice'])->name('invoice.email');
+            Route::post('/{id}/send-to-courier', [OrderController::class, 'sendCourier'])->name('send-courier');
         });
 
         // Reports Routes
