@@ -94,7 +94,7 @@
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit"
                     class="w-full border border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white py-2 rounded-lg transition duration-200 text-xs font-medium flex items-center justify-center">
-                    <i class="fas fa-shopping-cart text-sm"></i>
+                    <i class="fas fa-shopping-bag  text-sm"></i>
                 </button>
             </form>
 
