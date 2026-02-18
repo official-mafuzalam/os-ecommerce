@@ -26,7 +26,7 @@ class CartController extends Controller
         // 🔹 PROFESSIONAL TRACKING: ViewCart (GA4 + FB)
         if ($items->isNotEmpty()) {
             track_event('ViewCart', [
-                'currency' => 'USD',
+                'currency' => 'BDT',
                 'value' => $cart->subtotal,
                 'content_type' => 'product',
                 'content_ids' => $items->pluck('product.sku')->toArray(),
@@ -87,9 +87,8 @@ class CartController extends Controller
             }
 
             // 🔹 PROFESSIONAL HYBRID TRACKING: AddToCart
-            // This replaces the old FacebookCapiService injection and manual logic
             track_event('AddToCart', [
-                'currency' => 'USD',
+                'currency' => 'BDT',
                 'value' => $product->price * $request->quantity,
                 'content_type' => 'product',
                 'content_ids' => [$product->sku],

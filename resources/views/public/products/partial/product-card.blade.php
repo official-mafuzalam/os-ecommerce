@@ -89,7 +89,7 @@
 
         <!-- Actions -->
         <div class="flex gap-1.5">
-            <form action="{{ route('cart.add', $product) }}" method="POST" class="flex-1">
+            <form action="{{ route('cart.add', $product) }}" method="POST" class="flex-1" title="Add to Cart">
                 @csrf
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit"
@@ -98,11 +98,10 @@
                 </button>
             </form>
 
-            <a href="{{ route('public.products.show', $product->slug) }}"
+            <a href="{{ route('public.products.show', $product->slug) }}" title="Buy Now"
                 class="flex-1 border border-gray-800 text-gray-800 hover:bg-gray-800 hover:text-white py-2 px-3 rounded-lg transition duration-200 text-xs font-medium flex items-center justify-center">
                 <i class="fas fa-bolt text-sm"></i>
             </a>
-
         </div>
     </div>
 </div>

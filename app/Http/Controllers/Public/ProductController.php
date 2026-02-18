@@ -9,7 +9,6 @@ use App\Models\Deal;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Review;
-use App\Services\FacebookCapiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -300,7 +299,7 @@ class ProductController extends Controller
         // 🔹 PROFESSIONAL HYBRID TRACKING
         // Fires FB CAPI (Background), GTM (Browser), and FB Pixel (Browser)
         track_event('ViewContent', [
-            'currency' => 'USD',
+            'currency' => 'BDT',
             'value' => $product->price,
             'content_type' => 'product',
             'content_ids' => [$product->sku],
