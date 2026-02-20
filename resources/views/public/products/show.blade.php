@@ -246,7 +246,7 @@
                                         class="w-full fashion-btn fashion-btn-outline flex items-center justify-center gap-2 py-4">
                                         <i class="fas fa-bolt"></i>
                                         @if ($lang === '1')
-                                            বিক্রয় করুন
+                                            এখনই কিনুন
                                         @else
                                             Buy Now
                                         @endif
@@ -275,7 +275,7 @@
                                               rounded-lg transition-colors font-medium">
                                         <i class="fab fa-whatsapp"></i>
                                         @if ($lang === '1')
-                                            হোয়াটসঅ্যাপ যোগাযোগ
+                                            হোয়াটসঅ্যাপে যোগাযোগ
                                         @else
                                             WhatsApp Contact
                                         @endif
