@@ -200,19 +200,51 @@
                                         @error('image_gallery')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
-                                        @if ($product->images->count() > 0)
-                                            <div class="mt-2 flex flex-wrap gap-2">
-                                                @foreach ($product->images as $image)
-                                                    <div class="relative">
-                                                        <img src="{{ Storage::url($image->image_path) }}"
-                                                            alt="Gallery image"
-                                                            class="h-16 w-16 object-cover rounded-md">
-                                                        @if ($image->is_primary)
-                                                            <span
-                                                                class="absolute top-0 right-0 bg-blue-600 text-white text-xs px-1 rounded">Primary</span>
-                                                        @endif
-                                                    </div>
-                                                @endforeach
+
+                                        <!-- Current Images with Remove Option -->
+                                        @if ($product->exists && $product->images->count() > 0)
+                                            <div class="mt-4">
+                                                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    Current Images (check to remove):</p>
+                                                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                                                    @foreach ($product->images as $image)
+                                                        <div class="relative group">
+                                                            <img src="{{ Storage::url($image->image_path) }}"
+                                                                alt="Gallery image"
+                                                                class="h-20 w-20 object-cover rounded-md border-2 {{ $image->is_primary ? 'border-blue-500' : 'border-gray-200' }}">
+
+                                                            <!-- Remove checkbox -->
+                                                            <div class="absolute top-0 left-0 mt-1 ml-1">
+                                                                <input type="checkbox" name="remove_images[]"
+                                                                    value="{{ $image->id }}"
+                                                                    id="remove_image_{{ $image->id }}"
+                                                                    class="rounded border-gray-300 text-red-600 shadow-sm focus:border-red-500 focus:ring-red-500">
+                                                            </div>
+
+                                                            @if ($image->is_primary)
+                                                                <span
+                                                                    class="absolute top-0 right-0 bg-blue-600 text-white text-xs px-1 rounded-bl-md">
+                                                                    Primary
+                                                                </span>
+                                                            @endif
+
+                                                            <!-- Set as primary option (optional) -->
+                                                            <div
+                                                                class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 opacity-0 group-hover:opacity-100 transition-opacity rounded-b-md">
+                                                                <label
+                                                                    class="flex items-center justify-center space-x-1">
+                                                                    <input type="radio" name="primary_image"
+                                                                        value="{{ $image->id }}"
+                                                                        {{ $image->is_primary ? 'checked' : '' }}
+                                                                        class="text-blue-600 focus:ring-blue-500">
+                                                                    <span>Primary</span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                                <p class="text-xs text-gray-500 mt-2">Check images you want to remove.
+                                                    Select radio button to set as primary image.</p>
                                             </div>
                                         @endif
                                     </div>
@@ -522,7 +554,7 @@
                 generateButton.disabled = true;
 
                 // Make API request to your Laravel backend
-                fetch('{{ route("admin.products.generate-description") }}', {
+                fetch('{{ route('admin.products.generate-description') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

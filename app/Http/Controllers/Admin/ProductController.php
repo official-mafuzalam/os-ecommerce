@@ -10,15 +10,19 @@ use App\Models\Brand;
 use App\Models\Deal;
 use App\Models\ProductAttribute;
 use App\Models\ProductImage;
+use App\Services\ImageCompressionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-// use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
-    public function __construct()
+    protected $perPageProducts = 20;
+    protected $imageCompressor;
+
+    public function __construct(ImageCompressionService $imageCompressor)
     {
         $this->middleware('can:products_manage')->only([
             'index',
@@ -41,9 +45,10 @@ class ProductController extends Controller
             'removeDeal',
             'generateDescription'
         ]);
+
+        $this->imageCompressor = $imageCompressor;
     }
 
-    protected $perPageProducts = 20;
     /**
      * Display a listing of the resource.
      */
@@ -82,7 +87,6 @@ class ProductController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-
     public function create()
     {
         $categories = Category::where('is_active', true)->get();
@@ -111,7 +115,7 @@ class ProductController extends Controller
             'sku' => 'required|string|unique:products,sku',
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
-            'image_gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image_gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Increased to 5MB max upload
             'specifications' => 'nullable|json',
             'is_active' => 'sometimes|boolean',
             'is_featured' => 'sometimes|boolean',
@@ -135,114 +139,45 @@ class ProductController extends Controller
             // Create product
             $product = Product::create($validated);
 
-            if ($request->filled('product_attributes')) { // Changed from attributes
-                foreach ($request->product_attributes as $index => $attributeData) { // Changed from attributes
+            // Save product attributes
+            if ($request->filled('product_attributes')) {
+                foreach ($request->product_attributes as $index => $attributeData) {
                     if (!empty($attributeData['id']) && !empty($attributeData['values'])) {
                         foreach ($attributeData['values'] as $valueIndex => $value) {
-                            ProductAttribute::create([
-                                'product_id' => $product->id,
-                                'attribute_id' => $attributeData['id'],
-                                'value' => trim($value),
-                                'order' => $valueIndex
-                            ]);
+                            if (!empty(trim($value))) {
+                                ProductAttribute::create([
+                                    'product_id' => $product->id,
+                                    'attribute_id' => $attributeData['id'],
+                                    'value' => trim($value),
+                                    'order' => $valueIndex
+                                ]);
+                            }
                         }
                     }
                 }
             }
 
-
-            // Handle gallery images (compress to <= 200 KB when possible)
+            // Handle gallery images with compression service
             if ($request->hasFile('image_gallery')) {
-                foreach ($request->file('image_gallery') as $index => $image) {
-                    $mime = $image->getMimeType();
-                    $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-                    $filename = Str::slug($originalName) . '-' . time() . '-' . $index . '.jpg';
-                    $publicDir = storage_path('app/public/products/gallery');
-                    $targetPath = $publicDir . DIRECTORY_SEPARATOR . $filename;
+                $imagePaths = $this->imageCompressor->bulkCompress(
+                    $request->file('image_gallery'),
+                    [
+                        'max_size_kb' => 200,
+                        'max_width' => 1200,
+                        'max_height' => 1200,
+                        'target_ratio' => 4 / 3,
+                        'format' => 'jpg',
+                        'storage_path' => 'products/gallery',
+                        'filename_prefix' => 'prod-' . $product->id,
+                        'strip_metadata' => true,
+                    ]
+                );
 
-                    if (!file_exists($publicDir)) {
-                        mkdir($publicDir, 0755, true);
-                    }
-
-                    try {
-                        switch ($mime) {
-                            case 'image/png':
-                                $src = imagecreatefrompng($image->getPathname());
-                                break;
-                            case 'image/gif':
-                                $src = imagecreatefromgif($image->getPathname());
-                                break;
-                            case 'image/webp':
-                                if (function_exists('imagecreatefromwebp')) {
-                                    $src = imagecreatefromwebp($image->getPathname());
-                                } else {
-                                    $src = imagecreatefromjpeg($image->getPathname());
-                                }
-                                break;
-                            default:
-                                $src = imagecreatefromjpeg($image->getPathname());
-                                break;
-                        }
-
-                        $w = imagesx($src);
-                        $h = imagesy($src);
-
-                        $dst = imagecreatetruecolor($w, $h);
-                        $white = imagecolorallocate($dst, 255, 255, 255);
-                        imagefill($dst, 0, 0, $white);
-                        imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $w, $h);
-
-                        $quality = 85;
-                        imagejpeg($dst, $targetPath, $quality);
-
-                        imagedestroy($src);
-                        imagedestroy($dst);
-
-                        $maxBytes = 200 * 1024; // 200 KB
-
-                        while (filesize($targetPath) > $maxBytes && $quality > 30) {
-                            $quality -= 5;
-                            $src = imagecreatefromjpeg($targetPath);
-                            $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
-                            $white = imagecolorallocate($dst, 255, 255, 255);
-                            imagefill($dst, 0, 0, $white);
-                            imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src), imagesx($src), imagesy($src));
-                            imagejpeg($dst, $targetPath, $quality);
-                            imagedestroy($src);
-                            imagedestroy($dst);
-                        }
-
-                        while (filesize($targetPath) > $maxBytes) {
-                            $src = imagecreatefromjpeg($targetPath);
-                            $origW = imagesx($src);
-                            $origH = imagesy($src);
-                            $newW = (int) ($origW * 0.9);
-                            $newH = (int) ($origH * 0.9);
-
-                            if ($newW < 400 || $newH < 400) {
-                                imagedestroy($src);
-                                break;
-                            }
-
-                            $dst = imagecreatetruecolor($newW, $newH);
-                            $white = imagecolorallocate($dst, 255, 255, 255);
-                            imagefill($dst, 0, 0, $white);
-                            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
-                            imagejpeg($dst, $targetPath, $quality);
-                            imagedestroy($src);
-                            imagedestroy($dst);
-                        }
-
-                        $galleryPath = 'products/gallery/' . $filename;
-                    } catch (\Exception $e) {
-                        // fallback to storing original file
-                        $galleryPath = $image->store('products/gallery', 'public');
-                    }
-
+                foreach ($imagePaths as $index => $path) {
                     ProductImage::create([
                         'product_id' => $product->id,
-                        'image_path' => $galleryPath,
-                        'is_primary' => $index === 0,
+                        'image_path' => $path,
+                        'is_primary' => $index === 0, // First image is primary
                     ]);
                 }
             }
@@ -255,13 +190,13 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // Log::error('Product creation failed: ' . $e->getMessage(), [
-            //     'trace' => $e->getTraceAsString()
-            // ]);
+            Log::error('Product creation failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return back()
                 ->withInput()
-                ->withErrors(['error' => 'Something went wrong while creating the product.']);
+                ->withErrors(['error' => 'Something went wrong while creating the product: ' . $e->getMessage()]);
         }
     }
 
@@ -271,9 +206,9 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $allDeals = Deal::active()->ordered()->get();
-        $product->load(['category', 'brand', 'images']);
+        $product->load(['category', 'brand', 'images', 'attributes']);
 
-        $groupedAttributes = collect($product->attributes)
+        $groupedAttributes = $product->attributes
             ->groupBy('id')
             ->map(function ($items) {
                 return [
@@ -298,7 +233,7 @@ class ProductController extends Controller
         $product->load('attributes');
 
         // Group attributes by attribute_id and collect values
-        $groupedAttributes = collect($product->attributes)
+        $groupedAttributes = $product->attributes
             ->groupBy('id')
             ->map(function ($items) {
                 return [
@@ -316,7 +251,6 @@ class ProductController extends Controller
             'groupedAttributes'
         ));
     }
-
 
     /**
      * Update the specified resource in storage.
@@ -337,14 +271,17 @@ class ProductController extends Controller
             'sku' => 'required|string|unique:products,sku,' . $product->id,
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
-            'image_gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image_gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'specifications' => 'nullable|json',
             'is_active' => 'sometimes|boolean',
             'is_featured' => 'sometimes|boolean',
-            'product_attributes' => 'nullable|array', // Changed from attributes
+            'product_attributes' => 'nullable|array',
             'product_attributes.*.id' => 'required|exists:attributes,id',
             'product_attributes.*.values' => 'required|array',
             'product_attributes.*.values.*' => 'string|max:255',
+            'remove_images' => 'nullable|array',
+            'remove_images.*' => 'exists:product_images,id',
+            'primary_image' => 'nullable|exists:product_images,id',
         ]);
 
         try {
@@ -362,133 +299,22 @@ class ProductController extends Controller
             // Update product
             $product->update($validated);
 
-            // --- Handle product attributes ---
-            // Remove all old attributes
-            ProductAttribute::where('product_id', $product->id)->delete();
-
-            if ($request->filled('product_attributes')) { // Changed from attributes
-                foreach ($request->product_attributes as $order => $attributeData) { // Changed from attributes
-                    $attrId = $attributeData['id'] ?? null;
-                    $values = $attributeData['values'] ?? [];
-
-                    if ($attrId && !empty($values)) {
-                        foreach ($values as $valueIndex => $value) {
-                            ProductAttribute::create([
-                                'product_id' => $product->id,
-                                'attribute_id' => (int) $attrId,
-                                'value' => trim($value),
-                                'order' => $valueIndex,
-                            ]);
-                        }
-                    }
-                }
-
-                // Log::info('Product attributes synced', [
-                //     'product_id' => $product->id,
-                //     'product_attributes' => $request->input('product_attributes', []) // Changed from attributes
-                // ]);
+            // Handle image removal
+            if ($request->has('remove_images') && !empty($request->remove_images)) {
+                $this->removeProductImages($product, $request->remove_images);
             }
 
-            // Handle gallery images (compress to <= 200 KB when possible)
+            // Handle primary image selection
+            if ($request->has('primary_image')) {
+                $this->updatePrimaryImage($product, $request->primary_image);
+            }
+
+            // Handle product attributes
+            $this->syncProductAttributes($product, $request->product_attributes ?? []);
+
+            // Handle new gallery images
             if ($request->hasFile('image_gallery')) {
-                foreach ($request->file('image_gallery') as $index => $image) {
-                    $mime = $image->getMimeType();
-                    $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-                    $filename = Str::slug($originalName) . '-' . time() . '-' . $index . '.jpg';
-                    $publicDir = storage_path('app/public/products/gallery');
-                    $targetPath = $publicDir . DIRECTORY_SEPARATOR . $filename;
-
-                    if (!file_exists($publicDir)) {
-                        mkdir($publicDir, 0755, true);
-                    }
-
-                    // Check if GD functions are available
-                    if (function_exists('imagecreatefromjpeg') && function_exists('imagejpeg')) {
-                        try {
-                            switch ($mime) {
-                                case 'image/png':
-                                    $src = imagecreatefrompng($image->getPathname());
-                                    break;
-                                case 'image/gif':
-                                    $src = imagecreatefromgif($image->getPathname());
-                                    break;
-                                case 'image/webp':
-                                    if (function_exists('imagecreatefromwebp')) {
-                                        $src = imagecreatefromwebp($image->getPathname());
-                                    } else {
-                                        $src = imagecreatefromjpeg($image->getPathname());
-                                    }
-                                    break;
-                                default:
-                                    $src = imagecreatefromjpeg($image->getPathname());
-                                    break;
-                            }
-
-                            $w = imagesx($src);
-                            $h = imagesy($src);
-
-                            $dst = imagecreatetruecolor($w, $h);
-                            $white = imagecolorallocate($dst, 255, 255, 255);
-                            imagefill($dst, 0, 0, $white);
-                            imagecopyresampled($dst, $src, 0, 0, 0, 0, $w, $h, $w, $h);
-
-                            $quality = 85;
-                            imagejpeg($dst, $targetPath, $quality);
-
-                            imagedestroy($src);
-                            imagedestroy($dst);
-
-                            $maxBytes = 200 * 1024; // 200 KB
-
-                            while (filesize($targetPath) > $maxBytes && $quality > 30) {
-                                $quality -= 5;
-                                $src = imagecreatefromjpeg($targetPath);
-                                $dst = imagecreatetruecolor(imagesx($src), imagesy($src));
-                                $white = imagecolorallocate($dst, 255, 255, 255);
-                                imagefill($dst, 0, 0, $white);
-                                imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($src), imagesy($src), imagesx($src), imagesy($src));
-                                imagejpeg($dst, $targetPath, $quality);
-                                imagedestroy($src);
-                                imagedestroy($dst);
-                            }
-
-                            while (filesize($targetPath) > $maxBytes) {
-                                $src = imagecreatefromjpeg($targetPath);
-                                $origW = imagesx($src);
-                                $origH = imagesy($src);
-                                $newW = (int) ($origW * 0.9);
-                                $newH = (int) ($origH * 0.9);
-
-                                if ($newW < 400 || $newH < 400) {
-                                    imagedestroy($src);
-                                    break;
-                                }
-
-                                $dst = imagecreatetruecolor($newW, $newH);
-                                $white = imagecolorallocate($dst, 255, 255, 255);
-                                imagefill($dst, 0, 0, $white);
-                                imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
-                                imagejpeg($dst, $targetPath, $quality);
-                                imagedestroy($src);
-                                imagedestroy($dst);
-                            }
-
-                            $galleryPath = 'products/gallery/' . $filename;
-                        } catch (\Exception $e) {
-                            // fallback to storing original file
-                            $galleryPath = $image->store('products/gallery', 'public');
-                        }
-                    } else {
-                        // GD not available, store original file
-                        $galleryPath = $image->store('products/gallery', 'public');
-                    }
-
-                    ProductImage::create([
-                        'product_id' => $product->id,
-                        'image_path' => $galleryPath,
-                        'is_primary' => $index === 0,
-                    ]);
-                }
+                $this->addNewGalleryImages($product, $request->file('image_gallery'));
             }
 
             DB::commit();
@@ -499,13 +325,13 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // Log::error('Product update failed: ' . $e->getMessage(), [
-            //     'trace' => $e->getTraceAsString()
-            // ]);
+            Log::error('Product update failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return back()
                 ->withInput()
-                ->withErrors(['error' => 'Something went wrong while updating the product.']);
+                ->withErrors(['error' => 'Something went wrong while updating the product: ' . $e->getMessage()]);
         }
     }
 
@@ -514,47 +340,66 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        // Delete associated images
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
+        try {
+            DB::beginTransaction();
+
+            // Soft delete the product
+            $product->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.products.index')
+                ->with('success', 'Product moved to trash successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Product deletion failed: ' . $e->getMessage());
+
+            return back()->withErrors(['error' => 'Failed to delete product.']);
         }
-
-        if ($product->image_gallery) {
-            foreach ($product->image_gallery as $image) {
-                Storage::disk('public')->delete($image);
-            }
-        }
-
-        $product->delete();
-
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Product deleted successfully.');
     }
 
     /**
      * Display a listing of soft-deleted products.
      */
-    public function trash()
+    public function trash(Request $request)
     {
         $brands = Brand::where('is_active', true)->get();
         $categories = Category::where('is_active', true)->get();
 
         $products = Product::onlyTrashed()
             ->with(['category', 'brand'])
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%");
+                });
+            })
             ->latest()
-            ->paginate($this->perPageProducts);
+            ->paginate($this->perPageProducts)
+            ->appends($request->all());
 
         return view('admin.products.trash', compact('brands', 'categories', 'products'));
     }
+
     /**
      * Restore a soft-deleted product.
      */
     public function restore($id)
     {
-        $product = Product::onlyTrashed()->findOrFail($id);
-        $product->restore();
-        return redirect()->route('admin.products.trash')
-            ->with('success', 'Product restored successfully.');
+        try {
+            $product = Product::onlyTrashed()->findOrFail($id);
+            $product->restore();
+
+            return redirect()->route('admin.products.trash')
+                ->with('success', 'Product restored successfully.');
+
+        } catch (\Exception $e) {
+            Log::error('Product restore failed: ' . $e->getMessage());
+
+            return back()->withErrors(['error' => 'Failed to restore product.']);
+        }
     }
 
     /**
@@ -562,23 +407,27 @@ class ProductController extends Controller
      */
     public function bulkDestroy(Request $request)
     {
-        // Validate the request
         $request->validate([
             'selected_products' => 'required|string'
         ]);
 
-        // Decode the JSON string
         $selectedProducts = json_decode($request->selected_products);
 
         if (empty($selectedProducts)) {
             return redirect()->back()->with('error', 'No products selected.');
         }
 
-        // Soft delete the selected products
-        Product::whereIn('id', $selectedProducts)->delete();
+        try {
+            Product::whereIn('id', $selectedProducts)->delete();
 
-        return redirect()->route('admin.products.index')
-            ->with('success', count($selectedProducts) . ' products moved to trash successfully.');
+            return redirect()->route('admin.products.index')
+                ->with('success', count($selectedProducts) . ' products moved to trash successfully.');
+
+        } catch (\Exception $e) {
+            Log::error('Bulk delete failed: ' . $e->getMessage());
+
+            return back()->withErrors(['error' => 'Failed to delete products.']);
+        }
     }
 
     /**
@@ -586,23 +435,41 @@ class ProductController extends Controller
      */
     public function bulkForceDelete(Request $request)
     {
-        // Validate the request
         $request->validate([
             'selected_products' => 'required|string'
         ]);
 
-        // Decode the JSON string
         $selectedProducts = json_decode($request->selected_products);
 
         if (empty($selectedProducts)) {
             return redirect()->back()->with('error', 'No products selected.');
         }
 
-        // Permanently delete the selected products
-        Product::onlyTrashed()->whereIn('id', $selectedProducts)->forceDelete();
+        try {
+            DB::beginTransaction();
 
-        return redirect()->route('admin.products.trash')
-            ->with('success', count($selectedProducts) . ' products permanently deleted successfully.');
+            $products = Product::onlyTrashed()->whereIn('id', $selectedProducts)->get();
+
+            foreach ($products as $product) {
+                // Delete associated images from storage
+                $this->deleteProductImagesFromStorage($product);
+
+                // Force delete the product
+                $product->forceDelete();
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.products.trash')
+                ->with('success', count($selectedProducts) . ' products permanently deleted successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Bulk force delete failed: ' . $e->getMessage());
+
+            return back()->withErrors(['error' => 'Failed to permanently delete products.']);
+        }
     }
 
     /**
@@ -610,23 +477,27 @@ class ProductController extends Controller
      */
     public function bulkRestore(Request $request)
     {
-        // Validate the request
         $request->validate([
             'selected_products' => 'required|string'
         ]);
 
-        // Decode the JSON string
         $selectedProducts = json_decode($request->selected_products);
 
         if (empty($selectedProducts)) {
             return redirect()->back()->with('error', 'No products selected.');
         }
 
-        // Restore the selected products
-        Product::onlyTrashed()->whereIn('id', $selectedProducts)->restore();
+        try {
+            Product::onlyTrashed()->whereIn('id', $selectedProducts)->restore();
 
-        return redirect()->route('admin.products.trash')
-            ->with('success', count($selectedProducts) . ' products restored successfully.');
+            return redirect()->route('admin.products.trash')
+                ->with('success', count($selectedProducts) . ' products restored successfully.');
+
+        } catch (\Exception $e) {
+            Log::error('Bulk restore failed: ' . $e->getMessage());
+
+            return back()->withErrors(['error' => 'Failed to restore products.']);
+        }
     }
 
     /**
@@ -634,11 +505,29 @@ class ProductController extends Controller
      */
     public function forceDelete($id)
     {
-        $product = Product::onlyTrashed()->findOrFail($id);
-        $product->forceDelete();
+        try {
+            DB::beginTransaction();
 
-        return redirect()->route('admin.products.trash')
-            ->with('success', 'Product permanently deleted successfully.');
+            $product = Product::onlyTrashed()->findOrFail($id);
+
+            // Delete associated images from storage
+            $this->deleteProductImagesFromStorage($product);
+
+            // Force delete the product
+            $product->forceDelete();
+
+            DB::commit();
+
+            return redirect()->route('admin.products.trash')
+                ->with('success', 'Product permanently deleted successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Force delete failed: ' . $e->getMessage());
+
+            return back()->withErrors(['error' => 'Failed to permanently delete product.']);
+        }
     }
 
     /**
@@ -646,9 +535,23 @@ class ProductController extends Controller
      */
     public function toggleStatus(Product $product)
     {
-        $product->update(['is_active' => !$product->is_active]);
+        try {
+            $product->update(['is_active' => !$product->is_active]);
 
-        return back()->with('success', 'Product status updated successfully');
+            return response()->json([
+                'success' => true,
+                'message' => 'Product status updated successfully',
+                'status' => $product->is_active
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Toggle status failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update product status'
+            ], 500);
+        }
     }
 
     /**
@@ -656,13 +559,27 @@ class ProductController extends Controller
      */
     public function toggleFeatured(Product $product)
     {
-        $product->update(['is_featured' => !$product->is_featured]);
+        try {
+            $product->update(['is_featured' => !$product->is_featured]);
 
-        return back()->with('success', 'Product featured status updated successfully');
+            return response()->json([
+                'success' => true,
+                'message' => 'Product featured status updated successfully',
+                'status' => $product->is_featured
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Toggle featured failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update featured status'
+            ], 500);
+        }
     }
 
     /**
-     * Set primary image for the product.
+     * Set primary image for the product (API endpoint).
      */
     public function setPrimaryImage(Request $request, Product $product)
     {
@@ -678,7 +595,10 @@ class ProductController extends Controller
                 ->update(['is_primary' => false]);
 
             // Set the selected image as primary
-            $image = ProductImage::find($request->image_id);
+            $image = ProductImage::where('id', $request->image_id)
+                ->where('product_id', $product->id)
+                ->firstOrFail();
+
             $image->is_primary = true;
             $image->save();
 
@@ -692,7 +612,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // Log::error('Failed to set primary image: ' . $e->getMessage());
+            Log::error('Failed to set primary image: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -707,8 +627,9 @@ class ProductController extends Controller
     public function editDeals(Product $product)
     {
         $allDeals = Deal::orderBy('priority', 'desc')->get();
+        $product->load('deals');
 
-        return view('admin.products.show', compact('product', 'allDeals'));
+        return view('admin.products.deals', compact('product', 'allDeals'));
     }
 
     /**
@@ -721,18 +642,25 @@ class ProductController extends Controller
             'deal_ids.*' => 'exists:deals,id',
         ]);
 
-        // Sync the deals (replace existing assignments)
-        $syncData = [];
-        if ($request->has('deal_ids')) {
-            foreach ($request->deal_ids as $dealId) {
-                $syncData[$dealId] = ['is_featured' => false]; // Default values
+        try {
+            // Sync the deals (replace existing assignments)
+            $syncData = [];
+            if ($request->has('deal_ids')) {
+                foreach ($request->deal_ids as $dealId) {
+                    $syncData[$dealId] = ['is_featured' => false];
+                }
             }
+
+            $product->deals()->sync($syncData);
+
+            return redirect()->back()
+                ->with('success', 'Deal assignments updated successfully.');
+
+        } catch (\Exception $e) {
+            Log::error('Assign deals failed: ' . $e->getMessage());
+
+            return back()->withErrors(['error' => 'Failed to assign deals.']);
         }
-
-        $product->deals()->sync($syncData);
-
-        return redirect()->back()
-            ->with('success', 'Deal assignments updated successfully.');
     }
 
     /**
@@ -740,9 +668,148 @@ class ProductController extends Controller
      */
     public function removeDeal(Product $product, Deal $deal)
     {
-        $product->deals()->detach($deal->id);
+        try {
+            $product->deals()->detach($deal->id);
 
-        return redirect()->back()
-            ->with('success', 'Product removed from deal successfully.');
+            return redirect()->back()
+                ->with('success', 'Product removed from deal successfully.');
+
+        } catch (\Exception $e) {
+            Log::error('Remove deal failed: ' . $e->getMessage());
+
+            return back()->withErrors(['error' => 'Failed to remove product from deal.']);
+        }
+    }
+
+    /**
+     * Generate description using AI (placeholder)
+     */
+    public function generateDescription(Request $request)
+    {
+        $request->validate([
+            'product_name' => 'required|string'
+        ]);
+
+        // This is a placeholder. Implement your AI description generation here
+        $description = "This is a generated description for " . $request->product_name .
+            ". It includes all the key features and benefits of the product.";
+
+        return response()->json([
+            'description' => $description
+        ]);
+    }
+
+    /**
+     * Private helper methods
+     */
+
+    /**
+     * Remove product images
+     */
+    private function removeProductImages(Product $product, array $imageIds): void
+    {
+        $imagesToRemove = ProductImage::whereIn('id', $imageIds)
+            ->where('product_id', $product->id)
+            ->get();
+
+        foreach ($imagesToRemove as $image) {
+            // Delete file from storage
+            $fullPath = storage_path('app/public/' . $image->image_path);
+            if (file_exists($fullPath) && is_file($fullPath)) {
+                unlink($fullPath);
+            }
+
+            // Delete database record
+            $image->delete();
+        }
+    }
+
+    /**
+     * Update primary image (renamed from setPrimaryImage to avoid conflict)
+     */
+    private function updatePrimaryImage(Product $product, int $imageId): void
+    {
+        // Remove primary flag from all images
+        ProductImage::where('product_id', $product->id)
+            ->update(['is_primary' => false]);
+
+        // Set new primary image
+        ProductImage::where('id', $imageId)
+            ->where('product_id', $product->id)
+            ->update(['is_primary' => true]);
+    }
+
+    /**
+     * Sync product attributes
+     */
+    private function syncProductAttributes(Product $product, array $attributes): void
+    {
+        // Remove all old attributes
+        ProductAttribute::where('product_id', $product->id)->delete();
+
+        if (!empty($attributes)) {
+            foreach ($attributes as $order => $attributeData) {
+                $attrId = $attributeData['id'] ?? null;
+                $values = $attributeData['values'] ?? [];
+
+                if ($attrId && !empty($values)) {
+                    foreach ($values as $valueIndex => $value) {
+                        if (!empty(trim($value))) {
+                            ProductAttribute::create([
+                                'product_id' => $product->id,
+                                'attribute_id' => (int) $attrId,
+                                'value' => trim($value),
+                                'order' => $valueIndex,
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Add new gallery images
+     */
+    private function addNewGalleryImages(Product $product, array $images): void
+    {
+        // Check if there are no remaining images, set first new image as primary
+        $remainingImagesCount = ProductImage::where('product_id', $product->id)->count();
+        $setPrimary = $remainingImagesCount === 0;
+
+        $imagePaths = $this->imageCompressor->bulkCompress(
+            $images,
+            [
+                'max_size_kb' => 200,
+                'max_width' => 1200,
+                'max_height' => 1200,
+                'target_ratio' => 4 / 3,
+                'format' => 'jpg',
+                'storage_path' => 'products/gallery',
+                'filename_prefix' => 'prod-' . $product->id,
+                'strip_metadata' => true,
+            ]
+        );
+
+        foreach ($imagePaths as $index => $path) {
+            ProductImage::create([
+                'product_id' => $product->id,
+                'image_path' => $path,
+                'is_primary' => $setPrimary && $index === 0,
+            ]);
+        }
+    }
+
+    /**
+     * Delete all product images from storage
+     */
+    private function deleteProductImagesFromStorage(Product $product): void
+    {
+        foreach ($product->images as $image) {
+            $fullPath = storage_path('app/public/' . $image->image_path);
+            if (file_exists($fullPath) && is_file($fullPath)) {
+                unlink($fullPath);
+            }
+        }
     }
 }
