@@ -11,11 +11,11 @@
                 <div>
                     <!-- Main Image -->
                     <div class="mb-4 bg-white rounded-2xl shadow-sm p-4 md:p-6">
-                        <div class="relative overflow-hidden rounded-xl">
+                        <div id="public-image-zoom-container" class="relative overflow-hidden rounded-xl cursor-zoom-in">
                             @if ($product->images->count() > 0)
                                 <img id="main-product-image"
                                     src="{{ Storage::url($product->images->first()->image_path) }}"
-                                    alt="{{ $product->name }}" class="w-full h-80 md:h-96 object-contain bg-gray-50">
+                                    alt="{{ $product->name }}" class="w-full h-80 md:h-96 object-contain bg-gray-50 transition-transform duration-200 ease-out origin-center pointer-events-none">
                             @else
                                 <div class="w-full h-80 md:h-96 bg-gray-100 flex items-center justify-center rounded-xl">
                                     <i class="fas fa-image text-5xl text-gray-300"></i>
@@ -356,18 +356,94 @@
                     <!-- Specifications Tab -->
                     <div id="content-specifications" class="hidden space-y-6">
                         <h3 class="text-xl font-bold text-gray-900">Product Specifications</h3>
-                        @if ($product->specifications && count($product->specifications) > 0)
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            @if ($product->material)
+                                <div class="border-b border-gray-100 pb-3">
+                                    <dt class="font-medium text-gray-900 mb-1">Material / Fabric</dt>
+                                    <dd class="text-gray-700">{{ $product->material }}</dd>
+                                </div>
+                            @endif
+                            @if ($product->ingredients)
+                                <div class="border-b border-gray-100 pb-3">
+                                    <dt class="font-medium text-gray-900 mb-1">Ingredients</dt>
+                                    <dd class="text-gray-700 whitespace-pre-line">{{ $product->ingredients }}</dd>
+                                </div>
+                            @endif
+                            @if ($product->warranty_info)
+                                <div class="border-b border-gray-100 pb-3">
+                                    <dt class="font-medium text-gray-900 mb-1">Warranty Info</dt>
+                                    <dd class="text-gray-700">{{ $product->warranty_info }}</dd>
+                                </div>
+                            @endif
+                            @if ($product->weight)
+                                <div class="border-b border-gray-100 pb-3">
+                                    <dt class="font-medium text-gray-900 mb-1">Weight</dt>
+                                    <dd class="text-gray-700">{{ $product->weight }} kg</dd>
+                                </div>
+                            @endif
+                            @if ($product->length || $product->width || $product->height)
+                                <div class="border-b border-gray-100 pb-3">
+                                    <dt class="font-medium text-gray-900 mb-1">Dimensions (L × W × H)</dt>
+                                    <dd class="text-gray-700">{{ $product->length ?? '-' }} × {{ $product->width ?? '-' }} × {{ $product->height ?? '-' }} cm</dd>
+                                </div>
+                            @endif
+                            @if ($product->shipping_class)
+                                <div class="border-b border-gray-100 pb-3">
+                                    <dt class="font-medium text-gray-900 mb-1">Shipping Class</dt>
+                                    <dd class="text-gray-700">{{ $product->shipping_class }}</dd>
+                                </div>
+                            @endif
+                            @if ($product->origin_country)
+                                <div class="border-b border-gray-100 pb-3">
+                                    <dt class="font-medium text-gray-900 mb-1">Origin Country</dt>
+                                    <dd class="text-gray-700">{{ $product->origin_country }}</dd>
+                                </div>
+                            @endif
+                            @if ($product->usage_instructions)
+                                <div class="border-b border-gray-100 pb-3 md:col-span-2">
+                                    <dt class="font-medium text-gray-900 mb-1">Usage Instructions</dt>
+                                    <dd class="text-gray-700 whitespace-pre-line">{{ $product->usage_instructions }}</dd>
+                                </div>
+                            @endif
+                            @if ($product->care_instructions)
+                                <div class="border-b border-gray-100 pb-3 md:col-span-2">
+                                    <dt class="font-medium text-gray-900 mb-1">Care Instructions</dt>
+                                    <dd class="text-gray-700 whitespace-pre-line">{{ $product->care_instructions }}</dd>
+                                </div>
+                            @endif
+                            @if ($product->certifications && count($product->certifications) > 0)
+                                <div class="border-b border-gray-100 pb-3 md:col-span-2">
+                                    <dt class="font-medium text-gray-900 mb-1">Certifications</dt>
+                                    <dd class="text-gray-700">
+                                        <div class="flex flex-wrap gap-2 mt-1">
+                                            @foreach ($product->certifications as $cert)
+                                                <span class="px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-xs font-semibold rounded-full">{{ $cert }}</span>
+                                            @endforeach
+                                        </div>
+                                    </dd>
+                                </div>
+                            @endif
+                            @if ($product->tags && count($product->tags) > 0)
+                                <div class="border-b border-gray-100 pb-3 md:col-span-2">
+                                    <dt class="font-medium text-gray-900 mb-1">Tags</dt>
+                                    <dd class="text-gray-700">
+                                        <div class="flex flex-wrap gap-2 mt-1">
+                                            @foreach ($product->tags as $tag)
+                                                <span class="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold rounded-full">#{{ $tag }}</span>
+                                            @endforeach
+                                        </div>
+                                    </dd>
+                                </div>
+                            @endif
+                            @if ($product->specifications && count($product->specifications) > 0)
                                 @foreach ($product->specifications as $key => $value)
                                     <div class="border-b border-gray-100 pb-3">
                                         <dt class="font-medium text-gray-900 mb-1">{{ $key }}</dt>
                                         <dd class="text-gray-700">{{ $value }}</dd>
                                     </div>
                                 @endforeach
-                            </div>
-                        @else
-                            <p class="text-gray-600">No specifications available for this product.</p>
-                        @endif
+                            @endif
+                        </div>
                     </div>
 
                     <!-- Reviews Tab -->
@@ -596,6 +672,31 @@
             function changeImage(src) {
                 document.getElementById('main-product-image').src = src;
             }
+
+            // Public page hover zoom logic
+            document.addEventListener('DOMContentLoaded', function() {
+                const zoomContainer = document.getElementById('public-image-zoom-container');
+                const mainImg = document.getElementById('main-product-image');
+
+                if (zoomContainer && mainImg) {
+                    zoomContainer.addEventListener('mousemove', (e) => {
+                        const rect = zoomContainer.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+
+                        const xPercent = (x / rect.width) * 100;
+                        const yPercent = (y / rect.height) * 100;
+
+                        mainImg.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+                        mainImg.style.transform = 'scale(2)';
+                    });
+
+                    zoomContainer.addEventListener('mouseleave', () => {
+                        mainImg.style.transform = 'scale(1)';
+                        mainImg.style.transformOrigin = 'center center';
+                    });
+                }
+            });
 
             // Quantity functions
             function increaseQuantity() {

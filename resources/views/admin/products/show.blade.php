@@ -207,6 +207,116 @@
                         </div>
                     </div>
                 @endif
+
+                <!-- Marketing & Status -->
+                @if ($product->is_on_sale || $product->is_new_arrival || $product->is_best_seller || $product->label)
+                <div class="bg-white rounded-lg border border-gray-200">
+                    <div class="p-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Marketing</h3>
+                        <div class="flex flex-wrap gap-2">
+                            @if ($product->label)
+                                <span class="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-800">{{ $product->label }}</span>
+                            @endif
+                            @if ($product->is_on_sale)
+                                <span class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800">On Sale</span>
+                            @endif
+                            @if ($product->is_new_arrival)
+                                <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">New Arrival</span>
+                            @endif
+                            @if ($product->is_best_seller)
+                                <span class="px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-800">Best Seller</span>
+                            @endif
+                        </div>
+                        @if ($product->tags && count($product->tags) > 0)
+                            <div class="mt-3">
+                                <dt class="text-xs text-gray-500 mb-1">Tags</dt>
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach ($product->tags as $tag)
+                                        <span class="px-2 py-0.5 text-xs bg-gray-100 text-gray-700 rounded">{{ $tag }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
+                <!-- Logistics -->
+                @if ($product->weight || $product->length || $product->width || $product->height || $product->shipping_class)
+                <div class="bg-white rounded-lg border border-gray-200">
+                    <div class="p-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Logistics</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            @if ($product->weight)
+                                <div><dt class="text-xs text-gray-500">Weight</dt><dd class="text-sm text-gray-900">{{ $product->weight }} kg</dd></div>
+                            @endif
+                            @if ($product->length)
+                                <div><dt class="text-xs text-gray-500">Dimensions (L×W×H)</dt>
+                                <dd class="text-sm text-gray-900">{{ $product->length }} × {{ $product->width }} × {{ $product->height }} cm</dd></div>
+                            @endif
+                            @if ($product->shipping_class)
+                                <div><dt class="text-xs text-gray-500">Shipping Class</dt><dd class="text-sm text-gray-900">{{ $product->shipping_class }}</dd></div>
+                            @endif
+                            @if ($product->origin_country)
+                                <div><dt class="text-xs text-gray-500">Origin</dt><dd class="text-sm text-gray-900">{{ $product->origin_country }}</dd></div>
+                            @endif
+                            @if ($product->warranty_info)
+                                <div><dt class="text-xs text-gray-500">Warranty</dt><dd class="text-sm text-gray-900">{{ $product->warranty_info }}</dd></div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Product Details -->
+                @if ($product->material || $product->ingredients || $product->usage_instructions || $product->care_instructions || ($product->certifications && count($product->certifications) > 0))
+                <div class="bg-white rounded-lg border border-gray-200">
+                    <div class="p-4 space-y-3">
+                        <h3 class="text-sm font-medium text-gray-700">Product Details</h3>
+                        @if ($product->material)
+                            <div><dt class="text-xs text-gray-500">Material / Fabric</dt><dd class="text-sm text-gray-900">{{ $product->material }}</dd></div>
+                        @endif
+                        @if ($product->ingredients)
+                            <div><dt class="text-xs text-gray-500">Ingredients</dt><dd class="text-sm text-gray-900 whitespace-pre-line">{{ $product->ingredients }}</dd></div>
+                        @endif
+                        @if ($product->usage_instructions)
+                            <div><dt class="text-xs text-gray-500">Usage Instructions</dt><dd class="text-sm text-gray-900 whitespace-pre-line">{{ $product->usage_instructions }}</dd></div>
+                        @endif
+                        @if ($product->care_instructions)
+                            <div><dt class="text-xs text-gray-500">Care Instructions</dt><dd class="text-sm text-gray-900 whitespace-pre-line">{{ $product->care_instructions }}</dd></div>
+                        @endif
+                        @if ($product->certifications && count($product->certifications) > 0)
+                            <div>
+                                <dt class="text-xs text-gray-500 mb-1">Certifications</dt>
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach ($product->certifications as $cert)
+                                        <span class="px-2 py-0.5 text-xs bg-green-50 text-green-700 border border-green-200 rounded">{{ $cert }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
+                <!-- SEO -->
+                @if ($product->meta_title || $product->meta_description || $product->meta_keywords)
+                <div class="bg-white rounded-lg border border-gray-200">
+                    <div class="p-4 space-y-2">
+                        <h3 class="text-sm font-medium text-gray-700">SEO</h3>
+                        @if ($product->meta_title)
+                            <div><dt class="text-xs text-gray-500">Meta Title</dt><dd class="text-sm text-gray-900">{{ $product->meta_title }}</dd></div>
+                        @endif
+                        @if ($product->meta_description)
+                            <div><dt class="text-xs text-gray-500">Meta Description</dt><dd class="text-sm text-gray-900">{{ $product->meta_description }}</dd></div>
+                        @endif
+                        @if ($product->meta_keywords)
+                            <div><dt class="text-xs text-gray-500">Meta Keywords</dt><dd class="text-sm text-gray-900">{{ $product->meta_keywords }}</dd></div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
             </div>
         </div>
 

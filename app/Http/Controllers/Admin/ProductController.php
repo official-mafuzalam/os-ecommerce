@@ -108,17 +108,40 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
+            'short_description' => 'nullable|string|max:500',
             'buy_price' => 'nullable|numeric|min:0',
             'price' => 'required|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
+            'low_stock_threshold' => 'nullable|integer|min:0',
             'sku' => 'required|string|unique:products,sku',
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
-            'image_gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Increased to 5MB max upload
+            'image_gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'specifications' => 'nullable|json',
             'is_active' => 'sometimes|boolean',
             'is_featured' => 'sometimes|boolean',
+            'is_new_arrival' => 'sometimes|boolean',
+            'is_bestseller' => 'sometimes|boolean',
+            'published_at' => 'nullable|date',
+            'min_order_quantity' => 'nullable|integer|min:1',
+            'max_order_quantity' => 'nullable|integer|min:1',
+            'meta_title' => 'nullable|string|max:160',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string',
+            'weight' => 'nullable|numeric|min:0',
+            'length' => 'nullable|numeric|min:0',
+            'width' => 'nullable|numeric|min:0',
+            'height' => 'nullable|numeric|min:0',
+            'tags' => 'nullable|string',
+            'label' => 'nullable|string|max:50',
+            'ingredients' => 'nullable|string',
+            'usage_instructions' => 'nullable|string',
+            'warranty_info' => 'nullable|string',
+            'origin_country' => 'nullable|string|max:100',
+            'certifications' => 'nullable|string',
+            'material' => 'nullable|string|max:255',
+            'care_instructions' => 'nullable|string',
             'product_attributes' => 'nullable|array',
             'product_attributes.*.id' => 'required|exists:attributes,id',
             'product_attributes.*.values' => 'required|array',
@@ -131,6 +154,20 @@ class ProductController extends Controller
             $validated['slug'] = Str::slug($validated['name']);
             $validated['is_active'] = $request->boolean('is_active');
             $validated['is_featured'] = $request->boolean('is_featured');
+            $validated['is_new_arrival'] = $request->boolean('is_new_arrival');
+            $validated['is_bestseller'] = $request->boolean('is_bestseller');
+
+            if ($request->filled('tags')) {
+                $validated['tags'] = array_map('trim', explode(',', $request->tags));
+            } else {
+                $validated['tags'] = null;
+            }
+
+            if ($request->filled('certifications')) {
+                $validated['certifications'] = array_map('trim', explode(',', $request->certifications));
+            } else {
+                $validated['certifications'] = null;
+            }
 
             if (!empty($validated['specifications'])) {
                 $validated['specifications'] = json_decode($validated['specifications'], true);
@@ -264,10 +301,12 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
+            'short_description' => 'nullable|string|max:500',
             'buy_price' => 'nullable|numeric|min:0',
             'price' => 'required|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
+            'low_stock_threshold' => 'nullable|integer|min:0',
             'sku' => 'required|string|unique:products,sku,' . $product->id,
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
@@ -275,6 +314,27 @@ class ProductController extends Controller
             'specifications' => 'nullable|json',
             'is_active' => 'sometimes|boolean',
             'is_featured' => 'sometimes|boolean',
+            'is_new_arrival' => 'sometimes|boolean',
+            'is_bestseller' => 'sometimes|boolean',
+            'published_at' => 'nullable|date',
+            'min_order_quantity' => 'nullable|integer|min:1',
+            'max_order_quantity' => 'nullable|integer|min:1',
+            'meta_title' => 'nullable|string|max:160',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string',
+            'weight' => 'nullable|numeric|min:0',
+            'length' => 'nullable|numeric|min:0',
+            'width' => 'nullable|numeric|min:0',
+            'height' => 'nullable|numeric|min:0',
+            'tags' => 'nullable|string',
+            'label' => 'nullable|string|max:50',
+            'ingredients' => 'nullable|string',
+            'usage_instructions' => 'nullable|string',
+            'warranty_info' => 'nullable|string',
+            'origin_country' => 'nullable|string|max:100',
+            'certifications' => 'nullable|string',
+            'material' => 'nullable|string|max:255',
+            'care_instructions' => 'nullable|string',
             'product_attributes' => 'nullable|array',
             'product_attributes.*.id' => 'required|exists:attributes,id',
             'product_attributes.*.values' => 'required|array',
@@ -290,6 +350,20 @@ class ProductController extends Controller
             $validated['slug'] = Str::slug($validated['name']);
             $validated['is_active'] = $request->boolean('is_active');
             $validated['is_featured'] = $request->boolean('is_featured');
+            $validated['is_new_arrival'] = $request->boolean('is_new_arrival');
+            $validated['is_bestseller'] = $request->boolean('is_bestseller');
+
+            if ($request->filled('tags')) {
+                $validated['tags'] = array_map('trim', explode(',', $request->tags));
+            } else {
+                $validated['tags'] = null;
+            }
+
+            if ($request->filled('certifications')) {
+                $validated['certifications'] = array_map('trim', explode(',', $request->certifications));
+            } else {
+                $validated['certifications'] = null;
+            }
 
             // Decode specifications JSON
             if (!empty($validated['specifications'])) {

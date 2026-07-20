@@ -44,6 +44,17 @@
                                     </div>
 
                                     <div>
+                                        <label for="short_description"
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Short Description</label>
+                                        <input type="text" id="short_description" name="short_description"
+                                            value="{{ old('short_description', $product->short_description) }}"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                                        @error('short_description')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
                                         <label for="sku"
                                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SKU
                                             *</label>
@@ -61,15 +72,46 @@
                                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Description *
                                         </label>
-                                        <div class="flex items-center mb-1">
-                                            <span class="text-sm text-gray-500 dark:text-gray-400 mr-2">Auto-generate
-                                                from product name</span>
-                                            <button type="button" id="generate-description"
-                                                class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 py-1 px-2 rounded-md transition-colors">
-                                                Generate Description
-                                            </button>
+                                        <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-700 mb-3 space-y-3">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">AI Marketing Generator</span>
+                                                <button type="button" id="generate-description"
+                                                    class="text-xs bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-3 rounded-md transition-colors shadow-sm disabled:opacity-50">
+                                                    Generate Description
+                                                </button>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                                <div>
+                                                    <label class="block text-gray-500 dark:text-gray-400 mb-1">Language</label>
+                                                    <select id="ai-language"
+                                                        class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white py-1 px-2 text-xs">
+                                                        <option value="English" selected>English</option>
+                                                        <option value="Bengali">Bengali</option>
+                                                        <option value="Arabic">Arabic</option>
+                                                        <option value="Spanish">Spanish</option>
+                                                        <option value="French">French</option>
+                                                        <option value="Hindi">Hindi</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-gray-500 dark:text-gray-400 mb-1">Tone</label>
+                                                    <select id="ai-tone"
+                                                        class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white py-1 px-2 text-xs">
+                                                        <option value="Professional" selected>Professional</option>
+                                                        <option value="Casual">Casual</option>
+                                                        <option value="Luxury">Luxury</option>
+                                                        <option value="Minimal">Minimal</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Target Audience (Optional)</label>
+                                                <input type="text" id="ai-audience"
+                                                    placeholder="e.g. Health conscious, women 20-30"
+                                                    class="w-full rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white py-1 px-2 text-xs">
+                                            </div>
                                         </div>
-                                        <textarea id="description" name="description" rows="4"
+                                        <textarea id="description" name="description" rows="6"
                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3"
                                             required>{{ old('description', $product->description) }}</textarea>
                                         @error('description')
@@ -129,6 +171,42 @@
                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3"
                                             required>
                                         @error('stock_quantity')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label for="low_stock_threshold"
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Low Stock Threshold</label>
+                                        <input type="number" id="low_stock_threshold" name="low_stock_threshold"
+                                            min="0"
+                                            value="{{ old('low_stock_threshold', $product->low_stock_threshold ?? 5) }}"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                                        @error('low_stock_threshold')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label for="min_order_quantity"
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Min Order Qty</label>
+                                        <input type="number" id="min_order_quantity" name="min_order_quantity"
+                                            min="1"
+                                            value="{{ old('min_order_quantity', $product->min_order_quantity ?? 1) }}"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                                        @error('min_order_quantity')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-span-2">
+                                        <label for="max_order_quantity"
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Order Qty (Leave empty for no limit)</label>
+                                        <input type="number" id="max_order_quantity" name="max_order_quantity"
+                                            min="1"
+                                            value="{{ old('max_order_quantity', $product->max_order_quantity) }}"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                                        @error('max_order_quantity')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>
@@ -252,38 +330,124 @@
                             </div>
 
                             <div>
-                                <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">Status</h3>
+                                 <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">Status & Marketing</h3>
 
-                                <div class="space-y-3">
-                                    <div class="flex items-center">
-                                        <input type="checkbox" id="is_active" name="is_active" value="1"
-                                            {{ old('is_active', $product->is_active) ? 'checked' : '' }}
-                                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
-                                        <label for="is_active"
-                                            class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Active Product
-                                        </label>
-                                    </div>
+                                 <div class="space-y-4">
+                                     <div class="flex items-center">
+                                         <input type="checkbox" id="is_active" name="is_active" value="1"
+                                             {{ old('is_active', $product->is_active) ? 'checked' : '' }}
+                                             class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
+                                         <label for="is_active"
+                                             class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                             Active Product
+                                         </label>
+                                     </div>
 
-                                    <div class="flex items-center">
-                                        <input type="checkbox" id="is_featured" name="is_featured" value="1"
-                                            {{ old('is_featured', $product->is_featured) ? 'checked' : '' }}
-                                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
-                                        <label for="is_featured"
-                                            class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            Featured Product
-                                        </label>
-                                    </div>
-                                </div>
-                                @error('is_active')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                                @error('is_featured')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
+                                     <div class="flex items-center">
+                                         <input type="checkbox" id="is_featured" name="is_featured" value="1"
+                                             {{ old('is_featured', $product->is_featured) ? 'checked' : '' }}
+                                             class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
+                                         <label for="is_featured"
+                                             class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                             Featured Product
+                                         </label>
+                                     </div>
+
+                                     <div class="flex items-center">
+                                         <input type="checkbox" id="is_new_arrival" name="is_new_arrival" value="1"
+                                             {{ old('is_new_arrival', $product->is_new_arrival) ? 'checked' : '' }}
+                                             class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
+                                         <label for="is_new_arrival"
+                                             class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                             New Arrival
+                                         </label>
+                                     </div>
+
+                                     <div class="flex items-center">
+                                         <input type="checkbox" id="is_bestseller" name="is_bestseller" value="1"
+                                             {{ old('is_bestseller', $product->is_bestseller) ? 'checked' : '' }}
+                                             class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
+                                         <label for="is_bestseller"
+                                             class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                             Bestseller
+                                         </label>
+                                     </div>
+
+                                     <div>
+                                         <label for="published_at"
+                                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Publish Date/Time</label>
+                                         <input type="datetime-local" id="published_at" name="published_at"
+                                             value="{{ old('published_at', $product->published_at ? $product->published_at->format('Y-m-d\TH:i') : '') }}"
+                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                                         @error('published_at')
+                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                         @enderror
+                                     </div>
+
+                                     <div>
+                                         <label for="label"
+                                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Promo Label (e.g. Sale, Hot, Eco)</label>
+                                         <input type="text" id="label" name="label"
+                                             value="{{ old('label', $product->label) }}"
+                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                                         @error('label')
+                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                         @enderror
+                                     </div>
+                                 </div>
+                                 @error('is_active')
+                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                 @enderror
+                                 @error('is_featured')
+                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                 @enderror
+                             </div>
+
+                             <div>
+                                 <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">Logistics & Shipping</h3>
+                                 <div class="grid grid-cols-2 gap-4">
+                                     <div>
+                                         <label for="weight"
+                                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Weight (kg)</label>
+                                         <input type="number" id="weight" name="weight" step="0.001" min="0"
+                                             value="{{ old('weight', $product->weight) }}"
+                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                                         @error('weight')
+                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                         @enderror
+                                     </div>
+                                     <div>
+                                         <label for="length"
+                                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Length (cm)</label>
+                                         <input type="number" id="length" name="length" step="0.1" min="0"
+                                             value="{{ old('length', $product->length) }}"
+                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                                         @error('length')
+                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                         @enderror
+                                     </div>
+                                     <div>
+                                         <label for="width"
+                                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Width (cm)</label>
+                                         <input type="number" id="width" name="width" step="0.1" min="0"
+                                             value="{{ old('width', $product->width) }}"
+                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                                         @error('width')
+                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                         @enderror
+                                     </div>
+                                     <div>
+                                         <label for="height"
+                                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Height (cm)</label>
+                                         <input type="number" id="height" name="height" step="0.1" min="0"
+                                             value="{{ old('height', $product->height) }}"
+                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                                         @error('height')
+                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                         @enderror
+                                     </div>
+                                 </div>
+                             </div>
 
                     <!-- Product Attributes Section -->
                     <div id="attributes-container" class="space-y-4">
@@ -370,6 +534,96 @@
                         @error('specifications')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
+                    </div>
+
+                    <!-- SEO Section -->
+                    <div class="mt-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <button type="button" onclick="this.nextElementSibling.classList.toggle('hidden')"
+                            class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700 text-left">
+                            <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">SEO Settings</h3>
+                            <span class="text-gray-500 text-sm">Click to expand</span>
+                        </button>
+                        <div class="hidden px-4 py-4 space-y-4">
+                            <div>
+                                <label for="meta_title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta Title <span class="text-gray-400 text-xs">(max 160 chars)</span></label>
+                                <input type="text" id="meta_title" name="meta_title" maxlength="160"
+                                    value="{{ old('meta_title', $product->meta_title) }}"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                                @error('meta_title')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="meta_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta Description</label>
+                                <textarea id="meta_description" name="meta_description" rows="2"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">{{ old('meta_description', $product->meta_description) }}</textarea>
+                                @error('meta_description')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="meta_keywords" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meta Keywords <span class="text-gray-400 text-xs">(comma separated)</span></label>
+                                <input type="text" id="meta_keywords" name="meta_keywords"
+                                    value="{{ old('meta_keywords', $product->meta_keywords) }}"
+                                    placeholder="e.g. organic, skincare, moisturizer"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                                @error('meta_keywords')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cross-Category Flexible Fields -->
+                    <div class="mt-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <button type="button" onclick="this.nextElementSibling.classList.toggle('hidden')"
+                            class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700 text-left">
+                            <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">Product Details (Fashion / Natural / Gadget)</h3>
+                            <span class="text-gray-500 text-sm">Click to expand</span>
+                        </button>
+                        <div class="hidden px-4 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="tags" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags <span class="text-gray-400 text-xs">(comma separated)</span></label>
+                                <input type="text" id="tags" name="tags"
+                                    value="{{ old('tags', is_array($product->tags) ? implode(', ', $product->tags) : $product->tags) }}"
+                                    placeholder="e.g. organic, vegan, handmade"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                            </div>
+                            <div>
+                                <label for="origin_country" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Origin Country</label>
+                                <input type="text" id="origin_country" name="origin_country"
+                                    value="{{ old('origin_country', $product->origin_country) }}"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                            </div>
+                            <div>
+                                <label for="material" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Material / Fabric <span class="text-gray-400 text-xs">(Fashion)</span></label>
+                                <input type="text" id="material" name="material"
+                                    value="{{ old('material', $product->material) }}"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                            </div>
+                            <div>
+                                <label for="warranty_info" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Warranty Info <span class="text-gray-400 text-xs">(Gadgets)</span></label>
+                                <input type="text" id="warranty_info" name="warranty_info"
+                                    value="{{ old('warranty_info', $product->warranty_info) }}"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                            </div>
+                            <div>
+                                <label for="certifications" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Certifications <span class="text-gray-400 text-xs">(comma separated)</span></label>
+                                <input type="text" id="certifications" name="certifications"
+                                    value="{{ old('certifications', is_array($product->certifications) ? implode(', ', $product->certifications) : $product->certifications) }}"
+                                    placeholder="e.g. ISO, Organic, Halal"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="ingredients" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ingredients <span class="text-gray-400 text-xs">(Natural Products)</span></label>
+                                <textarea id="ingredients" name="ingredients" rows="3"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">{{ old('ingredients', $product->ingredients) }}</textarea>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="usage_instructions" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Usage Instructions</label>
+                                <textarea id="usage_instructions" name="usage_instructions" rows="3"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">{{ old('usage_instructions', $product->usage_instructions) }}</textarea>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="care_instructions" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Care Instructions <span class="text-gray-400 text-xs">(Fashion)</span></label>
+                                <textarea id="care_instructions" name="care_instructions" rows="2"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">{{ old('care_instructions', $product->care_instructions) }}</textarea>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Form Actions -->
@@ -549,11 +803,24 @@
                     return;
                 }
 
+                // Gather extra dynamic context
+                const price = document.getElementById('price') ? document.getElementById('price').value : '';
+                const discount = document.getElementById('discount') ? document.getElementById('discount').value : '';
+
+                const categoryEl = document.getElementById('category_id');
+                const category = categoryEl && categoryEl.selectedIndex > 0 ? categoryEl.options[categoryEl.selectedIndex].text : '';
+
+                const brandEl = document.getElementById('brand_id');
+                const brand = brandEl && brandEl.selectedIndex > 0 ? brandEl.options[brandEl.selectedIndex].text : '';
+
+                const language = document.getElementById('ai-language').value;
+                const tone = document.getElementById('ai-tone').value;
+                const targetAudience = document.getElementById('ai-audience').value;
+
                 // Show loading state
                 generateButton.innerHTML = 'Generating...';
                 generateButton.disabled = true;
 
-                // Make API request to your Laravel backend
                 fetch('{{ route('admin.products.generate-description') }}', {
                         method: 'POST',
                         headers: {
@@ -561,13 +828,52 @@
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
                         body: JSON.stringify({
-                            product_name: productName
+                            product_name: productName,
+                            price: price,
+                            discount: discount,
+                            category: category,
+                            brand: brand,
+                            language: language,
+                            tone: tone,
+                            target_audience: targetAudience
                         })
                     })
                     .then(response => response.json())
                     .then(data => {
                         if (data.description) {
                             descriptionField.value = data.description;
+                            
+                            // Auto-populate SEO Settings & Product Details
+                            if (data.meta_title && document.getElementById('meta_title')) {
+                                document.getElementById('meta_title').value = data.meta_title;
+                            }
+                            if (data.meta_description && document.getElementById('meta_description')) {
+                                document.getElementById('meta_description').value = data.meta_description;
+                            }
+                            if (data.meta_keywords && document.getElementById('meta_keywords')) {
+                                document.getElementById('meta_keywords').value = data.meta_keywords;
+                            }
+                            if (data.tags && document.getElementById('tags')) {
+                                document.getElementById('tags').value = data.tags;
+                            }
+                            if (data.certifications && document.getElementById('certifications')) {
+                                document.getElementById('certifications').value = data.certifications;
+                            }
+                            if (data.material && document.getElementById('material')) {
+                                document.getElementById('material').value = data.material;
+                            }
+                            if (data.warranty_info && document.getElementById('warranty_info')) {
+                                document.getElementById('warranty_info').value = data.warranty_info;
+                            }
+                            if (data.ingredients && document.getElementById('ingredients')) {
+                                document.getElementById('ingredients').value = data.ingredients;
+                            }
+                            if (data.usage_instructions && document.getElementById('usage_instructions')) {
+                                document.getElementById('usage_instructions').value = data.usage_instructions;
+                            }
+                            if (data.care_instructions && document.getElementById('care_instructions')) {
+                                document.getElementById('care_instructions').value = data.care_instructions;
+                            }
                         } else {
                             alert('Failed to generate description');
                         }
@@ -577,7 +883,6 @@
                         alert('An error occurred while generating the description');
                     })
                     .finally(() => {
-                        // Reset button state
                         generateButton.innerHTML = 'Generate Description';
                         generateButton.disabled = false;
                     });

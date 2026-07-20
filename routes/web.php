@@ -66,7 +66,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/brands', [PublicProductController::class, 'brands'])->name('public.brands');
     Route::get('/categories', [PublicProductController::class, 'categories'])->name('public.categories');
     Route::get('/deals', [PublicProductController::class, 'deals'])->name('public.deals');
-    Route::get('/deals/{deal}', [PublicProductController::class, 'dealShow'])->name('public.deals.show');
+    Route::get('/deals/{deal:slug}', [PublicProductController::class, 'dealShow'])->name('public.deals.show');
 
     // Product reviews
     Route::post('/products/{product}/review', [PublicProductController::class, 'submitReview'])->name('public.products.review.submit');

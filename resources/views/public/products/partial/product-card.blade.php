@@ -6,7 +6,7 @@
             <div class="relative overflow-hidden bg-gray-50 aspect-square">
                 <img src="{{ $product->images->where('is_primary', true)->first()
                     ? Storage::url($product->images->where('is_primary', true)->first()->image_path)
-                    : 'https://placehold.co/400x400?text=No+Image' }}"
+                    : ($product->images->first() ? Storage::url($product->images->first()->image_path) : 'https://placehold.co/400x400?text=No+Image') }}"
                     alt="{{ $product->name }}"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
 

@@ -1,6 +1,6 @@
 <div class="group rounded-3xl border border-emerald-100 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
     <a href="{{ route('public.products.show', $product->slug) }}" class="block overflow-hidden rounded-3xl bg-emerald-50 mb-4">
-        <img src="{{ $product->images->where('is_primary', true)->first() ? Storage::url($product->images->where('is_primary', true)->first()->image_path) : 'https://placehold.co/400x400?text=No+Image' }}"
+        <img src="{{ $product->images->where('is_primary', true)->first() ? Storage::url($product->images->where('is_primary', true)->first()->image_path) : ($product->images->first() ? Storage::url($product->images->first()->image_path) : 'https://placehold.co/400x400?text=No+Image') }}"
             alt="{{ $product->name }}" class="w-full h-56 object-cover transition duration-500 group-hover:scale-105">
     </a>
 

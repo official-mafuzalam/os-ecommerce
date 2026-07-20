@@ -272,6 +272,9 @@ class ProductController extends Controller
     {
         $product = Product::where('slug', $slug)->firstOrFail();
 
+        // Share product globally so components like <x-meta /> can access it
+        view()->share('product', $product);
+
         // Eager load relationships
         $product->load(['category', 'brand', 'attributes', 'reviews.user']);
 

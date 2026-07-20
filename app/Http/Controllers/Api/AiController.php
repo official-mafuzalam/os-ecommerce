@@ -12,23 +12,60 @@ class AiController extends Controller
     public function generateDescription(Request $request)
     {
         $request->validate([
-            'product_name' => 'required|string'
+            'product_name' => 'required|string',
+            'price' => 'nullable|numeric',
+            'discount' => 'nullable|numeric',
+            'category' => 'nullable|string',
+            'brand' => 'nullable|string',
+            'language' => 'nullable|string',
+            'tone' => 'nullable|string',
+            'target_audience' => 'nullable|string'
         ]);
 
         $productName = $request->product_name;
+        $price = $request->price;
+        $discount = $request->discount;
+        $category = $request->category;
+        $brand = $request->brand;
+        $language = $request->language ?? 'English';
+        $tone = $request->tone ?? 'Professional';
+        $audience = $request->target_audience;
 
-        // More concise and clear prompt
-        $prompt = "As a professional e-commerce copywriter, write a complete product description for: '{$productName}'
-    
-    Structure:
-    1. HEADLINE: Catchy title (5-8 words)
-    2. INTRODUCTION: 2-3 engaging sentences about main benefits
-    3. KEY FEATURES: 4-5 bullet points (each: feature + benefit)
-    4. SPECIFICATIONS: Key technical details
-    5. TARGET USERS: Who should buy this
-    6. CALL TO ACTION: Persuasive ending
-    
-    Important: Return ALL 6 sections. Write 250-300 words total. Use plain text with clear section breaks.";
+        // Pricing context
+        $priceInfo = "";
+        if ($price) {
+            $finalPrice = $price - ($discount ?? 0);
+            $priceInfo = "Price: {$finalPrice} (Original: {$price}";
+            if ($discount > 0) {
+                $priceInfo .= ", Discount: {$discount}";
+            }
+            $priceInfo .= ")";
+        }
+
+        // Build a highly optimized marketing prompt requesting structured JSON
+        $prompt = "As an expert copywriter and SEO specialist, write a premium marketing product description and metadata for: '{$productName}'.
+Language: {$language} (Write all text fields in this language).
+Tone: {$tone}
+Category: {$category}
+Brand: {$brand}
+{$priceInfo}
+Target Audience: {$audience}
+
+You MUST return a valid JSON object. Do not include any markdown formatting wrappers or text other than the JSON object itself.
+Use this JSON schema:
+{
+  \"description\": \"Comprehensive premium description containing a headline, benefits, features, target users, and Call To Action.\",
+  \"meta_title\": \"SEO Meta Title (max 60 characters)\",
+  \"meta_description\": \"SEO Meta Description (max 160 characters)\",
+  \"meta_keywords\": \"SEO Meta Keywords (comma separated list)\",
+  \"tags\": \"Relevant tags (comma separated list, e.g. organic, cotton, premium)\",
+  \"certifications\": \"Relevant certifications if applicable (comma separated list, e.g. Organic, ISO, Halal)\",
+  \"material\": \"Material or fabric details if fashion (e.g. 100% Cotton)\",
+  \"warranty_info\": \"Warranty info if gadget (e.g. 1 Year Brand Warranty)\",
+  \"ingredients\": \"Ingredients list if natural/food/cosmetic product\",
+  \"usage_instructions\": \"Usage instructions\",
+  \"care_instructions\": \"Care/maintenance instructions if fashion\"
+}";
 
         $apiKey = null;
         $model = null;
@@ -52,10 +89,11 @@ class AiController extends Controller
                     ]
                 ],
                 'generationConfig' => [
-                    'maxOutputTokens' => 1500, // Increased for full response
-                    'temperature' => 0.8,
+                    'maxOutputTokens' => 1500,
+                    'temperature' => 0.7,
                     'topP' => 0.95,
                     'topK' => 40,
+                    'responseMimeType' => 'application/json'
                 ],
                 'safetySettings' => [
                     ['category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_ONLY_HIGH'],
@@ -69,7 +107,6 @@ class AiController extends Controller
         }
 
         if (!$apiKey) {
-            // Log::error('Gemini API key is not configured.');
             return response()->json(['error' => 'Gemini API key is not configured.'], 500);
         }
 
@@ -77,16 +114,11 @@ class AiController extends Controller
             $response = Http::withHeaders(['Content-Type' => 'application/json'])
                 ->withOptions([
                     'verify' => !app()->environment('local'),
-                    'timeout' => 90, // Increased timeout
+                    'timeout' => 90,
                 ])
                 ->post($url, $postData);
 
             if ($response->failed()) {
-                // Log::error('API request failed', [
-                //     'status' => $response->status(),
-                //     'response' => $response->body()
-                // ]);
-
                 return response()->json([
                     'error' => 'API call failed',
                     'details' => $response->json()['error']['message'] ?? 'Unknown error'
@@ -94,58 +126,65 @@ class AiController extends Controller
             }
 
             $result = $response->json();
-
-            // Debug log
-            // Log::info('API Response', [
-            //     'has_candidates' => isset($result['candidates']),
-            //     'candidate_count' => isset($result['candidates']) ? count($result['candidates']) : 0,
-            //     'finish_reason' => $result['candidates'][0]['finishReason'] ?? 'none',
-            //     'response_keys' => array_keys($result)
-            // ]);
             $description = null;
+            $metaTitle = '';
+            $metaDescription = '';
+            $metaKeywords = '';
+            $tags = '';
+            $certifications = '';
+            $material = '';
+            $warrantyInfo = '';
+            $ingredients = '';
+            $usageInstructions = '';
+            $careInstructions = '';
 
             if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-                $description = trim($result['candidates'][0]['content']['parts'][0]['text']);
-
-                // Check if response is complete
-                if (strlen($description) < 100) {
-                    // Log::warning('Response seems too short', ['length' => strlen($description)]);
-                    // Try to generate a fallback
-                    $description = $this->generateCompleteDescription($productName, $description);
+                $text = trim($result['candidates'][0]['content']['parts'][0]['text']);
+                
+                // Parse JSON response
+                $jsonStr = $text;
+                if (preg_match('/```json\s*(.*?)\s*```/s', $text, $matches)) {
+                    $jsonStr = $matches[1];
+                } elseif (preg_match('/```\s*(.*?)\s*```/s', $text, $matches)) {
+                    $jsonStr = $matches[1];
                 }
-
-            } elseif (isset($result['candidates'][0]['finishReason'])) {
-                $finishReason = $result['candidates'][0]['finishReason'];
-
-                if ($finishReason === 'MAX_TOKENS') {
-                    // Extract whatever text we got
-                    if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-                        $partialText = trim($result['candidates'][0]['content']['parts'][0]['text']);
-                        $description = $this->completePartialDescription($partialText, $productName);
-                    }
-                } elseif ($finishReason === 'SAFETY') {
-                    return response()->json(['error' => 'Content was blocked by safety filters.'], 400);
+                
+                $data = json_decode(trim($jsonStr), true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
+                    $description = $data['description'] ?? '';
+                    $metaTitle = $data['meta_title'] ?? '';
+                    $metaDescription = $data['meta_description'] ?? '';
+                    $metaKeywords = $data['meta_keywords'] ?? '';
+                    $tags = $data['tags'] ?? '';
+                    $certifications = $data['certifications'] ?? '';
+                    $material = $data['material'] ?? '';
+                    $warrantyInfo = $data['warranty_info'] ?? '';
+                    $ingredients = $data['ingredients'] ?? '';
+                    $usageInstructions = $data['usage_instructions'] ?? '';
+                    $careInstructions = $data['care_instructions'] ?? '';
+                } else {
+                    $description = $text;
                 }
             }
 
             if (!$description) {
-                // Generate a fallback description
                 $description = $this->generateFallbackDescription($productName);
             }
 
-            // Log::info('AI Description Generated', [
-            //     'product_name' => $productName,
-            //     'api' => $apiName,
-            //     'model' => $model,
-            //     'description_length' => strlen($description)
-            // ]);
-
-            return response()->json(['description' => $description]);
-
+            return response()->json([
+                'description' => $description,
+                'meta_title' => $metaTitle,
+                'meta_description' => $metaDescription,
+                'meta_keywords' => $metaKeywords,
+                'tags' => $tags,
+                'certifications' => $certifications,
+                'material' => $material,
+                'warranty_info' => $warrantyInfo,
+                'ingredients' => $ingredients,
+                'usage_instructions' => $usageInstructions,
+                'care_instructions' => $careInstructions
+            ]);
         } catch (\Exception $e) {
-            // Log::error('AI Description Generation Failed: ' . $e->getMessage());
-
-            // Generate fallback on exception
             $fallbackDescription = $this->generateFallbackDescription($productName);
 
             return response()->json([

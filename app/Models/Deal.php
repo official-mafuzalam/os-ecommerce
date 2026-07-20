@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 
 class Deal extends Model
 {
@@ -18,6 +19,7 @@ class Deal extends Model
      */
     protected $fillable = [
         'title',
+        'slug',
         'description',
         'discount_text',
         'discount_percentage',
@@ -32,6 +34,34 @@ class Deal extends Model
         'ends_at',
         'priority',
     ];
+
+    /**
+     * Auto-generate slug from title on create.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+        static::creating(function ($deal) {
+            if (empty($deal->slug)) {
+                $deal->slug = static::generateUniqueSlug($deal->title);
+            }
+        });
+    }
+
+    /**
+     * Generate a unique slug.
+     */
+    public static function generateUniqueSlug(string $title): string
+    {
+        $base = Str::slug($title);
+        $slug = $base;
+        $i = 1;
+        while (static::where('slug', $slug)->exists()) {
+            $slug = $base . '-' . $i++;
+        }
+        return $slug;
+    }
+
 
     /**
      * The attributes that should be cast.

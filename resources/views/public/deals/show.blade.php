@@ -313,7 +313,7 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         @foreach ($relatedDeals as $relatedDeal)
-                            <a href="{{ route('public.deals.show', $relatedDeal->id) }}"
+                            <a href="{{ route('public.deals.show', $relatedDeal->slug) }}"
                                 class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
                                 <!-- Deal Image -->
                                 <div class="relative aspect-video overflow-hidden">

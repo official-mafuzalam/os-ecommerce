@@ -1,322 +1,288 @@
 <x-app-layout>
-    @section('title', setting('site_name', 'OS Ecommerce') . ' | Our Brands')
+    @section('title', 'Shop by Brand | ' . setting('site_name', 'OS Ecommerce'))
 
     @push('styles')
         <style>
-            .material-symbols-outlined {
-                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-                vertical-align: middle;
-            }
-
-            .brand-card-hover {
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .brand-card-hover:hover {
-                transform: translateY(-8px);
-                box-shadow: 0 20px 40px rgba(0, 69, 37, 0.08);
-            }
-
-            .glass-effect {
+            .glass-nav {
                 backdrop-filter: blur(12px);
-                background-color: rgba(252, 249, 242, 0.7);
+                background: rgba(252, 249, 242, 0.7);
             }
 
-            ::-webkit-scrollbar {
-                width: 6px;
+            .brand-card:hover .card-image {
+                transform: scale(1.05);
             }
 
-            ::-webkit-scrollbar-track {
-                background: transparent;
+            .custom-scrollbar::-webkit-scrollbar {
+                height: 4px;
             }
 
-            ::-webkit-scrollbar-thumb {
-                background: #c0c9bf;
+            .custom-scrollbar::-webkit-scrollbar-track {
+                background: #f0eee7;
+            }
+
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: #4c3800;
                 border-radius: 10px;
+            }
+            
+            .reveal-item {
+                transition: opacity 0.6s ease-out, transform 0.6s ease-out;
             }
         </style>
     @endpush
 
     <x-slot name="main">
-        <div class="pb-xl">
-            <!-- Hero Section -->
-            <section class="bg-[#F8F5EE] py-xl px-margin-mobile md:px-margin-desktop overflow-hidden relative">
-                <div class="max-w-container-max mx-auto relative z-10">
-                    <!-- Breadcrumb -->
-                    <nav aria-label="Breadcrumb" class="flex mb-md">
-                        <ol class="flex items-center space-x-2 text-on-surface-variant font-label-md text-label-md">
-                            <li><a class="hover:text-primary transition-colors"
-                                    href="{{ route('public.welcome') }}">Home</a>
-                            </li>
-                            <li><span class="material-symbols-outlined text-sm">chevron_right</span></li>
-                            <li class="text-primary font-bold">Brands</li>
-                        </ol>
-                    </nav>
-                    <div class="max-w-3xl">
-                        <h1 class="font-display-lg text-display-lg mb-sm text-primary">Our Trusted Brands</h1>
-                        <p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
-                            Discover carefully selected wellness brands committed to quality, purity, and natural
-                            nutrition.
-                            Every partner in our ecosystem is chosen for their artisanal precision and ethical
-                            standards.
-                        </p>
+        <!-- Hero Section -->
+        <section class="relative pt-xl pb-lg px-gutter overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                <div class="absolute top-1/4 -right-20 w-96 h-96 border border-tertiary rounded-full blur-3xl opacity-20"></div>
+                <div class="absolute -bottom-20 -left-20 w-80 h-80 border border-primary rounded-full blur-3xl opacity-10"></div>
+            </div>
+            <div class="max-w-container-max mx-auto text-center relative z-10">
+                <span class="font-label-md text-label-md text-tertiary uppercase tracking-widest mb-4 block">Our Partners</span>
+                <h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary mb-6">Shop by Brand</h1>
+                <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
+                    Discover carefully selected wellness brands committed to quality, purity, and natural nutrition.
+                </p>
+            </div>
+        </section>
+
+        <!-- Featured Brands Carousel (Trending Now) -->
+        @if (isset($featuredBrands) && $featuredBrands->count() > 0)
+            <section class="py-lg px-gutter max-w-container-max mx-auto">
+                <div class="flex items-end justify-between mb-md">
+                    <h2 class="font-headline-md text-headline-md text-primary">Featured Partners</h2>
+                    <div class="flex gap-xs">
+                        <button
+                            class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:border-tertiary hover:text-tertiary transition-all"
+                            id="trending-prev">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        <button
+                            class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:border-tertiary hover:text-tertiary transition-all"
+                            id="trending-next">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
                     </div>
                 </div>
-                <!-- Decorative botanical element -->
-                <div class="absolute -right-20 -bottom-20 opacity-10 pointer-events-none">
-                    <span class="material-symbols-outlined text-[300px] text-primary">eco</span>
-                </div>
-            </section>
-
-            <!-- Search & Alphabet Filter -->
-            <section class="py-lg px-margin-mobile md:px-margin-desktop border-b border-surface-variant">
-                <div class="max-w-container-max mx-auto flex flex-col items-center">
-                    <div class="w-full max-w-xl relative group mb-lg">
-                        <span
-                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
-                        <input id="brand-search"
-                            class="w-full pl-12 pr-4 py-4 bg-surface-container-lowest border-none rounded-xl shadow-sm ring-1 ring-outline-variant focus:ring-2 focus:ring-primary transition-all font-body-md placeholder:text-outline-variant"
-                            placeholder="Search brands by name..." type="text" />
-                    </div>
-                    @if ($brands->count() > 0)
-                        <div class="flex flex-wrap justify-center gap-sm md:gap-md">
-                            <button data-letter="all"
-                                class="letter-btn w-10 h-10 rounded-full flex items-center justify-center font-label-md bg-primary text-white shadow-md">All</button>
-                            @foreach (range('A', 'Z') as $letter)
-                                <button data-letter="{{ $letter }}"
-                                    class="letter-btn w-10 h-10 rounded-full flex items-center justify-center font-label-md text-on-surface-variant hover:bg-primary-fixed hover:text-on-primary-fixed transition-all cursor-pointer
-                                    {{ $brands->where('name', 'LIKE', $letter . '%')->count() === 0 ? 'opacity-30 cursor-default' : '' }}">
-                                    {{ $letter }}
-                                </button>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-            </section>
-
-            <!-- Featured Brands Section -->
-            @if ($featuredBrands->count() > 0)
-                <section class="py-xl px-margin-mobile md:px-margin-desktop">
-                    <div class="max-w-container-max mx-auto">
-                        <div class="flex justify-between items-end mb-lg">
-                            <div>
-                                <span
-                                    class="font-label-md text-label-md text-tertiary uppercase tracking-widest block mb-xs">Curation</span>
-                                <h2 class="font-headline-lg text-headline-lg text-primary">Featured Partners</h2>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-                            @foreach ($featuredBrands->take(3) as $brand)
-                                <a href="{{ route('public.products', ['brand' => $brand->slug]) }}"
-                                    class="group relative overflow-hidden rounded-[24px] bg-surface-container-low p-base block">
-                                    <div
-                                        class="aspect-[4/5] rounded-[20px] overflow-hidden mb-md relative bg-surface-container-high flex items-center justify-center">
-                                        @if ($brand->logo)
-                                            <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                src="{{ Storage::url($brand->logo) }}" alt="{{ $brand->name }}" />
-                                        @else
-                                            <span
-                                                class="material-symbols-outlined text-[80px] text-primary/20">spa</span>
-                                        @endif
-                                        <div
-                                            class="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-md">
-                                            <span class="text-white font-label-md flex items-center gap-xs">
-                                                View Collection <span
-                                                    class="material-symbols-outlined">arrow_outward</span>
-                                            </span>
-                                        </div>
+                <div class="flex gap-md overflow-x-auto pb-6 custom-scrollbar snap-x" id="trending-carousel">
+                    @foreach ($featuredBrands as $featured)
+                        <div class="flex-none w-64 snap-start">
+                            <a href="{{ route('public.products', ['brand' => $featured->slug]) }}"
+                                class="group cursor-pointer block">
+                                <div class="aspect-[4/5] rounded-[24px] overflow-hidden mb-4 bg-surface-container shadow-sm group-hover:shadow-md transition-all duration-500">
+                                    <div class="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                                        style="background-image: url('{{ $featured->logo ? Storage::url($featured->logo) : 'https://placehold.co/400x500?text=' . urlencode($featured->name) }}')">
                                     </div>
-                                    <div class="px-sm pb-sm">
-                                        <h3 class="font-headline-md text-headline-md text-primary mb-xs">
-                                            {{ $brand->name }}</h3>
-                                        @if ($brand->description)
-                                            <p
-                                                class="font-body-md text-body-md text-on-surface-variant mb-md line-clamp-2">
-                                                {{ $brand->description }}</p>
-                                        @endif
-                                        <div
-                                            class="flex justify-between items-center border-t border-outline-variant pt-sm">
-                                            <span
-                                                class="font-label-md text-label-md text-tertiary">{{ $brand->products_count }}
-                                                Products</span>
-                                            <span
-                                                class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full text-[10px] font-bold tracking-tighter uppercase">Featured</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                </section>
-            @endif
-
-            <!-- Brand Directory Grid -->
-            <section class="py-xl px-margin-mobile md:px-margin-desktop bg-surface-container-lowest">
-                <div class="max-w-container-max mx-auto">
-                    <div class="mb-lg">
-                        <h2 class="font-headline-lg text-headline-lg text-primary text-center">Directory of Excellence
-                        </h2>
-                    </div>
-
-                    @forelse ($brands as $brand)
-                        <div class="brand-card-item" data-name="{{ strtolower($brand->name) }}">
-                        @empty
-                    @endforelse
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter" id="brands-grid">
-                        @forelse ($brands as $brand)
-                            <div class="brand-card-item brand-card-hover bg-surface border border-outline-variant/30 p-md rounded-[24px] transition-all duration-300 flex flex-col h-full"
-                                data-name="{{ strtolower($brand->name) }}">
-                                <div
-                                    class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-md overflow-hidden flex-shrink-0">
-                                    @if ($brand->logo)
-                                        <img src="{{ Storage::url($brand->logo) }}" alt="{{ $brand->name }}"
-                                            class="max-h-12 max-w-full object-contain" />
-                                    @else
-                                        <span
-                                            class="font-headline-md text-[24px] text-primary">{{ substr($brand->name, 0, 1) }}</span>
-                                    @endif
                                 </div>
-                                <h4 class="font-headline-md text-[24px] text-primary mb-xs">{{ $brand->name }}</h4>
+                                <h3 class="font-headline-md text-[20px] text-primary">{{ $featured->name }}</h3>
+                                <p class="text-caption text-on-surface-variant uppercase tracking-tighter">{{ $featured->products_count ?? 0 }} Products</p>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        <!-- Main Brand Grid & Filters -->
+        <section class="py-xl bg-surface-container-low px-gutter">
+            <div class="max-w-container-max mx-auto">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-xl gap-md">
+                    <div class="max-w-xl">
+                        <h2 class="font-headline-lg text-headline-lg text-primary mb-4">Directory of Excellence</h2>
+                        <p class="font-body-md text-body-md text-on-surface-variant">Search or filter our trusted wellness partners who supply our premium ecosystem.</p>
+                    </div>
+                    
+                    <!-- Search Input -->
+                    <div class="w-full max-w-xs relative">
+                        <input id="brand-search"
+                            class="w-full pl-10 pr-4 py-2 bg-surface border border-outline rounded-xl focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body-md placeholder:text-outline-variant text-sm"
+                            placeholder="Search brands..." type="text" />
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-base">search</span>
+                    </div>
+                </div>
+
+                <!-- Alphabet Filter -->
+                @if ($brands->count() > 0)
+                    <div class="flex flex-wrap justify-center gap-xs mb-xl">
+                        <button data-letter="all"
+                            class="letter-btn px-4 py-2 rounded-full font-label-md text-xs bg-primary text-white shadow-sm transition-all">All</button>
+                        @foreach (range('A', 'Z') as $letter)
+                            <button data-letter="{{ $letter }}"
+                                class="letter-btn px-3 py-2 rounded-full font-label-md text-xs text-on-surface-variant hover:bg-primary-fixed hover:text-on-primary-fixed transition-all cursor-pointer">
+                                {{ $letter }}
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md md:gap-lg" id="brands-grid">
+                    @forelse($brands as $brand)
+                        <div class="brand-card group bg-surface rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-surface-variant flex flex-col h-full opacity-0 translate-y-10 reveal-item"
+                             data-name="{{ strtolower($brand->name) }}">
+                            <div class="relative h-48 bg-surface-container-high overflow-hidden flex items-center justify-center p-md">
+                                @if ($brand->logo)
+                                    <img src="{{ Storage::url($brand->logo) }}" alt="{{ $brand->name }}"
+                                         class="max-h-24 max-w-full object-contain transition-transform duration-700 group-hover:scale-110" />
+                                @else
+                                    <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-700">
+                                        <span class="font-headline-md text-xl font-bold">{{ substr($brand->name, 0, 1) }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="p-md flex flex-col flex-grow">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-headline-md text-[20px] text-primary truncate max-w-[70%]">{{ $brand->name }}</h3>
+                                    <span class="text-caption text-tertiary-container font-bold bg-tertiary-fixed px-2 py-0.5 rounded-full text-xs whitespace-nowrap">
+                                        {{ $brand->products_count ?? 0 }} Products
+                                    </span>
+                                </div>
                                 @if ($brand->description)
-                                    <p
-                                        class="font-body-md text-body-md text-on-surface-variant mb-lg flex-grow line-clamp-2">
+                                    <p class="text-body-md text-on-surface-variant mb-6 line-clamp-2">
                                         {{ $brand->description }}</p>
                                 @else
-                                    <p
-                                        class="font-body-md text-body-md text-on-surface-variant mb-lg flex-grow opacity-50">
-                                        Wellness partner</p>
+                                    <p class="text-body-md text-on-surface-variant mb-6 line-clamp-2">Premium wellness partner supplying certified organic goods.</p>
                                 @endif
-                                <div class="flex flex-col gap-sm mt-auto">
-                                    <span class="font-label-md text-label-md text-outline">{{ $brand->products_count }}
-                                        Products</span>
+
+                                <div class="mt-auto">
                                     <a href="{{ route('public.products', ['brand' => $brand->slug]) }}"
-                                        class="w-full h-12 border border-primary text-primary rounded-xl font-label-md hover:bg-primary hover:text-white transition-all active:scale-95 flex items-center justify-center">
-                                        View Products
+                                        class="w-full h-12 flex items-center justify-center gap-2 border border-primary text-primary rounded-xl font-label-md uppercase tracking-wider group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                                        Explore <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                                     </a>
                                 </div>
                             </div>
-                        @empty
-                            <div class="col-span-full text-center py-xl">
-                                <span
-                                    class="material-symbols-outlined text-[80px] text-outline/30 block mb-md">spa</span>
-                                <h3 class="font-headline-md text-headline-md text-primary mb-sm">No Brands Available
-                                </h3>
-                                <p class="font-body-md text-on-surface-variant mb-lg">Our brand catalog is being
-                                    updated. Check back soon.</p>
-                                <a href="{{ route('public.products') }}"
-                                    class="inline-flex items-center gap-xs font-label-md text-primary border border-primary px-md py-sm rounded-xl hover:bg-primary hover:text-white transition-all">
-                                    <span class="material-symbols-outlined text-[18px]">store</span>
-                                    Browse All Products
-                                </a>
-                            </div>
-                        @endforelse
-                    </div>
-
-                    <!-- Pagination -->
-                    @if ($brands->hasPages())
-                        <div class="mt-xl flex justify-center">
-                            {{ $brands->links() }}
                         </div>
-                    @endif
+                    @empty
+                        <div class="col-span-full py-12 text-center">
+                            <div class="w-20 h-20 rounded-full bg-surface text-on-surface-variant flex items-center justify-center mx-auto mb-6">
+                                <span class="material-symbols-outlined text-4xl">spa</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-primary mb-4">No Brands Available</h3>
+                            <p class="text-on-surface-variant mb-8 max-w-md mx-auto">
+                                Our brands catalog is being updated. Please check back soon.
+                            </p>
+                        </div>
+                    @endforelse
                 </div>
-            </section>
 
-            <!-- Newsletter Section -->
-            <section
-                class="py-xl px-margin-mobile md:px-margin-desktop bg-primary text-on-primary relative overflow-hidden">
-                <div class="max-w-container-max mx-auto text-center relative z-10">
-                    <span class="font-label-md tracking-widest uppercase mb-md block">Community</span>
-                    <h2 class="font-display-lg text-display-lg mb-md">Join the Vitality Circle</h2>
-                    <p class="max-w-xl mx-auto font-body-lg text-body-lg opacity-80 mb-xl">
-                        Be the first to discover new brand arrivals, exclusive seasonal harvests, and ancient wellness
-                        wisdom delivered to your inbox.
-                    </p>
-                    <form class="flex flex-col md:flex-row gap-base max-w-lg mx-auto"
-                        action="{{ route('public.subscribe') }}" method="POST">
-                        @csrf
-                        <input name="email" type="email"
-                            class="flex-grow h-14 px-6 rounded-xl bg-white/10 border border-white/20 focus:bg-white/20 focus:ring-2 focus:ring-tertiary-fixed outline-none text-white placeholder:text-white/50 transition-all"
-                            placeholder="Your email address" />
-                        <button type="submit"
-                            class="h-14 px-8 bg-tertiary-fixed text-on-tertiary-fixed font-bold rounded-xl hover:bg-tertiary-fixed-dim transition-all active:scale-95">
-                            Subscribe
-                        </button>
-                    </form>
+                @if ($brands->hasPages())
+                    <div class="mt-12 flex justify-center">
+                        {{ $brands->links() }}
+                    </div>
+                @endif
+            </div>
+        </section>
+
+        <!-- Newsletter Section -->
+        <section class="bg-surface-container py-xl px-gutter relative overflow-hidden">
+            <div class="max-w-3xl mx-auto text-center relative z-10">
+                <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="material-symbols-outlined text-[40px] text-primary">volunteer_activism</span>
                 </div>
-                <!-- Decorative circles -->
-                <div class="absolute -top-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
-                <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
-            </section>
-
-        </div>
+                <h2 class="font-headline-lg text-headline-lg text-primary mb-4">Join the Vitality Circle</h2>
+                <p class="font-body-md text-body-md text-on-surface-variant mb-md">Subscribe to receive seasonal wellness guides, early access to new harvests, and 10% off your first order.</p>
+                <form class="flex flex-col md:flex-row gap-4 max-w-lg mx-auto" action="{{ route('public.subscribe') }}" method="POST">
+                    @csrf
+                    <input name="email"
+                        class="flex-grow bg-white border-0 border-b-2 border-outline-variant focus:border-tertiary focus:ring-0 px-4 py-4 text-body-md rounded-lg shadow-sm"
+                        placeholder="Your Email Address" required="" type="email" />
+                    <button
+                        class="bg-primary text-white font-label-md uppercase tracking-widest px-8 py-4 rounded-xl hover:bg-primary-container transition-all shadow-md active:scale-95"
+                        type="submit">
+                        Subscribe
+                    </button>
+                </form>
+            </div>
+            <!-- Botanical decoration -->
+            <div class="absolute -bottom-10 -right-10 w-64 h-64 opacity-5 pointer-events-none transform rotate-12">
+                <span class="material-symbols-outlined text-[200px]">eco</span>
+            </div>
+        </section>
     </x-slot>
 
     @push('scripts')
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const letterBtns = document.querySelectorAll('.letter-btn');
-                const brandCards = document.querySelectorAll('.brand-card-item');
-                const searchInput = document.getElementById('brand-search');
+            // Simple scroll behavior for the Carousel
+            const carousel = document.getElementById('trending-carousel');
+            const nextBtn = document.getElementById('trending-next');
+            const prevBtn = document.getElementById('trending-prev');
 
-                // Letter filter
-                letterBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const letter = btn.dataset.letter;
-
-                        letterBtns.forEach(b => {
-                            b.classList.remove('bg-primary', 'text-white', 'shadow-md');
-                            b.classList.add('text-on-surface-variant');
-                        });
-                        btn.classList.add('bg-primary', 'text-white', 'shadow-md');
-                        btn.classList.remove('text-on-surface-variant');
-
-                        brandCards.forEach(card => {
-                            const name = card.dataset.name || '';
-                            if (letter === 'all') {
-                                card.style.display = '';
-                            } else {
-                                card.style.display = name.startsWith(letter.toLowerCase()) ?
-                                    '' : 'none';
-                            }
-                        });
-
-                        if (searchInput) searchInput.value = '';
+            if (nextBtn && carousel) {
+                nextBtn.addEventListener('click', () => {
+                    carousel.scrollBy({
+                        left: 300,
+                        behavior: 'smooth'
                     });
                 });
+            }
+            if (prevBtn && carousel) {
+                prevBtn.addEventListener('click', () => {
+                    carousel.scrollBy({
+                        left: -300,
+                        behavior: 'smooth'
+                    });
+                });
+            }
 
-                // Search filter
-                if (searchInput) {
-                    searchInput.addEventListener('input', function() {
-                        const query = this.value.toLowerCase();
+            // Interactive Search & Alphabetical Filter logic
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('brand-search');
+                const letterBtns = document.querySelectorAll('.letter-btn');
+                const brandCards = document.querySelectorAll('.brand-card');
 
-                        // Reset letter filter
-                        letterBtns.forEach(b => {
-                            b.classList.remove('bg-primary', 'text-white', 'shadow-md');
-                            b.classList.add('text-on-surface-variant');
-                        });
-                        const allBtn = document.querySelector('[data-letter="all"]');
-                        if (allBtn) {
-                            allBtn.classList.add('bg-primary', 'text-white', 'shadow-md');
-                            allBtn.classList.remove('text-on-surface-variant');
+                function filterBrands() {
+                    const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+                    const activeBtn = document.querySelector('.letter-btn.bg-primary');
+                    const letter = activeBtn ? activeBtn.dataset.letter.toLowerCase() : 'all';
+
+                    brandCards.forEach(card => {
+                        const name = card.dataset.name || '';
+                        const matchesSearch = name.includes(query);
+                        const matchesLetter = (letter === 'all' || name.startsWith(letter));
+
+                        if (matchesSearch && matchesLetter) {
+                            card.style.display = 'flex';
+                        } else {
+                            card.style.display = 'none';
                         }
-
-                        brandCards.forEach(card => {
-                            const name = card.dataset.name || '';
-                            card.style.display = name.includes(query) ? '' : 'none';
-                        });
                     });
                 }
 
-                // Stagger animation on cards
-                brandCards.forEach((card, i) => {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(20px)';
-                    setTimeout(() => {
-                        card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0)';
-                    }, i * 50);
+                if (searchInput) {
+                    searchInput.addEventListener('input', filterBrands);
+                }
+
+                letterBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        letterBtns.forEach(b => {
+                            b.classList.remove('bg-primary', 'text-white', 'shadow-sm');
+                            b.classList.add('text-on-surface-variant');
+                        });
+                        btn.classList.add('bg-primary', 'text-white', 'shadow-sm');
+                        btn.classList.remove('text-on-surface-variant');
+                        filterBrands();
+                    });
+                });
+
+                // Intersection Observer for scroll animations
+                const observerOptions = {
+                    threshold: 0.05,
+                    rootMargin: "0px 0px -50px 0px"
+                };
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('opacity-100', 'translate-y-0');
+                            entry.target.classList.remove('opacity-0', 'translate-y-10');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, observerOptions);
+
+                document.querySelectorAll('.reveal-item').forEach((el, index) => {
+                    el.style.transitionDelay = `${index * 0.05}s`;
+                    observer.observe(el);
                 });
             });
         </script>

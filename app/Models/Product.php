@@ -16,12 +16,38 @@ class Product extends Model
         'slug',
         'sku',
         'description',
+        'short_description',
         'buy_price',
         'price',
         'discount',
         'stock_quantity',
+        'low_stock_threshold',
         'is_active',
         'is_featured',
+        'is_new_arrival',
+        'is_bestseller',
+        'published_at',
+        'views_count',
+        'sales_count',
+        'min_order_quantity',
+        'max_order_quantity',
+        'meta_title',
+        'meta_description',
+        'meta_keywords',
+        'og_image',
+        'weight',
+        'length',
+        'width',
+        'height',
+        'tags',
+        'label',
+        'ingredients',
+        'usage_instructions',
+        'warranty_info',
+        'origin_country',
+        'certifications',
+        'material',
+        'care_instructions',
         'category_id',
         'brand_id',
         'specifications'
@@ -29,10 +55,20 @@ class Product extends Model
 
     protected $casts = [
         'specifications' => 'array',
+        'tags' => 'array',
+        'certifications' => 'array',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
+        'is_new_arrival' => 'boolean',
+        'is_bestseller' => 'boolean',
         'price' => 'decimal:2',
         'discount' => 'decimal:2',
+        'buy_price' => 'decimal:2',
+        'weight' => 'decimal:3',
+        'length' => 'decimal:2',
+        'width' => 'decimal:2',
+        'height' => 'decimal:2',
+        'published_at' => 'datetime',
     ];
 
     protected $appends = ['final_price', 'discount_percentage', 'average_rating', 'reviews_count'];
@@ -136,6 +172,16 @@ class Product extends Model
         return $this->images()->where('is_primary', true)->first() ?? $this->images()->first();
     }
 
+    public function getSeoTitleAttribute()
+    {
+        return $this->meta_title ?: $this->name;
+    }
+
+    public function getSeoDescriptionAttribute()
+    {
+        return $this->meta_description ?: Str::limit(strip_tags($this->short_description ?: $this->description), 160);
+    }
+
     // Scopes
     public function scopeActive($query)
     {
@@ -160,6 +206,30 @@ class Product extends Model
     public function scopeWithDiscount($query)
     {
         return $query->whereNotNull('discount')->where('discount', '>', 0);
+    }
+
+    public function scopePublished($query)
+    {
+        return $query->where('is_active', true)
+            ->where(function ($q) {
+                $q->whereNull('published_at')
+                    ->orWhere('published_at', '<=', now());
+            });
+    }
+
+    public function scopeNewArrivals($query)
+    {
+        return $query->where('is_new_arrival', true);
+    }
+
+    public function scopeBestsellers($query)
+    {
+        return $query->where('is_bestseller', true);
+    }
+
+    public function scopeLowStock($query)
+    {
+        return $query->whereRaw('stock_quantity <= low_stock_threshold');
     }
 
     // Methods
