@@ -84,26 +84,4 @@ class SettingController extends Controller
             ->with('success', 'Settings updated successfully.');
     }
 
-    public function homepageSections()
-    {
-        $layoutSetting = Setting::where('key', 'default_layout_type')->first();
-
-        return view('admin.settings.homepage_sections', compact('layoutSetting'));
-    }
-
-    public function updateHomepageSections(Request $request)
-    {
-        $request->validate([
-            'default_layout_type' => 'required|in:layout1,layout2',
-        ]);
-
-        Setting::updateOrCreate(
-            ['key' => 'default_layout_type', 'group' => 'general'],
-            ['value' => $request->default_layout_type]
-        );
-        Cache::flush();
-        return redirect()->back()->with('success', 'Layout updated successfully!');
-    }
-
-
 }

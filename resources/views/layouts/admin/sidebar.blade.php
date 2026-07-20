@@ -324,7 +324,6 @@
                     'admin.carousels.index',
                     'admin.carousels.create',
                     'admin.carousels.edit',
-                    'admin.settings.homepage-sections',
                 ])
                     ? 'hs-accordion-active'
                     : '' }}"
@@ -351,20 +350,13 @@
                         </svg>
                     </a>
                     <div id="settings-accordion-sub"
-                        class="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 {{ in_array(Route::currentRouteName(), ['admin.settings.index', 'admin.carousels.index', 'admin.carousels.create', 'admin.carousels.edit', 'admin.settings.homepage-sections']) ? 'block' : 'hidden' }}">
+                        class="hs-accordion-content w-full overflow-hidden transition-[height] duration-300 {{ in_array(Route::currentRouteName(), ['admin.settings.index', 'admin.carousels.index', 'admin.carousels.create', 'admin.carousels.edit']) ? 'block' : 'hidden' }}">
                         <ul class="pt-2 pl-2">
                             <li>
                                 <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-slate-700 rounded-md hover:bg-gray-100 dark:bg-gray-800 dark:text-white 
                                     {{ in_array(Route::currentRouteName(), ['admin.settings.index']) ? 'bg-gray-200 dark:bg-gray-900' : 'text-slate-700' }}"
                                     href="{{ route('admin.settings.index') }}">
                                     General
-                                </a>
-                            </li>
-                            <li>
-                                <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-slate-700 rounded-md hover:bg-gray-100 dark:bg-gray-800 dark:text-white 
-                                    {{ in_array(Route::currentRouteName(), ['admin.settings.homepage-sections']) ? 'bg-gray-200 dark:bg-gray-900' : 'text-slate-700' }}"
-                                    href="{{ route('admin.settings.homepage-sections') }}">
-                                    Hero Layout
                                 </a>
                             </li>
                             <li>

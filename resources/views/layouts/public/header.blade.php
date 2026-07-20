@@ -22,13 +22,13 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Elegant Fonts for Fashion E-commerce -->
+    <!-- Theme fonts for fashion and natural products -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Montserrat for headings, Playfair Display for elegance, Inter for body -->
+    <!-- Playfair Display + Montserrat + Inter for fashion, Merriweather + Work Sans for natural products -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Merriweather:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Preload critical assets -->
@@ -52,6 +52,39 @@
             --color-accent: #F59E0B;
             --color-light: #F9FAFB;
             --color-dark: #1F2937;
+            --nav-bg: rgba(255, 255, 255, 0.95);
+            --nav-border: rgba(0, 0, 0, 0.05);
+            --btn-bg: var(--color-primary);
+            --btn-outline-text: var(--color-primary);
+            --card-border: rgba(0, 0, 0, 0.05);
+            --hero-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --hero-text: white;
+            --newsletter-bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --footer-bg: var(--color-primary);
+            --footer-text: white;
+            --overlay-bg: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+        }
+
+        body.theme-natural {
+            --font-elegant: 'Merriweather', serif;
+            --font-heading: 'Work Sans', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --color-primary: #1f4c2f;
+            --color-secondary: #6b8e23;
+            --color-accent: #a7c957;
+            --color-light: #f5faf0;
+            --color-dark: #11331e;
+            --nav-bg: rgba(245, 248, 238, 0.95);
+            --nav-border: rgba(30, 70, 32, 0.08);
+            --btn-bg: #1f4c2f;
+            --btn-outline-text: #1f4c2f;
+            --card-border: rgba(30, 70, 32, 0.08);
+            --hero-bg: linear-gradient(135deg, #e4f4e1 0%, #b0d2a4 100%);
+            --hero-text: #0f2a15;
+            --newsletter-bg: linear-gradient(135deg, #eff7ec 0%, #d4e8c9 100%);
+            --footer-bg: #16391f;
+            --footer-text: #f7faf7;
+            --overlay-bg: linear-gradient(to top, rgba(20, 50, 20, 0.85), transparent);
         }
 
         * {
@@ -99,14 +132,14 @@
 
         /* Fashion Navigation */
         .fashion-nav {
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--nav-bg);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid var(--nav-border);
             transition: all 0.3s ease;
         }
 
         .fashion-nav.scrolled {
-            background: rgba(255, 255, 255, 0.98);
+            background: var(--nav-bg);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
         }
 
@@ -140,13 +173,24 @@
         .fashion-btn {
             padding: 0.75rem 1.5rem;
             border: none;
-            background: var(--color-primary);
+            background: var(--btn-bg);
             color: white;
             font-weight: 500;
             letter-spacing: 0.05em;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+        }
+
+        .fashion-btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--btn-outline-text);
+            color: var(--btn-outline-text);
+        }
+
+        .fashion-btn-outline:hover {
+            background: var(--btn-bg);
+            color: white;
         }
 
         .fashion-btn:hover {
@@ -171,7 +215,7 @@
             border-radius: 12px;
             overflow: hidden;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--card-border);
             position: relative;
         }
 
@@ -256,7 +300,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            background: var(--overlay-bg);
             color: white;
             padding: 1.5rem;
             transform: translateY(100%);
@@ -339,8 +383,8 @@
 
         /* Fashion Hero Section */
         .fashion-hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: var(--hero-bg);
+            color: var(--hero-text);
             padding: 6rem 0;
             position: relative;
             overflow: hidden;
@@ -360,7 +404,7 @@
 
         /* Fashion Newsletter */
         .fashion-newsletter {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: var(--newsletter-bg);
             padding: 4rem 0;
         }
 
@@ -389,6 +433,71 @@
             }
         }
 
+        /* Natural theme utility overrides */
+        body.theme-natural .text-indigo-600 {
+            color: #2f5f2a !important;
+        }
+
+        body.theme-natural .hover\:text-indigo-800:hover {
+            color: #254f26 !important;
+        }
+
+        body.theme-natural .bg-indigo-600 {
+            background-color: #1f4c2f !important;
+        }
+
+        body.theme-natural .hover\:bg-indigo-700:hover {
+            background-color: #1b4127 !important;
+        }
+
+        body.theme-natural .from-indigo-50 {
+            --tw-gradient-from: #eff7ec !important;
+        }
+
+        body.theme-natural .to-purple-50 {
+            --tw-gradient-to: #e2f1db !important;
+        }
+
+        body.theme-natural .bg-gray-50 {
+            background-color: #f5faf0 !important;
+        }
+
+        body.theme-natural .bg-gray-100 {
+            background-color: #eef4e8 !important;
+        }
+
+        body.theme-natural .border-gray-100 {
+            border-color: rgba(30, 70, 32, 0.15) !important;
+        }
+
+        body.theme-natural .text-gray-900 {
+            color: #11331e !important;
+        }
+
+        body.theme-natural .text-gray-600 {
+            color: #4a5d43 !important;
+        }
+
+        body.theme-natural .text-gray-700 {
+            color: #2a4230 !important;
+        }
+
+        body.theme-natural .bg-white {
+            background-color: #f7faf4 !important;
+        }
+
+        body.theme-natural .bg-white\/20 {
+            background-color: rgba(247, 250, 244, 0.8) !important;
+        }
+
+        body.theme-natural .bg-white\/90 {
+            background-color: rgba(247, 250, 244, 0.9) !important;
+        }
+
+        body.theme-natural .bg-white\/20:hover {
+            background-color: rgba(247, 250, 244, 1) !important;
+        }
+
         /* Fashion Animations */
         @keyframes fadeInUp {
             from {
@@ -408,8 +517,8 @@
 
         /* Fashion Footer */
         .fashion-footer {
-            background: var(--color-primary);
-            color: white;
+            background: var(--footer-bg);
+            color: var(--footer-text);
             padding: 4rem 0 2rem;
         }
 
@@ -490,7 +599,7 @@
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
-        "@type": "FashionStore",
+        "@type": "{{ setting('site_theme', 'fashion') === 'natural' ? 'HealthAndBeautyStore' : 'FashionStore' }}",
         "name": "{{ setting('site_name', 'Octosync Software Ltd') }}",
         "image": "{{ setting('og_image', asset('assets/logo/logo.png')) }}",
         "@id": "{{ url('/') }}",
@@ -505,7 +614,7 @@
             "postalCode": "{{ setting('site_postal_code', '') }}",
             "addressCountry": "{{ setting('site_country', 'BD') }}"
         },
-        "description": "{{ setting('meta_description', 'Premium Fashion E-commerce Destination') }}",
+        "description": "{{ setting('meta_description', setting('site_theme', 'fashion') === 'natural' ? 'Natural health, wellness and nutrition products for conscious living.' : 'Premium Fashion E-commerce Destination') }}",
         "openingHours": "Mo-Sa 10:00-20:00",
         "sameAs": [
             @if(setting('facebook_url'))"{{ setting('facebook_url') }}",@endif
@@ -523,12 +632,12 @@
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
 
     <!-- Theme Color -->
-    <meta name="theme-color" content="#111827">
-    <meta name="msapplication-navbutton-color" content="#111827">
-    <meta name="apple-mobile-web-app-status-bar-style" content="#111827">
+    <meta name="theme-color" content="{{ setting('site_theme', 'fashion') === 'natural' ? '#16391f' : '#111827' }}">
+    <meta name="msapplication-navbutton-color" content="{{ setting('site_theme', 'fashion') === 'natural' ? '#16391f' : '#111827' }}">
+    <meta name="apple-mobile-web-app-status-bar-style" content="{{ setting('site_theme', 'fashion') === 'natural' ? '#16391f' : '#111827' }}">
 </head>
 
-<body class="bg-white">
+<body class="bg-white theme-{{ setting('site_theme', 'fashion') }}">
     <!-- Loading Screen -->
     <div id="fashionLoader" class="fashion-loader">
         <div class="loader-spinner"></div>
@@ -548,9 +657,7 @@
                 <!-- Logo -->
                 <a href="{{ route('public.welcome') }}"
                     class="brand-logo text-2xl font-bold text-gray-900 hover:text-gray-700 transition-colors">
-                    {{ setting('site_name', 'Octosync Fashion') }}
-                </a>
-
+                        {{ setting('site_name', 'OS Ecommerce') }}
                 <!-- Desktop Menu -->
                 <div class="hidden lg:flex items-center space-x-8">
                     <a href="{{ route('public.welcome') }}" class="nav-link">Home</a>

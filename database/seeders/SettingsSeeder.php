@@ -121,12 +121,24 @@ class SettingsSeeder extends Seeder
                 'order' => 7,
             ],
             [
+                'key' => 'site_theme',
+                'value' => 'fashion',
+                'type' => 'select',
+                'group' => 'general',
+                'label' => 'Site Theme',
+                'options' => json_encode([
+                    'fashion' => 'Fashion',
+                    'natural' => 'Natural Products',
+                ]),
+                'order' => 8,
+            ],
+            [
                 'key' => 'license_key',
                 'value' => '508c4dd9-2e3e-40d6-bbdd-872b28c1ea49',
                 'type' => 'text',
                 'group' => 'general',
                 'label' => 'License Key',
-                'order' => 8,
+                'order' => 9,
             ],
             [
                 'key' => 'google_map_embed_code',
@@ -144,23 +156,6 @@ class SettingsSeeder extends Seeder
                 $setting
             );
         }
-
-        // --------------------
-        // Default Layout Setting
-        // --------------------
-        Setting::updateOrCreate(
-            ['key' => 'default_layout_type', 'group' => 'general'],
-            [
-                'value' => 'layout1', // default
-                'type' => 'radio',
-                'label' => 'Default Public Page Layout',
-                'options' => json_encode([
-                    'layout1' => 'Layout 1',
-                    'layout2' => 'Layout 2',
-                ]),
-                'order' => 8,
-            ]
-        );
 
         // --------------------
         // About Us Settings

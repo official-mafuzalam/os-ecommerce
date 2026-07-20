@@ -14,8 +14,13 @@
                     </h3>
                 </div>
                 <p class="text-gray-300 mb-6 leading-relaxed">
-                    Premium fashion destination offering curated collections of luxury clothing, accessories, and style
-                    essentials for the modern individual.
+                    @if (setting('site_theme', 'fashion') === 'natural')
+                        Premium natural products destination offering curated wellness essentials, organic nutrition,
+                        and mindful living supplies.
+                    @else
+                        Premium fashion destination offering curated collections of luxury clothing, accessories, and style
+                        essentials for the modern individual.
+                    @endif
                 </p>
                 <div class="flex gap-4">
                     <a href="{{ setting('facebook_url', '#') }}" class="social-icon hover:bg-white hover:text-gray-900">
@@ -166,7 +171,7 @@
                 <!-- Copyright -->
                 <div class="text-center lg:text-left">
                     <p class="text-gray-400 text-sm">
-                        &copy; {{ date('Y') }} {{ setting('site_name', 'Octosync Fashion') }}. All rights
+                        &copy; {{ date('Y') }} {{ setting('site_name', 'OS Ecommerce') }}. All rights
                         reserved.
                     </p>
                     <p class="text-gray-500 text-xs mt-1">

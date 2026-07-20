@@ -2,42 +2,16 @@
     @section('title', setting('site_title', 'OS E-commerce'))
     <x-slot name="main">
         @php
-            $layoutSetting = setting('default_layout_type');
-
-            // Split deals dynamically
-            $leftDeals = $allDeals->slice(0, 2);
-            $rightDeals = $allDeals->slice(2, 2);
-            $bottomDeals = $allDeals->slice(4);
+            $bottomDeals = $allDeals;
         @endphp
 
         <!-- Hero Section -->
         <section class="relative">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div
-                    class="{{ $layoutSetting === 'layout2' ? 'grid grid-cols-1 lg:grid-cols-4 gap-6' : 'grid grid-cols-1 gap-6' }}">
-
-                    {{-- Left Deals (Layout2 only) --}}
-                    @if ($layoutSetting === 'layout2' && $leftDeals->count())
-                        <div class="hidden lg:block space-y-4">
-                            @foreach ($leftDeals as $deal)
-                                @include('public.partials.deal-card', ['deal' => $deal, 'compact' => true])
-                            @endforeach
-                        </div>
-                    @endif
-
-                    {{-- Main Carousel --}}
-                    <div class="{{ $layoutSetting === 'layout2' ? 'lg:col-span-2' : '' }}">
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
                         @include('public.partials.carousel', ['carousels' => $carousels])
                     </div>
-
-                    {{-- Right Deals (Layout2 only) --}}
-                    @if ($layoutSetting === 'layout2' && $rightDeals->count())
-                        <div class="hidden lg:block space-y-4">
-                            @foreach ($rightDeals as $deal)
-                                @include('public.partials.deal-card', ['deal' => $deal, 'compact' => true])
-                            @endforeach
-                        </div>
-                    @endif
                 </div>
             </div>
         </section>

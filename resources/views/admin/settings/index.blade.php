@@ -70,10 +70,15 @@
                                                         accept="image/*">
                                                 </div>
                                             @elseif($setting->type === 'select')
+                                                @php
+                                                    $selectOptions = is_array($setting->options)
+                                                        ? $setting->options
+                                                        : json_decode($setting->options, true);
+                                                @endphp
                                                 <select name="{{ $setting->key }}" id="setting-{{ $setting->key }}"
                                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                                    @if ($setting->options)
-                                                        @foreach (json_decode($setting->options, true) as $value => $label)
+                                                    @if ($selectOptions)
+                                                        @foreach ($selectOptions as $value => $label)
                                                             <option value="{{ $value }}"
                                                                 {{ $setting->value == $value ? 'selected' : '' }}>
                                                                 {{ $label }}

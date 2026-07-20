@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +20,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $theme = setting('site_theme', 'fashion');
+        $themeViewPath = resource_path("views/themes/{$theme}");
+
+        if (is_dir($themeViewPath)) {
+            View::getFinder()->prependLocation($themeViewPath);
+        }
     }
 }
