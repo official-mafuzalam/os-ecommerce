@@ -1,30 +1,30 @@
 <x-app-layout>
-    @section('title', 'About Us - ' . setting('site_name', 'Prokiti Sudha'))
+    @section('title', 'About Us - ' . setting('site_name', 'OS Ecommerce'))
 
     @push('styles')
-    <style>
-        .glass-panel {
-            backdrop-filter: blur(12px);
-            background: rgba(255, 255, 255, 0.7);
-        }
+        <style>
+            .glass-panel {
+                backdrop-filter: blur(12px);
+                background: rgba(255, 255, 255, 0.7);
+            }
 
-        .botanical-overlay {
-            mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
-            opacity: 0.08;
-            pointer-events: none;
-        }
+            .botanical-overlay {
+                mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+                opacity: 0.08;
+                pointer-events: none;
+            }
 
-        .timeline-line::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 1px;
-            background: linear-gradient(to bottom, transparent, #707971 20%, #707971 80%, transparent);
-            transform: translateX(-50%);
-        }
-    </style>
+            .timeline-line::before {
+                content: '';
+                position: absolute;
+                left: 50%;
+                top: 0;
+                bottom: 0;
+                width: 1px;
+                background: linear-gradient(to bottom, transparent, #707971 20%, #707971 80%, transparent);
+                transform: translateX(-50%);
+            }
+        </style>
     @endpush
 
     <x-slot name="main">
@@ -64,10 +64,10 @@
                 <div class="md:col-span-7">
                     <span class="font-label-md text-label-md text-tertiary tracking-widest block mb-base uppercase">Our
                         Heritage</span>
-                    <h2 class="font-headline-lg text-headline-lg text-primary mb-md">The Essence of Prokiti Sudha</h2>
+                    <h2 class="font-headline-lg text-headline-lg text-primary mb-md">The Essence of OS Ecommerce</h2>
                     <div class="space-y-md font-body-md text-body-md text-on-surface-variant leading-relaxed">
                         <p>
-                            Prokiti Sudha was born from a singular realization: the profound healing power of our
+                            OS Ecommerce was born from a singular realization: the profound healing power of our
                             ancestors' traditions was being lost in the noise of the modern world. Our name, meaning
                             "The Nectar of Nature," reflects our dedication to preserving the purity and potency of
                             botanical wisdom.
@@ -250,7 +250,7 @@
                 <div class="flex flex-col md:flex-row items-center justify-between mb-xl relative z-10">
                     <div class="md:w-[45%] text-center md:text-right">
                         <h4 class="font-headline-md text-headline-md text-primary">2020</h4>
-                        <p class="font-body-md text-body-md text-on-surface-variant">The Vision Begins: Prokiti Sudha
+                        <p class="font-body-md text-body-md text-on-surface-variant">The Vision Begins: OS Ecommerce
                             founded in a small lab with 3 botanists.</p>
                     </div>
                     <div
@@ -318,7 +318,7 @@
                             data-icon="format_quote">format_quote</span>
                         <blockquote class="font-headline-md text-headline-md italic text-primary leading-tight mb-md">
                             "We believe that everyone deserves the pure, untainted strength that nature provides.
-                            Prokiti Sudha isn't just a business; it's our promise to return to a life of vitality, where
+                            OS Ecommerce isn't just a business; it's our promise to return to a life of vitality, where
                             every breath and every choice is rooted in purity."
                         </blockquote>
                         <div class="mt-md">
@@ -358,25 +358,25 @@
     </x-slot>
 
     @push('scripts')
-    <script>
-        // Simple scroll animation for revealing sections
-        const observerOptions = {
-            threshold: 0.1
-        };
+        <script>
+            // Simple scroll animation for revealing sections
+            const observerOptions = {
+                threshold: 0.1
+            };
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('opacity-100', 'translate-y-0');
-                    entry.target.classList.remove('opacity-0', 'translate-y-8');
-                }
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('opacity-100', 'translate-y-0');
+                        entry.target.classList.remove('opacity-0', 'translate-y-8');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('section').forEach(section => {
+                section.classList.add('transition-all', 'duration-700', 'ease-out', 'opacity-0', 'translate-y-8');
+                observer.observe(section);
             });
-        }, observerOptions);
-
-        document.querySelectorAll('section').forEach(section => {
-            section.classList.add('transition-all', 'duration-700', 'ease-out', 'opacity-0', 'translate-y-8');
-            observer.observe(section);
-        });
-    </script>
+        </script>
     @endpush
 </x-app-layout>

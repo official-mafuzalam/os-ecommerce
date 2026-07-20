@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'Order Confirmed | Prokiti Sudha')
+    @section('title', 'Order Confirmed | OS Ecommerce')
 
     @push('styles')
         <style>
@@ -76,7 +76,7 @@
 
     <x-slot name="main">
         <canvas id="confetti"></canvas>
-        <main class="max-w-container-max mx-auto px-gutter py-md pt-24 botanical-bg min-h-screen">
+        <div class="max-w-container-max mx-auto px-gutter py-md botanical-bg min-h-screen">
             <!-- Breadcrumb -->
             <nav class="flex items-center gap-xs text-caption text-on-surface-variant/60 mb-lg">
                 <a class="hover:text-primary" href="{{ route('public.welcome') }}">Home</a>
@@ -99,7 +99,7 @@
                             <h1 class="font-display-lg text-headline-lg md:text-display-lg mb-sm text-primary">🎉 Order
                                 Confirmed!</h1>
                             <p class="font-body-lg text-on-surface-variant max-w-[600px] mx-auto">
-                                Thank you for your order. Your wellness journey with Prokiti Sudha has officially begun.
+                                Thank you for your order. Your wellness journey with OS Ecommerce has officially begun.
                                 We've sent a confirmation email to {{ $order->customer_email }}.
                             </p>
                         </div>
@@ -326,7 +326,7 @@
                     </div>
                 </div>
             </section>
-        </main>
+        </div>
     </x-slot>
 
     @push('scripts')

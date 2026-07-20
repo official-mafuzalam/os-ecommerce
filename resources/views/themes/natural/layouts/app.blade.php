@@ -96,7 +96,7 @@
 @endif
 
 <!-- Page Content -->
-<div class="pt-16">
+<div class="pt-20">
 
     @if (isset($main))
         <main>

@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'Contact Us | ' . setting('site_name', 'Prokiti Sudha'))
+    @section('title', 'Contact Us | ' . setting('site_name', 'OS Ecommerce'))
 
     @push('styles')
         <style>
@@ -35,7 +35,7 @@
     @endpush
 
     <x-slot name="main">
-        <main class="pt-8 md:pt-16 pb-xl">
+        <div class="pb-xl">
             <!-- Hero Section -->
             <section class="px-margin-desktop max-w-container-max mx-auto mb-xl">
                 <div class="max-w-3xl">
@@ -302,7 +302,7 @@
                     </div>
                 </div>
             </section>
-        </main>
+        </div>
     </x-slot>
 
     @push('scripts')

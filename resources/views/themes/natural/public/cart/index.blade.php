@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', setting('site_name', 'Prokiti Sudha') . ' | Your Cart')
+    @section('title', setting('site_name', 'OS Ecommerce') . ' | Your Cart')
 
     @push('styles')
         <style>
@@ -28,6 +28,7 @@
                     opacity: 0;
                     transform: translateY(20px);
                 }
+
                 to {
                     opacity: 1;
                     transform: translateY(0);
@@ -37,18 +38,20 @@
     @endpush
 
     <x-slot name="main">
-        <main class="pt-32 pb-xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto min-h-screen">
+        <div class="pb-xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto min-h-screen">
             <!-- Header Section -->
             <header class="mb-xl text-center md:text-left">
                 <div class="flex flex-col md:flex-row md:items-end gap-sm">
                     <h1 class="font-cormorant text-[56px] leading-tight text-primary italic mb-0">Your Selection</h1>
                     @if ($cartItems->count() > 0)
-                        <span class="mb-2 ml-0 md:ml-4 inline-flex items-center bg-primary text-on-primary font-label-md text-[11px] px-sm py-1 rounded-full h-fit">
+                        <span
+                            class="mb-2 ml-0 md:ml-4 inline-flex items-center bg-primary text-on-primary font-label-md text-[11px] px-sm py-1 rounded-full h-fit">
                             {{ $cartItems->count() }} {{ Str::plural('item', $cartItems->count()) }}
                         </span>
                     @endif
                 </div>
-                <p class="font-body-lg text-body-lg text-on-surface-variant max-w-[540px] mt-sm">A curated path to vitality.
+                <p class="font-body-lg text-body-lg text-on-surface-variant max-w-[540px] mt-sm">A curated path to
+                    vitality.
                     Review your organic essentials before proceeding to a secure checkout.</p>
             </header>
 
@@ -63,15 +66,18 @@
                             <div class="cart-item flex flex-col md:flex-row gap-gutter p-md bg-white/40 rounded-[24px] border border-outline-variant/30 hover:shadow-lg transition-all duration-500 group"
                                 id="cart-item-{{ $item->id }}">
                                 <!-- Product Image -->
-                                <div class="w-full md:w-32 h-40 md:h-32 rounded-xl overflow-hidden bg-surface-container flex-shrink-0 relative">
+                                <div
+                                    class="w-full md:w-32 h-40 md:h-32 rounded-xl overflow-hidden bg-surface-container flex-shrink-0 relative">
                                     <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                         alt="{{ $item->product->name }}"
                                         src="{{ $item->product->images->where('is_primary', true)->first()
                                             ? Storage::url($item->product->images->where('is_primary', true)->first()->image_path)
                                             : 'https://placehold.co/400x400?text=No+Image' }}" />
                                     @if ($item->quantity > $item->product->stock_quantity)
-                                        <div class="absolute inset-0 bg-error/10 backdrop-blur-sm flex items-center justify-center">
-                                            <span class="text-[10px] font-label-md text-error bg-white/90 px-sm py-1 rounded-full">
+                                        <div
+                                            class="absolute inset-0 bg-error/10 backdrop-blur-sm flex items-center justify-center">
+                                            <span
+                                                class="text-[10px] font-label-md text-error bg-white/90 px-sm py-1 rounded-full">
                                                 Limited Stock
                                             </span>
                                         </div>
@@ -84,7 +90,8 @@
                                         <div class="flex-grow pr-4">
                                             {{-- Category / Collection label --}}
                                             @if ($item->product->category)
-                                                <span class="font-label-md text-label-md text-secondary uppercase tracking-widest mb-1 block">
+                                                <span
+                                                    class="font-label-md text-label-md text-secondary uppercase tracking-widest mb-1 block">
                                                     {{ $item->product->category->name }}
                                                 </span>
                                             @endif
@@ -98,7 +105,8 @@
                                             @if ($item->attributes && $item->attributes->count() > 0)
                                                 <div class="flex flex-wrap gap-xs mt-xs">
                                                     @foreach ($item->attributes as $attribute)
-                                                        <span class="inline-flex items-center px-sm py-1 rounded-full font-label-md text-[10px] bg-surface-container text-on-surface-variant border border-outline-variant">
+                                                        <span
+                                                            class="inline-flex items-center px-sm py-1 rounded-full font-label-md text-[10px] bg-surface-container text-on-surface-variant border border-outline-variant">
                                                             {{ $attribute->name }}: {{ $attribute->pivot->value }}
                                                         </span>
                                                     @endforeach
@@ -111,7 +119,8 @@
                                                     SKU: {{ $item->product->sku }}
                                                 </p>
                                                 <span class="text-outline-variant">•</span>
-                                                <span class="font-caption text-caption px-sm py-0.5 rounded-full
+                                                <span
+                                                    class="font-caption text-caption px-sm py-0.5 rounded-full
                                                     {{ $item->product->stock_quantity > 0
                                                         ? 'text-secondary bg-secondary-container/40 border border-secondary-fixed-dim'
                                                         : 'text-error bg-error-container border border-error' }}">
@@ -121,12 +130,14 @@
 
                                             {{-- Unit price --}}
                                             <div class="mt-xs">
-                                                <span class="font-caption text-caption text-on-surface-variant">Unit Price: </span>
+                                                <span class="font-caption text-caption text-on-surface-variant">Unit
+                                                    Price: </span>
                                                 <span class="font-label-md text-on-surface">
                                                     ৳ {{ number_format($item->product->final_price, 2) }}
                                                 </span>
                                                 @if ($item->product->discount > 0)
-                                                    <span class="font-caption text-caption text-error line-through ml-2">
+                                                    <span
+                                                        class="font-caption text-caption text-error line-through ml-2">
                                                         ৳ {{ number_format($item->product->price, 2) }}
                                                     </span>
                                                 @endif
@@ -143,7 +154,8 @@
                                     <div class="flex justify-between items-center mt-4">
                                         {{-- Quantity Stepper --}}
                                         <div class="flex flex-col">
-                                            <div class="flex items-center border border-outline-variant rounded-full px-3 py-1">
+                                            <div
+                                                class="flex items-center border border-outline-variant rounded-full px-3 py-1">
                                                 <button type="button"
                                                     onclick="updateQuantity('{{ $item->id }}', {{ $item->quantity - 1 }})"
                                                     class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors
@@ -195,7 +207,8 @@
 
                         <!-- Promo Code -->
                         <div class="p-md bg-white/40 rounded-[24px] border border-outline-variant/30">
-                            <h3 class="font-label-md text-label-md text-primary uppercase tracking-widest mb-md">Promo Code</h3>
+                            <h3 class="font-label-md text-label-md text-primary uppercase tracking-widest mb-md">Promo
+                                Code</h3>
                             <div class="flex gap-2">
                                 <input
                                     class="flex-grow bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 font-body-md"
@@ -206,7 +219,8 @@
                         </div>
 
                         <!-- Upsell / Continue Shopping -->
-                        <div class="mt-sm p-xl border-2 border-dashed border-outline-variant/30 rounded-[24px] flex flex-col items-center text-center">
+                        <div
+                            class="mt-sm p-xl border-2 border-dashed border-outline-variant/30 rounded-[24px] flex flex-col items-center text-center">
                             <span class="material-symbols-outlined text-secondary-fixed-dim text-4xl mb-4">eco</span>
                             <p class="font-label-md text-on-surface-variant">Looking for more vitality?</p>
                             <a class="font-cormorant text-[28px] text-primary underline underline-offset-8 mt-2 hover:text-secondary transition-colors"
@@ -218,22 +232,27 @@
                     <aside class="lg:col-span-5 xl:col-span-4">
                         <div class="glass-panel sticky top-32 p-xl rounded-[24px] shadow-xl overflow-hidden relative">
                             <!-- Subtle background decoration -->
-                            <div class="absolute -top-10 -right-10 w-40 h-40 bg-secondary-fixed/20 rounded-full blur-3xl -z-10"></div>
+                            <div
+                                class="absolute -top-10 -right-10 w-40 h-40 bg-secondary-fixed/20 rounded-full blur-3xl -z-10">
+                            </div>
 
                             <h2 class="font-cormorant text-[32px] text-primary mb-xl">Order Summary</h2>
 
                             <div class="space-y-6 mb-xl">
                                 <div class="flex justify-between items-center">
                                     <span class="font-body-md text-on-surface-variant">Subtotal</span>
-                                    <span class="font-label-md text-on-surface">৳ {{ number_format($cart->subtotal, 2) }}</span>
+                                    <span class="font-label-md text-on-surface">৳
+                                        {{ number_format($cart->subtotal, 2) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="font-body-md text-on-surface-variant">Items ({{ $cart->total_quantity }})</span>
+                                    <span class="font-body-md text-on-surface-variant">Items
+                                        ({{ $cart->total_quantity }})</span>
                                     <span class="font-label-md text-on-surface">{{ $cart->total_quantity }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="font-body-md text-on-surface-variant">Shipping</span>
-                                    <span class="font-label-md text-secondary uppercase tracking-wider">On checkout page</span>
+                                    <span class="font-label-md text-secondary uppercase tracking-wider">On checkout
+                                        page</span>
                                 </div>
                                 <div class="flex justify-between items-center">
                                     <span class="font-body-md text-on-surface-variant">Tax</span>
@@ -241,14 +260,16 @@
                                 </div>
                                 <div class="pt-6 border-t border-outline-variant/30 flex justify-between items-center">
                                     <span class="font-cormorant text-[24px] text-primary">Total</span>
-                                    <span class="font-cormorant text-[24px] text-primary">৳ {{ number_format($cart->subtotal, 2) }}</span>
+                                    <span class="font-cormorant text-[24px] text-primary">৳
+                                        {{ number_format($cart->subtotal, 2) }}</span>
                                 </div>
                             </div>
 
                             <!-- Checkout Button -->
                             <a href="{{ route('public.checkout') }}"
                                 class="w-full bg-primary text-white font-label-md h-14 rounded-[16px] hover:bg-primary-container active:scale-[0.98] transition-all flex items-center justify-center gap-2 mb-gutter shadow-lg shadow-primary/20">
-                                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lock</span>
+                                <span class="material-symbols-outlined"
+                                    style="font-variation-settings: 'FILL' 1;">lock</span>
                                 Proceed to Checkout
                             </a>
 
@@ -256,19 +277,27 @@
                             <div class="grid grid-cols-2 gap-4 mt-gutter">
                                 <div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl">
                                     <span class="material-symbols-outlined text-primary">verified_user</span>
-                                    <span class="text-[10px] font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">Secure SSL Encryption</span>
+                                    <span
+                                        class="text-[10px] font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">Secure
+                                        SSL Encryption</span>
                                 </div>
                                 <div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl">
                                     <span class="material-symbols-outlined text-primary">biotech</span>
-                                    <span class="text-[10px] font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">100% Lab Tested</span>
+                                    <span
+                                        class="text-[10px] font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">100%
+                                        Lab Tested</span>
                                 </div>
                                 <div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl">
                                     <span class="material-symbols-outlined text-primary">payments</span>
-                                    <span class="text-[10px] font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">Multiple Payment Options</span>
+                                    <span
+                                        class="text-[10px] font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">Multiple
+                                        Payment Options</span>
                                 </div>
                                 <div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl">
                                     <span class="material-symbols-outlined text-primary">local_shipping</span>
-                                    <span class="text-[10px] font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">Fast Delivery</span>
+                                    <span
+                                        class="text-[10px] font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">Fast
+                                        Delivery</span>
                                 </div>
                             </div>
 
@@ -278,10 +307,10 @@
                         </div>
                     </aside>
                 </div>
-
             @else
                 <!-- Empty Cart State -->
-                <div class="p-xl border-2 border-dashed border-outline-variant/30 rounded-[24px] flex flex-col items-center text-center py-24 max-w-2xl mx-auto">
+                <div
+                    class="p-xl border-2 border-dashed border-outline-variant/30 rounded-[24px] flex flex-col items-center text-center py-24 max-w-2xl mx-auto">
                     <span class="material-symbols-outlined text-secondary-fixed-dim text-6xl mb-6">shopping_bag</span>
                     <h3 class="font-cormorant text-[36px] text-primary mb-2">Your cart is empty</h3>
                     <p class="font-body-md text-on-surface-variant mb-8 max-w-md">
@@ -303,7 +332,7 @@
                     </div>
                 </div>
             @endif
-        </main>
+        </div>
     </x-slot>
 
     @push('scripts')
@@ -354,7 +383,9 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                         },
-                        body: JSON.stringify({ quantity: quantity })
+                        body: JSON.stringify({
+                            quantity: quantity
+                        })
                     })
                     .then(res => res.json())
                     .then(data => {

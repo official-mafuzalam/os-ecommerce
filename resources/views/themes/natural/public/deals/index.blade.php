@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <main class="relative">
+        <div class="relative">
             <!-- Hero Section -->
             <section class="relative px-margin-desktop pt-xl pb-lg overflow-hidden">
                 <div class="max-w-container-max mx-auto grid md:grid-cols-2 items-center gap-lg">
@@ -284,7 +284,7 @@
                     <p class="mt-4 text-caption text-on-surface-variant/60 italic">Respecting your inbox as much as your wellness.</p>
                 </div>
             </section>
-        </main>
+        </div>
     </x-slot>
 
     @push('scripts')

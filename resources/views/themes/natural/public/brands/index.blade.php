@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', setting('site_name', 'Prokiti Sudha') . ' | Our Brands')
+    @section('title', setting('site_name', 'OS Ecommerce') . ' | Our Brands')
 
     @push('styles')
         <style>
@@ -38,8 +38,7 @@
     @endpush
 
     <x-slot name="main">
-        <main class="pt-20">
-
+        <div class="pb-xl">
             <!-- Hero Section -->
             <section class="bg-[#F8F5EE] py-xl px-margin-mobile md:px-margin-desktop overflow-hidden relative">
                 <div class="max-w-container-max mx-auto relative z-10">
@@ -250,7 +249,7 @@
                 <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
             </section>
 
-        </main>
+        </div>
     </x-slot>
 
     @push('scripts')

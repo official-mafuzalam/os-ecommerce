@@ -20,7 +20,7 @@
                         <span class="material-symbols-outlined text-on-primary text-xl">eco</span>
                     </div>
                     <span class="font-headline-md text-headline-md text-primary">
-                        {{ setting('site_name', 'Prokiti Sudha') }}
+                        {{ setting('site_name', 'OS Ecommerce') }}
                     </span>
                 </div>
                 <p class="font-body-md text-body-md text-on-surface-variant mb-lg leading-relaxed">
@@ -196,7 +196,7 @@
                 {{-- Copyright --}}
                 <div class="text-center lg:text-left">
                     <p class="font-body-md text-body-md text-on-surface-variant">
-                        &copy; {{ date('Y') }} {{ setting('site_name', 'Prokiti Sudha') }}. All rights reserved.
+                        &copy; {{ date('Y') }} {{ setting('site_name', 'OS Ecommerce') }}. All rights reserved.
                     </p>
                     <p class="font-caption text-caption text-on-surface-variant/60 mt-xs">
                         Developed by

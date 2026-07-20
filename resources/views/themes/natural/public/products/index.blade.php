@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', setting('site_name', 'Prokiti Sudha') . ' | Shop All Collections')
+    @section('title', setting('site_name', 'OS Ecommerce') . ' | Shop All Collections')
 
     @push('styles')
         <style>
@@ -28,7 +28,7 @@
     @endpush
 
     <x-slot name="main">
-        <main class="pt-32 pb-xl px-margin-desktop max-w-container-max mx-auto">
+        <div class="pb-xl px-margin-desktop max-w-container-max mx-auto">
             <!-- Hero Title Section -->
             <header class="mb-xl text-center md:text-left">
                 <h1 class="font-cormorant text-[56px] leading-tight text-primary italic mb-sm">
@@ -249,7 +249,7 @@
                     @endif
                 </div>
             </div>
-        </main>
+        </div>
     </x-slot>
 
     @push('scripts')

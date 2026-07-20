@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'Track Your Order | Prokiti Sudha')
+    @section('title', 'Track Your Order | OS Ecommerce')
 
     @push('styles')
         <link
@@ -49,18 +49,9 @@
     @endpush
 
     <x-slot name="main">
-        <main class="pt-24 pb-xl relative">
-            <!-- Breadcrumb -->
-            <section class="max-w-container-max mx-auto px-margin-desktop py-8">
-                <nav class="flex items-center gap-2 text-on-surface-variant font-label-md">
-                    <a class="hover:text-primary transition-colors" href="{{ route('public.welcome') }}">Home</a>
-                    <span class="material-symbols-outlined text-sm">chevron_right</span>
-                    <span class="text-primary font-bold">Track Order</span>
-                </nav>
-            </section>
-
+        <div class="pb-xl">
             <!-- Hero Section -->
-            <section class="max-w-container-max mx-auto px-margin-desktop mb-xl">
+            <section class="max-w-container-max mx-auto px-margin-desktop mt-2 mb-xl">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-lg items-center">
                     <div class="space-y-6">
                         <h1 class="font-display-lg text-display-lg text-primary leading-tight">Track Your Order</h1>
@@ -207,10 +198,12 @@
                             <div class="relative py-8 overflow-x-auto">
                                 <div class="flex flex-row justify-between items-start min-w-[800px] relative z-10">
                                     <!-- Progress Line -->
-                                    <div class="absolute top-[28px] left-[10%] right-[10%] h-1 bg-surface-variant rounded-full overflow-hidden z-0">
-                                        <div class="h-full bg-primary transition-all duration-1000" style="width: {{ $progress }}%"></div>
+                                    <div
+                                        class="absolute top-[28px] left-[10%] right-[10%] h-1 bg-surface-variant rounded-full overflow-hidden z-0">
+                                        <div class="h-full bg-primary transition-all duration-1000"
+                                            style="width: {{ $progress }}%"></div>
                                     </div>
-                                    
+
                                     @foreach ($statusOrder as $index => $status)
                                         @php
                                             $isActive = $index === $currentIndex;
@@ -218,28 +211,40 @@
                                             $isFuture = $index > $currentIndex;
                                             $event = $trackingEvents[$status];
                                         @endphp
-                                        <div class="flex flex-col items-center text-center w-1/5 {{ $isFuture ? 'opacity-40' : '' }} relative z-10">
+                                        <div
+                                            class="flex flex-col items-center text-center w-1/5 {{ $isFuture ? 'opacity-40' : '' }} relative z-10">
                                             @if ($isActive)
-                                                <div class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center mb-3 shadow-xl ring-4 ring-white flex-shrink-0">
+                                                <div
+                                                    class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center mb-3 shadow-xl ring-4 ring-white flex-shrink-0">
                                                     <span class="material-symbols-outlined">{{ $event['icon'] }}</span>
                                                 </div>
-                                                <h4 class="font-label-md text-primary font-bold whitespace-nowrap">{{ $event['label'] }}</h4>
-                                                @if(!$isFuture)
-                                                    <p class="text-[11px] text-on-surface-variant mt-1 leading-tight px-2">{{ $event['description'] }}</p>
-                                                    <p class="text-[11px] text-on-surface-variant font-bold mt-0.5">{{ $event['date']->format('M d, h:i A') }}</p>
+                                                <h4 class="font-label-md text-primary font-bold whitespace-nowrap">
+                                                    {{ $event['label'] }}</h4>
+                                                @if (!$isFuture)
+                                                    <p
+                                                        class="text-[11px] text-on-surface-variant mt-1 leading-tight px-2">
+                                                        {{ $event['description'] }}</p>
+                                                    <p class="text-[11px] text-on-surface-variant font-bold mt-0.5">
+                                                        {{ $event['date']->format('M d, h:i A') }}</p>
                                                 @endif
                                             @elseif($isPast)
-                                                <div class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center mb-4 shadow-lg ring-4 ring-surface-container-low flex-shrink-0">
+                                                <div
+                                                    class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center mb-4 shadow-lg ring-4 ring-surface-container-low flex-shrink-0">
                                                     <span class="material-symbols-outlined">check</span>
                                                 </div>
-                                                <h4 class="font-label-md text-primary whitespace-nowrap">{{ $event['label'] }}</h4>
-                                                <p class="text-[11px] text-on-surface-variant mt-1 leading-tight px-2">{{ $event['description'] }}</p>
-                                                <p class="text-[11px] text-on-surface-variant font-bold mt-0.5">{{ $event['date']->format('M d, h:i A') }}</p>
+                                                <h4 class="font-label-md text-primary whitespace-nowrap">
+                                                    {{ $event['label'] }}</h4>
+                                                <p class="text-[11px] text-on-surface-variant mt-1 leading-tight px-2">
+                                                    {{ $event['description'] }}</p>
+                                                <p class="text-[11px] text-on-surface-variant font-bold mt-0.5">
+                                                    {{ $event['date']->format('M d, h:i A') }}</p>
                                             @else
-                                                <div class="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center mb-4 ring-4 ring-surface-container-low flex-shrink-0">
+                                                <div
+                                                    class="w-12 h-12 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center mb-4 ring-4 ring-surface-container-low flex-shrink-0">
                                                     <span class="material-symbols-outlined">{{ $event['icon'] }}</span>
                                                 </div>
-                                                <h4 class="font-label-md text-on-surface-variant whitespace-nowrap">{{ $event['label'] }}</h4>
+                                                <h4 class="font-label-md text-on-surface-variant whitespace-nowrap">
+                                                    {{ $event['label'] }}</h4>
                                             @endif
                                         </div>
                                     @endforeach
@@ -265,7 +270,9 @@
                                         #{{ $order->order_number }}</p>
                                     <div class="font-label-md text-on-surface-variant flex items-center gap-2">
                                         Tracking: <span id="tracking_display">{{ $order->tracking_number }}</span>
-                                        <button id="copy_tracking" class="hover:text-primary transition-colors flex items-center justify-center" title="Copy tracking number">
+                                        <button id="copy_tracking"
+                                            class="hover:text-primary transition-colors flex items-center justify-center"
+                                            title="Copy tracking number">
                                             <span class="material-symbols-outlined text-[16px]">content_copy</span>
                                         </button>
                                     </div>
@@ -293,7 +300,8 @@
                             <div class="space-y-6">
                                 <div>
                                     <p class="font-label-md text-on-surface-variant mb-1">Delivery Address</p>
-                                    <p class="font-body-md text-on-surface">{{ optional($order->shippingAddress)->full_address ?? 'N/A' }}</p>
+                                    <p class="font-body-md text-on-surface">
+                                        {{ optional($order->shippingAddress)->full_address ?? 'N/A' }}</p>
                                 </div>
                             </div>
                         </div>
@@ -344,30 +352,36 @@
                 </section>
             @endif
 
-            @if(isset($recommendedProducts) && $recommendedProducts->count() > 0)
+            @if (isset($recommendedProducts) && $recommendedProducts->count() > 0)
                 <!-- Recommended Products -->
                 <section class="max-w-container-max mx-auto px-margin-desktop mt-xl">
                     <div class="flex items-end justify-between mb-10">
                         <div>
                             <h2 class="font-headline-md text-headline-md text-primary">You May Also Like</h2>
                         </div>
-                        <a class="font-label-md text-primary hover:underline" href="{{ route('public.products') }}">View All Shop</a>
+                        <a class="font-label-md text-primary hover:underline"
+                            href="{{ route('public.products') }}">View All Shop</a>
                     </div>
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-gutter">
-                        @foreach($recommendedProducts as $product)
+                        @foreach ($recommendedProducts as $product)
                             <!-- Product Card -->
-                            <a href="{{ route('public.products.show', $product->slug) }}" class="group cursor-pointer block">
-                                <div class="aspect-[4/5] rounded-3xl overflow-hidden mb-4 bg-surface-container shadow-sm group-hover:shadow-xl transition-all duration-500 relative">
-                                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                                        alt="{{ $product->name }}" 
-                                        src="{{ $product->primary_image ? Storage::url($product->primary_image->image_path) : 'https://placehold.co/400x500?text=No+Image' }}"/>
-                                    <button class="absolute bottom-4 right-4 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0"
-                                            onclick="event.preventDefault(); window.location.href='{{ route('public.products.show', $product->slug) }}';">
+                            <a href="{{ route('public.products.show', $product->slug) }}"
+                                class="group cursor-pointer block">
+                                <div
+                                    class="aspect-[4/5] rounded-3xl overflow-hidden mb-4 bg-surface-container shadow-sm group-hover:shadow-xl transition-all duration-500 relative">
+                                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                        alt="{{ $product->name }}"
+                                        src="{{ $product->primary_image ? Storage::url($product->primary_image->image_path) : 'https://placehold.co/400x500?text=No+Image' }}" />
+                                    <button
+                                        class="absolute bottom-4 right-4 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0"
+                                        onclick="event.preventDefault(); window.location.href='{{ route('public.products.show', $product->slug) }}';">
                                         <span class="material-symbols-outlined text-primary">add_shopping_cart</span>
                                     </button>
                                 </div>
-                                <h3 class="font-label-md text-on-surface group-hover:text-primary transition-colors">{{ $product->name }}</h3>
-                                <p class="font-headline-sm text-primary font-bold">৳{{ number_format($product->final_price, 2) }}</p>
+                                <h3 class="font-label-md text-on-surface group-hover:text-primary transition-colors">
+                                    {{ $product->name }}</h3>
+                                <p class="font-headline-sm text-primary font-bold">
+                                    ৳{{ number_format($product->final_price, 2) }}</p>
                             </a>
                         @endforeach
                     </div>
@@ -442,7 +456,7 @@
                     </details>
                 </div>
             </section>
-        </main>
+        </div>
     </x-slot>
 
     @push('scripts')

@@ -19,24 +19,6 @@
         <link rel="icon" href="{{ asset('assets/logo/icon.png') }}" type="image/x-icon">
     @endif
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Theme fonts for fashion and natural products -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <!-- Playfair Display + Montserrat + Inter for fashion, Libre Caslon Text + Plus Jakarta Sans for natural products -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-
-    <!-- Preload critical assets -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        as="style">
-    <link rel="preload"
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
-        as="style">
-
     <!-- CSS -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -590,7 +572,6 @@
                         {{ setting('site_name', 'OS Ecommerce') }}
                 <!-- Desktop Menu -->
                 <div class="hidden lg:flex items-center space-x-8">
-                    <a href="{{ route('public.welcome') }}" class="nav-link">Home</a>
                     <a href="{{ route('public.products') }}" class="nav-link">Shop</a>
 
                     <!-- Fashion Categories Dropdown -->

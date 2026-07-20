@@ -28,10 +28,10 @@ use App\Http\Controllers\Public\ProductController as PublicProductController;
 use App\Http\Controllers\Public\SearchController;
 
 // Debug routes
-Route::get('/session', function () {
-    $session = session()->get('analytics_events', []);
-    dd($session);
-});
+// Route::get('/session', function () {
+//     $session = session()->get('analytics_events', []);
+//     dd($session);
+// });
 
 Route::get('/clear-cache', [ArtisanController::class, 'clearCache'])->name('clear.cache');
 

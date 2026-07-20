@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', $product->name . ' | ' . setting('site_name', 'Prokiti Sudha'))
+    @section('title', $product->name . ' | ' . setting('site_name', 'OS Ecommerce'))
 
     @push('styles')
         <style>
@@ -201,76 +201,18 @@
                 class="absolute -right-20 top-20 material-symbols-outlined text-[400px] text-primary opacity-5 select-none pointer-events-none">eco</span>
         </section>
 
-        <!-- How to Use Section -->
-        <section class="py-xl px-margin-desktop max-w-container-max mx-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-xl items-center">
-                <div class="order-2 lg:order-1 flex flex-col gap-lg">
-                    <h2 class="font-headline-lg text-headline-lg text-primary">The Ritual of Vitality</h2>
-                    <div class="flex flex-col gap-md">
-                        <div class="flex gap-md group">
-                            <div
-                                class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md text-label-md shrink-0 transition-transform group-hover:scale-110">
-                                1</div>
-                            <div class="flex flex-col gap-xs">
-                                <h4 class="font-label-md text-label-md text-primary">Measure</h4>
-                                <p class="font-body-md text-body-md text-on-surface-variant">Add 1 teaspoon (approx.
-                                    2g)
-                                    to your glass or blender.</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-md group">
-                            <div
-                                class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md text-label-md shrink-0 transition-transform group-hover:scale-110">
-                                2</div>
-                            <div class="flex flex-col gap-xs">
-                                <h4 class="font-label-md text-label-md text-primary">Infuse</h4>
-                                <p class="font-body-md text-body-md text-on-surface-variant">Mix with warm water,
-                                    fresh
-                                    juice, or your favorite smoothie base.</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-md group">
-                            <div
-                                class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md text-label-md shrink-0 transition-transform group-hover:scale-110">
-                                3</div>
-                            <div class="flex flex-col gap-xs">
-                                <h4 class="font-label-md text-label-md text-primary">Savor</h4>
-                                <p class="font-body-md text-body-md text-on-surface-variant">Consume daily in the
-                                    morning for sustained energy and cellular support.</p>
-                            </div>
-                        </div>
+        <!-- Product Description Section -->
+        @if ($product->description)
+            <section class="py-xl px-margin-desktop max-w-container-max mx-auto">
+                <div class="flex flex-col gap-md">
+                    <h2 class="font-headline-lg text-headline-lg text-primary">Product Description</h2>
+                    <div class="w-16 h-1 bg-tertiary-fixed-dim rounded-full mb-sm"></div>
+                    <div class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed prose max-w-none">
+                        {!! nl2br(e($product->description)) !!}
                     </div>
-                    <button
-                        class="w-fit px-xl py-base border border-primary text-primary font-label-md text-label-md rounded-full hover:bg-primary hover:text-on-primary transition-all duration-300">
-                        Explore Full Guide
-                    </button>
                 </div>
-                <div class="order-1 lg:order-2">
-                    @if ($product->images->count() >= 2)
-                        <div class="grid grid-cols-2 gap-md">
-                            <div
-                                class="aspect-square rounded-[24px] overflow-hidden shadow-lg transform translate-y-8">
-                                <img class="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                                    src="{{ Storage::url($product->images->skip(1)->first()->image_path) }}"
-                                    alt="{{ $product->name }}" />
-                            </div>
-                            @if ($product->images->count() >= 3)
-                                <div class="aspect-square rounded-[24px] overflow-hidden shadow-lg">
-                                    <img class="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                                        src="{{ Storage::url($product->images->skip(2)->first()->image_path) }}"
-                                        alt="{{ $product->name }}" />
-                                </div>
-                            @endif
-                        </div>
-                    @else
-                        <div
-                            class="aspect-square rounded-[24px] overflow-hidden shadow-lg bg-surface-container flex items-center justify-center">
-                            <span class="material-symbols-outlined text-[80px] text-outline-variant">eco</span>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </section>
+            </section>
+        @endif
 
         <!-- Related Rituals (Upsell) -->
         @if (isset($relatedProducts) && $relatedProducts->count() > 0)

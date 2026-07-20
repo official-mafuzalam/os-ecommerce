@@ -6,7 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <x-meta />
-    <title>@yield('title', setting('site_name', 'Prokiti Sudha'))</title>
+    <title>@yield('title', setting('site_name', 'OS Ecommerce'))</title>
     <!-- Favicon -->
     @if (setting('site_favicon'))
         <link rel="icon" href="{{ Storage::url(setting('site_favicon')) }}" type="image/x-icon">
@@ -16,12 +16,6 @@
     @endif
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link
-        href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:wght@400;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
     @include('layouts.public.head-scripts')
     <style>
         .material-symbols-outlined {
@@ -55,15 +49,48 @@
         <div class="flex justify-between items-center w-full px-margin-desktop max-w-container-max mx-auto h-full">
             <a href="{{ route('public.welcome') }}"
                 class="font-headline-md text-headline-md text-primary tracking-tight cursor-pointer active:scale-95 transition-transform">
-                Prokiti Sudha
+                {{ setting('site_name', 'OS Ecommerce') }}
             </a>
             <div class="hidden md:flex items-center space-x-lg">
                 <a class="font-label-md text-label-md text-primary border-b-2 border-primary pb-1 transition-colors duration-300"
                     href="{{ route('public.products') }}">Shop</a>
-                <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors duration-300"
-                    href="{{ route('public.about') }}">Our Story</a>
-                <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors duration-300"
-                    href="{{ route('public.contact') }}">Contact</a>
+
+                @php
+                    $categories = App\Models\Category::where('is_active', true)->take(8)->get();
+                @endphp
+                <!-- Fashion Categories Dropdown -->
+                @if ($categories->count() > 0)
+                    <div x-data="{ open: false }" class="relative">
+                        <a href="#"
+                            class="nav-link flex items-center font-label-md text-label-md text-primary border-b-2 border-primary pb-1 transition-colors duration-300"
+                            @click.prevent="open = !open">
+                            Categories
+                            <i class="fas fa-chevron-down ml-1 text-xs transition-transform"
+                                :class="open ? 'rotate-180' : ''"></i>
+                        </a>
+
+                        <div x-show="open" x-cloak @click.away="open = false"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 transform -translate-y-2"
+                            x-transition:enter-end="opacity-100 transform translate-y-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 transform translate-y-0"
+                            x-transition:leave-end="opacity-0 transform -translate-y-2"
+                            class="absolute top-full left-0 w-64 mt-2 py-2 bg-white rounded-lg shadow-xl border border-gray-100 z-50">
+                            @foreach ($categories as $category)
+                                <a href="{{ route('public.products', ['category' => $category->slug]) }}"
+                                    class="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors duration-200">
+                                    {{ $category->name }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+                <a href="{{ route('public.deals') }}"
+                    class="font-label-md text-label-md text-primary border-b-2 border-primary pb-1 transition-colors duration-300">Deals</a>
+                <a href="{{ route('public.parcel.tracking') }}"
+                    class="font-label-md text-label-md text-primary border-b-2 border-primary pb-1 transition-colors duration-300">Track
+                    Order</a>
             </div>
             <div class="flex items-center space-x-md">
                 @php

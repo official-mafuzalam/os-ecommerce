@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', setting('site_name', 'Prokiti Sudha') . ' | Nature\'s Purest Essence')
+    @section('title', setting('site_name', 'OS Ecommerce'))
     <x-slot name="main">
         <!-- Hero Section -->
         <section
@@ -145,7 +145,7 @@
                         <h2 class="font-headline-lg text-headline-lg text-primary mb-lg leading-tight">Grounded in
                             Ancient Wisdom, Refined by Modern Science.</h2>
                         <p class="font-body-lg text-body-lg text-on-surface-variant mb-lg leading-relaxed">
-                            Prokiti Sudha is more than a brand; it is a bridge between the lush, fertile lands of
+                            OS Ecommerce is more than a brand; it is a bridge between the lush, fertile lands of
                             Bangladesh and the modern pursuit of longevity. We believe that true vitality comes from
                             respect—for the soil, for the season, and for the complex intelligence of the plant kingdom.
                         </p>
