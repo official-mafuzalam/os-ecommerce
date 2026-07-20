@@ -58,7 +58,7 @@ class SearchController extends Controller
                         'slug' => $product->slug,
                         'price' => $product->price,
                         'price_formatted' => number_format($product->price) . ' TK',
-                        'image_url' => $product->images->where('is_primary', true)->first() ? Storage::url($product->images->where('is_primary', true)->first()->image_path) : 'https://via.placeholder.com/100',
+                        'image_url' => $product->images->where('is_primary', true)->first() ? Storage::url($product->images->where('is_primary', true)->first()->image_path) : asset('assets/placeholder.svg'),
                     ];
                 });
         }

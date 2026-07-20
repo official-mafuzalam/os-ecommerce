@@ -66,7 +66,7 @@
                                         <div class="flex items-center gap-3">
                                             <img class="w-10 h-10 rounded object-cover" src="{{ $deal->image_url }}"
                                                 alt="{{ $deal->title }}"
-                                                onerror="this.src='https://via.placeholder.com/40'">
+                                                onerror="this.src='/assets/placeholder.svg'">
                                             <div>
                                                 <div class="text-sm font-medium text-gray-900">
                                                     {{ Str::limit($deal->title, 25) }}

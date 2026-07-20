@@ -197,7 +197,7 @@
                                         <div class="flex items-center gap-3">
                                             <div class="w-10 h-10 flex-shrink-0">
                                                 <img class="w-10 h-10 rounded object-cover"
-                                                    src="{{ $product->images->where('is_primary', true)->first() ? Storage::url($product->images->where('is_primary', true)->first()->image_path) : 'https://via.placeholder.com/40' }}"
+                                                    src="{{ $product->images->where('is_primary', true)->first() ? Storage::url($product->images->where('is_primary', true)->first()->image_path) : '/assets/placeholder.svg' }}"
                                                     alt="{{ $product->name }}">
                                             </div>
                                             <div>

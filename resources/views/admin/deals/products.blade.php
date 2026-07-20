@@ -84,7 +84,7 @@
                                         <div class="flex items-center space-x-3">
                                             <div
                                                 class="flex-shrink-0 w-10 h-10 rounded border border-gray-200 overflow-hidden">
-                                                <img src="{{ $product->images->where('is_primary', true)->first() ? Storage::url($product->images->where('is_primary', true)->first()->image_path) : 'https://via.placeholder.com/40' }}"
+                                                <img src="{{ $product->images->where('is_primary', true)->first() ? Storage::url($product->images->where('is_primary', true)->first()->image_path) : '/assets/placeholder.svg' }}"
                                                     alt="{{ $product->name }}" class="w-full h-full object-cover">
                                             </div>
                                             <div class="min-w-0">

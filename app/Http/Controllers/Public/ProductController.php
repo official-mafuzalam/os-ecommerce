@@ -24,8 +24,8 @@ class ProductController extends Controller
             'category:id,name,slug',
             'brand:id,name,slug',
             'images' => function ($q) {
-                // Remove 'order' column since it doesn't exist
-                $q->where('is_primary', true)->limit(1);
+                // Load primary image first, then fallback to any first image
+                $q->orderByDesc('is_primary')->limit(1);
             }
         ])
             ->where('is_active', true)

@@ -37,7 +37,7 @@
                 <!-- Main Image -->
                 <div class="bg-white rounded-lg border border-gray-200 p-3">
                     <img id="mainProductImage"
-                        src="{{ $product->images->first() ? Storage::url($product->images->first()->image_path) : 'https://via.placeholder.com/300' }}"
+                        src="{{ $product->images->first() ? Storage::url($product->images->first()->image_path) : '/assets/placeholder.svg' }}"
                         alt="{{ $product->name }}" class="w-full h-64 object-contain">
                 </div>
 

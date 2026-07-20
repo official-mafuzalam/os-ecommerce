@@ -4,7 +4,17 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <x-meta />
     <title>@yield('title', setting('site_name', 'Prokiti Sudha'))</title>
+    <!-- Favicon -->
+    @if (setting('site_favicon'))
+        <link rel="icon" href="{{ Storage::url(setting('site_favicon')) }}" type="image/x-icon">
+        <link rel="apple-touch-icon" href="{{ Storage::url(setting('site_favicon')) }}">
+    @else
+        <link rel="icon" href="{{ asset('assets/logo/icon.png') }}" type="image/x-icon">
+    @endif
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link
         href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:wght@400;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap"
@@ -12,7 +22,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
-    </script>
+    @include('layouts.public.head-scripts')
     <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -56,8 +66,18 @@
                     href="{{ route('public.contact') }}">Contact</a>
             </div>
             <div class="flex items-center space-x-md">
-                <button
-                    class="material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform">shopping_cart</button>
+                @php
+                    $sessionCart = App\Models\ShoppingCart::where('session_id', session()->getId())->first();
+                    $cartCount = $sessionCart ? $sessionCart->items()->sum('quantity') : 0;
+                @endphp
+                <a href="{{ route('public.cart') }}"
+                    class="relative material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform">
+                    shopping_cart
+                    @if ($cartCount > 0)
+                        <span
+                            class="absolute -top-2 -right-2 bg-tertiary-fixed text-on-tertiary-fixed px-sm py-1 rounded-full font-label-md text-[10px] uppercase tracking-tighter">{{ $cartCount }}</span>
+                    @endif
+                </a>
                 <button
                     class="material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform">person</button>
                 <button class="md:hidden material-symbols-outlined text-primary">menu</button>

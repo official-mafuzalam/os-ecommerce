@@ -126,7 +126,7 @@
                                     <div class="flex items-start space-x-3">
                                         <div
                                             class="flex-shrink-0 w-12 h-12 rounded border border-gray-200 overflow-hidden">
-                                            <img src="{{ $item->product->images->where('is_primary', true)->first() ? Storage::url($item->product->images->where('is_primary', true)->first()->image_path) : 'https://via.placeholder.com/48' }}"
+                                            <img src="{{ $item->product->images->where('is_primary', true)->first() ? Storage::url($item->product->images->where('is_primary', true)->first()->image_path) : '/assets/placeholder.svg' }}"
                                                 alt="{{ $item->product->name }}" class="w-full h-full object-cover">
                                         </div>
                                         <div class="flex-1">

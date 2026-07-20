@@ -30,7 +30,7 @@ class Carousel extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->image ? Storage::url($this->image) : 'https://via.placeholder.com/1200x600';
+        return $this->image ? Storage::url($this->image) : asset('assets/placeholder.svg');
     }
 
     public function scopeActive($query)

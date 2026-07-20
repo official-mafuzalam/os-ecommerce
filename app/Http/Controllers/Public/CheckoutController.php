@@ -250,7 +250,6 @@ class CheckoutController extends Controller
             ]);
 
             return redirect()->route('public.order.complete', ['order_number' => $order->order_number]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Order Error: ' . $e->getMessage());
@@ -285,7 +284,7 @@ class CheckoutController extends Controller
             'tracking_number' => 'required|string|max:255'
         ]);
 
-        $order = Order::with(['items.product', 'items.attributes', 'shippingAddress'])
+        $order = Order::with(['items.product.images', 'items.attributes', 'shippingAddress'])
             ->where('order_number', $request->tracking_number)
             ->first();
 
@@ -293,6 +292,12 @@ class CheckoutController extends Controller
             return back()->withErrors(['message' => 'No order found with provided tracking number.'])->withInput();
         }
 
-        return view('public.parcel-tracking', ['order' => $order]);
+        // Fetch recommended products
+        $recommendedProducts = Product::with('images')->where('is_active', true)->inRandomOrder()->take(4)->get();
+
+        return view('public.parcel-tracking', [
+            'order' => $order,
+            'recommendedProducts' => $recommendedProducts
+        ]);
     }
 }

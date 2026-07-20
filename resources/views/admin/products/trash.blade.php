@@ -193,7 +193,7 @@
                                         <div class="flex items-center">
                                             <div class="h-10 w-10 flex-shrink-0">
                                                 <img class="h-10 w-10 rounded-md object-cover"
-                                                    src="{{ $product->images->where('is_primary', true)->first() ? Storage::url($product->images->where('is_primary', true)->first()->image_path) : 'https://via.placeholder.com/40' }}"
+                                                    src="{{ $product->images->where('is_primary', true)->first() ? Storage::url($product->images->where('is_primary', true)->first()->image_path) : '/assets/placeholder.svg' }}"
                                                     alt="{{ $product->name }}">
                                             </div>
                                             <div class="ml-4">
