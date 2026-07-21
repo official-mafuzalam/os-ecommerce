@@ -200,59 +200,112 @@
         <section class="bg-surface-container-low py-xl px-margin-desktop overflow-hidden relative">
             <div class="max-w-container-max mx-auto relative z-10">
                 <div class="flex flex-col items-center text-center mb-xl">
-                    <h2 class="font-headline-lg text-headline-lg text-primary mb-sm">Pure Composition</h2>
+                    <h2 class="font-headline-lg text-headline-lg text-primary mb-sm">
+                        কেন {{ setting('site_name') }}?
+                    </h2>
                     <div class="w-16 h-1 bg-tertiary-fixed-dim rounded-full"></div>
                 </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-xl">
+
+                    <!-- Card 1 -->
                     <div
                         class="flex flex-col items-center text-center gap-md p-lg bg-surface/50 backdrop-blur-sm rounded-[24px] hover:shadow-xl transition-all duration-500">
+
                         <div class="w-16 h-16 bg-primary-container/10 rounded-full flex items-center justify-center">
-                            <span class="material-symbols-outlined text-primary text-[32px]">filter_vintage</span>
+                            <span class="material-symbols-outlined text-primary text-[32px]">
+                                eco
+                            </span>
                         </div>
-                        <h3 class="font-label-md text-label-md text-primary">Single Origin</h3>
-                        <p class="font-body-md text-body-md text-on-surface-variant">100% Wild-harvested leaves
-                            from high-altitude natural groves.</p>
+
+                        <h3 class="font-label-md text-label-md text-primary">
+                            যত্নে নির্বাচিত প্রাকৃতিক উপাদান
+                        </h3>
+
+                        <p class="font-body-md text-body-md text-on-surface-variant">
+                            বিশ্বস্ত উৎস থেকে সংগ্রহ করা প্রাকৃতিক উপাদান দিয়ে তৈরি
+                            স্বাস্থ্যকর ওয়েলনেস পণ্য।
+                        </p>
+
                     </div>
+
+                    <!-- Card 2 -->
                     <div
                         class="flex flex-col items-center text-center gap-md p-lg bg-surface/50 backdrop-blur-sm rounded-[24px] hover:shadow-xl transition-all duration-500">
+
                         <div class="w-16 h-16 bg-primary-container/10 rounded-full flex items-center justify-center">
-                            <span class="material-symbols-outlined text-primary text-[32px]">nature</span>
+                            <span class="material-symbols-outlined text-primary text-[32px]">
+                                verified
+                            </span>
                         </div>
-                        <h3 class="font-label-md text-label-md text-primary">No Additives</h3>
-                        <p class="font-body-md text-body-md text-on-surface-variant">Free from synthetic fillers,
-                            colors, or preservatives. Just pure, ground plant life.</p>
+
+                        <h3 class="font-label-md text-label-md text-primary">
+                            বিশুদ্ধতা ও মানের প্রতি অঙ্গীকার
+                        </h3>
+
+                        <p class="font-body-md text-body-md text-on-surface-variant">
+                            পরিচ্ছন্ন প্রক্রিয়াকরণ, নিরাপদ প্যাকেজিং এবং প্রতিটি ধাপে
+                            গুণগত মান বজায় রাখার প্রচেষ্টা।
+                        </p>
+
                     </div>
+
+                    <!-- Card 3 -->
                     <div
                         class="flex flex-col items-center text-center gap-md p-lg bg-surface/50 backdrop-blur-sm rounded-[24px] hover:shadow-xl transition-all duration-500">
+
                         <div class="w-16 h-16 bg-primary-container/10 rounded-full flex items-center justify-center">
-                            <span class="material-symbols-outlined text-primary text-[32px]">science</span>
+                            <span class="material-symbols-outlined text-primary text-[32px]">
+                                favorite
+                            </span>
                         </div>
-                        <h3 class="font-label-md text-label-md text-primary">Lab Tested</h3>
-                        <p class="font-body-md text-body-md text-on-surface-variant">Rigorous third-party testing
-                            for
-                            purity, potency, and heavy metal clearance.</p>
+
+                        <h3 class="font-label-md text-label-md text-primary">
+                            স্বাস্থ্যকর জীবনযাপনের সঙ্গী
+                        </h3>
+
+                        <p class="font-body-md text-body-md text-on-surface-variant">
+                            প্রতিদিনের খাদ্যাভ্যাসকে আরও পুষ্টিকর ও স্বাস্থ্যসচেতন করতে
+                            আপনার বিশ্বস্ত সঙ্গী।
+                        </p>
+
                     </div>
+
                 </div>
 
                 {{-- Product Details --}}
-                @if ($product->ingredients || $product->weight || $product->length || $product->shipping_class || $product->origin_country || $product->material || $product->warranty_info || $product->usage_instructions || $product->care_instructions || ($product->certifications && count($product->certifications) > 0) || ($product->tags && count($product->tags) > 0))
+                @if (
+                    $product->ingredients ||
+                        $product->weight ||
+                        $product->length ||
+                        $product->shipping_class ||
+                        $product->origin_country ||
+                        $product->material ||
+                        $product->warranty_info ||
+                        $product->usage_instructions ||
+                        $product->care_instructions ||
+                        ($product->certifications && count($product->certifications) > 0) ||
+                        ($product->tags && count($product->tags) > 0))
                     <div class="mt-xl grid grid-cols-1 md:grid-cols-2 gap-gutter">
                         @if ($product->ingredients)
                             <div class="p-md bg-surface/50 rounded-[24px] md:col-span-2">
                                 <span class="font-label-md text-primary block mb-xs">Ingredients</span>
-                                <p class="font-body-md text-on-surface-variant whitespace-pre-line">{{ $product->ingredients }}</p>
+                                <p class="font-body-md text-on-surface-variant whitespace-pre-line">
+                                    {{ $product->ingredients }}</p>
                             </div>
                         @endif
                         @if ($product->usage_instructions)
                             <div class="p-md bg-surface/50 rounded-[24px] md:col-span-2">
                                 <span class="font-label-md text-primary block mb-xs">Usage Instructions</span>
-                                <p class="font-body-md text-on-surface-variant whitespace-pre-line">{{ $product->usage_instructions }}</p>
+                                <p class="font-body-md text-on-surface-variant whitespace-pre-line">
+                                    {{ $product->usage_instructions }}</p>
                             </div>
                         @endif
                         @if ($product->care_instructions)
                             <div class="p-md bg-surface/50 rounded-[24px] md:col-span-2">
                                 <span class="font-label-md text-primary block mb-xs">Care Instructions</span>
-                                <p class="font-body-md text-on-surface-variant whitespace-pre-line">{{ $product->care_instructions }}</p>
+                                <p class="font-body-md text-on-surface-variant whitespace-pre-line">
+                                    {{ $product->care_instructions }}</p>
                             </div>
                         @endif
                         @if ($product->material)
@@ -277,7 +330,8 @@
                             <div class="p-md bg-surface/50 rounded-[24px]">
                                 <span class="font-label-md text-primary block mb-xs">Dimensions (L × W × H)</span>
                                 <p class="font-body-md text-on-surface-variant">
-                                    {{ $product->length ?? '-' }} × {{ $product->width ?? '-' }} × {{ $product->height ?? '-' }} cm
+                                    {{ $product->length ?? '-' }} × {{ $product->width ?? '-' }} ×
+                                    {{ $product->height ?? '-' }} cm
                                 </p>
                             </div>
                         @endif
@@ -298,7 +352,8 @@
                                 <span class="font-label-md text-primary block mb-xs">Certifications</span>
                                 <div class="flex flex-wrap gap-xs mt-xs">
                                     @foreach ($product->certifications as $cert)
-                                        <span class="px-sm py-xs bg-primary/10 text-primary font-label-md text-xs rounded-full">{{ $cert }}</span>
+                                        <span
+                                            class="px-sm py-xs bg-primary/10 text-primary font-label-md text-xs rounded-full">{{ $cert }}</span>
                                     @endforeach
                                 </div>
                             </div>
@@ -308,7 +363,8 @@
                                 <span class="font-label-md text-primary block mb-xs">Tags</span>
                                 <div class="flex flex-wrap gap-xs mt-xs">
                                     @foreach ($product->tags as $tag)
-                                        <span class="px-sm py-xs bg-secondary/10 text-secondary font-label-md text-xs rounded-full">#{{ $tag }}</span>
+                                        <span
+                                            class="px-sm py-xs bg-secondary/10 text-secondary font-label-md text-xs rounded-full">#{{ $tag }}</span>
                                     @endforeach
                                 </div>
                             </div>

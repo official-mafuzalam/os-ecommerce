@@ -64,8 +64,6 @@ class CheckoutController extends Controller
     // Buy now for a single product
     public function buyNow(Product $product, Request $request)
     {
-        Log::info('Buy Now Request Data:', $request->all());
-
         $quantity = $request->input('quantity', 1);
 
         if ($quantity < 1)
@@ -88,13 +86,8 @@ class CheckoutController extends Controller
         // Handle attributes if provided
         $attributes = $request->input('attributes', []);
         if (!empty($attributes)) {
-            Log::info('Attributes received:', $attributes);
-
             foreach ($attributes as $attributeIdentifier => $value) {
                 if ($value) {
-                    Log::info("Processing attribute: ID={$attributeIdentifier}, Value={$value}");
-
-                    // Find attribute by ID, slug, or name
                     $attribute = null;
 
                     // First, try to find by ID (if numeric)
@@ -110,14 +103,10 @@ class CheckoutController extends Controller
                     }
 
                     if ($attribute) {
-                        Log::info("Found attribute: ID={$attribute->id}, Name={$attribute->name}");
-
                         $item->attributes()->attach($attribute->id, [
                             'value' => $value,
                             'order' => $attribute->order ?? 0
                         ]);
-
-                        Log::info("Attribute attached successfully");
                     } else {
                         Log::warning("Attribute not found: {$attributeIdentifier}");
                     }
@@ -125,21 +114,8 @@ class CheckoutController extends Controller
             }
         }
 
-        Log::info('Cart item created:', $item->toArray());
-
         // Reload the item with attributes
         $item->load('attributes');
-
-        Log::info('Attributes attached to cart item: ', [
-            'count' => $item->attributes->count(),
-            'attributes' => $item->attributes->map(function ($attr) {
-                return [
-                    'id' => $attr->id,
-                    'name' => $attr->name,
-                    'value' => $attr->pivot->value
-                ];
-            })->toArray()
-        ]);
 
         return redirect()->route('public.checkout')->with('success', $product->name . ' added for checkout.');
     }
@@ -191,9 +167,9 @@ class CheckoutController extends Controller
             $subtotal = $cartItems->sum('total_price');
 
             $order = Order::create([
-                'order_number' => Order::generateOrderNumber(),
                 'customer_email' => $request->email,
                 'customer_phone' => $request->phone,
+                'ip_address' => $request->ip(),
                 'subtotal' => $subtotal,
                 'shipping_cost' => $deliveryCharge,
                 'discount_amount' => 0,

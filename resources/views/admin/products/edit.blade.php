@@ -843,6 +843,10 @@
                         if (data.description) {
                             descriptionField.value = data.description;
                             
+                            if (data.short_description && document.getElementById('short_description')) {
+                                document.getElementById('short_description').value = data.short_description;
+                            }
+
                             // Auto-populate SEO Settings & Product Details
                             if (data.meta_title && document.getElementById('meta_title')) {
                                 document.getElementById('meta_title').value = data.meta_title;

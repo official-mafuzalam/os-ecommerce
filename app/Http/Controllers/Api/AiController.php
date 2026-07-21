@@ -54,6 +54,7 @@ Target Audience: {$audience}
 You MUST return a valid JSON object. Do not include any markdown formatting wrappers or text other than the JSON object itself.
 Use this JSON schema:
 {
+  \"short_description\": \"Catchy punchy summary (max 150 characters)\",
   \"description\": \"Comprehensive premium description containing a headline, benefits, features, target users, and Call To Action.\",
   \"meta_title\": \"SEO Meta Title (max 60 characters)\",
   \"meta_description\": \"SEO Meta Description (max 160 characters)\",
@@ -110,6 +111,10 @@ Use this JSON schema:
             return response()->json(['error' => 'Gemini API key is not configured.'], 500);
         }
 
+        if (session()->isStarted()) {
+            session_write_close();
+        }
+
         try {
             $response = Http::withHeaders(['Content-Type' => 'application/json'])
                 ->withOptions([
@@ -126,6 +131,7 @@ Use this JSON schema:
             }
 
             $result = $response->json();
+            $shortDescription = '';
             $description = null;
             $metaTitle = '';
             $metaDescription = '';
@@ -151,6 +157,7 @@ Use this JSON schema:
                 
                 $data = json_decode(trim($jsonStr), true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
+                    $shortDescription = $data['short_description'] ?? '';
                     $description = $data['description'] ?? '';
                     $metaTitle = $data['meta_title'] ?? '';
                     $metaDescription = $data['meta_description'] ?? '';
@@ -172,6 +179,7 @@ Use this JSON schema:
             }
 
             return response()->json([
+                'short_description' => $shortDescription,
                 'description' => $description,
                 'meta_title' => $metaTitle,
                 'meta_description' => $metaDescription,

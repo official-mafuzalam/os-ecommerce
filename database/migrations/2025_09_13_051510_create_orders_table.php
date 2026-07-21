@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->string('order_number')->unique();
             $table->string('customer_email')->nullable();
             $table->string('customer_phone');
+            $table->ipAddress('ip_address')->nullable();
             $table->decimal('subtotal', 10, 2);
             $table->decimal('shipping_cost', 10, 2)->default(0);
             $table->decimal('discount_amount', 10, 2)->default(0);

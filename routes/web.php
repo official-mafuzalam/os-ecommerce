@@ -55,7 +55,7 @@ Route::middleware(['web'])->group(function () {
     // Checkout routes
     Route::get('/buy-now/{product}', [CheckoutController::class, 'buyNow'])->name('public.products.buy-now');
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('public.checkout');
-    Route::post('/checkout', [CheckoutController::class, 'process'])->name('public.checkout.process');
+    Route::post('/checkout', [CheckoutController::class, 'process'])->middleware('throttle:5,1')->name('public.checkout.process');
     Route::get('/order-complete', [CheckoutController::class, 'orderComplete'])->name('public.order.complete');
     Route::get('/track-parcel', [CheckoutController::class, 'orderTrack'])->name('public.parcel.tracking');
     Route::post('/track-parcel', [CheckoutController::class, 'track'])->name('public.parcel.tracking.submit');

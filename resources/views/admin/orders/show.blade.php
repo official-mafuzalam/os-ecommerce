@@ -313,6 +313,15 @@
                                     <p class="text-sm text-gray-900 truncate">{{ $order->customer_email }}</p>
                                 </div>
                             @endif
+                            @if ($order->ip_address)
+                                <div>
+                                    <p class="text-xs text-gray-500">IP Address & Location</p>
+                                    <p class="text-sm font-mono text-gray-900">{{ $order->ip_address }}</p>
+                                    <a href="https://ipinfo.io/{{ $order->ip_address }}" target="_blank" class="inline-flex items-center text-xs text-blue-600 hover:underline mt-0.5">
+                                        Check IP Location ↗
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

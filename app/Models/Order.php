@@ -14,6 +14,7 @@ class Order extends Model
         'order_number',
         'customer_email',
         'customer_phone',
+        'ip_address',
         'subtotal',
         'shipping_cost',
         'discount_amount',
@@ -32,6 +33,14 @@ class Order extends Model
         'discount_amount' => 'decimal:2',
         'total_amount' => 'decimal:2'
     ];
+
+    // Booted
+    protected static function booted()
+    {
+        static::creating(function ($order) {
+            $order->order_number = Order::generateOrderNumber();
+        });
+    }
 
     // Relationships
     public function items()
