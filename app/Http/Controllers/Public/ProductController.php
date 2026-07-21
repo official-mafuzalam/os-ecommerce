@@ -24,9 +24,9 @@ class ProductController extends Controller
             'category:id,name,slug',
             'brand:id,name,slug',
             'images' => function ($q) {
-                // Load primary image first, then fallback to any first image
                 $q->orderByDesc('is_primary')->limit(1);
-            }
+            },
+            'detail:product_id,short_description,description',
         ])
             ->where('is_active', true)
             ->select('products.*');
@@ -276,7 +276,7 @@ class ProductController extends Controller
         view()->share('product', $product);
 
         // Eager load relationships
-        $product->load(['category', 'brand', 'attributes', 'reviews.user']);
+        $product->load(['category', 'brand', 'attributes', 'reviews.user', 'detail', 'seo']);
 
         // Related products logic
         $relatedProducts = Product::where('category_id', $product->category_id)

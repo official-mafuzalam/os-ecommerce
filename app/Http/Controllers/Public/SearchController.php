@@ -14,15 +14,17 @@ class SearchController extends Controller
     {
         $query = $request->get('q');
 
-        $products = Product::with(['category', 'brand'])
+        $products = Product::with(['category', 'brand', 'detail:product_id,short_description,description'])
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->where('is_active', true)
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($q) use ($query) {
                     $q->where('name', 'like', "%{$query}%")
-                        ->orWhere('description', 'like', "%{$query}%")
                         ->orWhere('sku', 'like', "%{$query}%")
+                        ->orWhereHas('detail', function ($q) use ($query) {
+                            $q->where('description', 'like', "%{$query}%");
+                        })
                         ->orWhereHas('category', function ($q) use ($query) {
                             $q->where('name', 'like', "%{$query}%");
                         })
@@ -47,7 +49,10 @@ class SearchController extends Controller
             $results = Product::where('is_active', true)
                 ->where(function ($q) use ($query) {
                     $q->where('name', 'like', "%{$query}%")
-                        ->orWhere('description', 'like', "%{$query}%");
+                        ->orWhere('sku', 'like', "%{$query}%")
+                        ->orWhereHas('detail', function ($q) use ($query) {
+                            $q->where('description', 'like', "%{$query}%");
+                        });
                 })
                 ->take(5)
                 ->get()

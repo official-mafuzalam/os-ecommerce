@@ -19,13 +19,13 @@ class HomeController extends Controller
         $carousels = Carousel::active()->ordered()->get();
         $deal = Deal::getCurrentDeal();
 
-        $allProducts = Product::with(['category', 'brand', 'images'])
+        $allProducts = Product::with(['category', 'brand', 'images', 'detail:product_id,short_description,description'])
             ->where('is_active', true)
             ->latest()
             ->take(24)
             ->get();
 
-        $featuredProducts = Product::with(['category', 'brand', 'images'])
+        $featuredProducts = Product::with(['category', 'brand', 'images', 'detail:product_id,short_description,description'])
             ->where('is_featured', true)
             ->where('is_active', true)
             ->take(12)

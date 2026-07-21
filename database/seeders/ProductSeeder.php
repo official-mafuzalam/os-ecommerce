@@ -479,15 +479,23 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($products as $productData) {
+            // Extract detail fields before product create
+            $detailFields = [
+                'description'    => $productData['description'] ?? null,
+                'specifications' => $productData['specifications'] ?? null,
+            ];
+            unset($productData['description'], $productData['specifications']);
+
             // Generate slug from name
             $productData['slug'] = Str::slug($productData['name']);
-
-            // Set default values
             $productData['is_active'] = true;
-            $productData['is_featured'] = rand(0, 1); // Randomly set some as featured
+            $productData['is_featured'] = rand(0, 1);
 
-            // Create the product
-            Product::create($productData);
+            // Create core product
+            $product = Product::create($productData);
+
+            // Create product_details record
+            $product->detail()->create($detailFields);
         }
     }
 }

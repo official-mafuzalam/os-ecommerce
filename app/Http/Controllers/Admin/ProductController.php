@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
 use App\Models\Product;
+use App\Models\ProductDetail;
+use App\Models\ProductSeo;
 use App\Models\Category;
 use App\Models\Brand;
 use App\Models\Deal;
@@ -157,24 +159,60 @@ class ProductController extends Controller
             $validated['is_new_arrival'] = $request->boolean('is_new_arrival');
             $validated['is_bestseller'] = $request->boolean('is_bestseller');
 
-            if ($request->filled('tags')) {
-                $validated['tags'] = array_map('trim', explode(',', $request->tags));
-            } else {
-                $validated['tags'] = null;
-            }
+            $tags = $request->filled('tags')
+                ? array_map('trim', explode(',', $request->tags))
+                : null;
 
-            if ($request->filled('certifications')) {
-                $validated['certifications'] = array_map('trim', explode(',', $request->certifications));
-            } else {
-                $validated['certifications'] = null;
-            }
+            $certifications = $request->filled('certifications')
+                ? array_map('trim', explode(',', $request->certifications))
+                : null;
 
-            if (!empty($validated['specifications'])) {
-                $validated['specifications'] = json_decode($validated['specifications'], true);
-            }
+            $specifications = !empty($validated['specifications'])
+                ? json_decode($validated['specifications'], true)
+                : null;
 
-            // Create product
-            $product = Product::create($validated);
+            // Extract detail & seo fields before product create
+            $detailFields = [
+                'description'        => $validated['description'] ?? null,
+                'short_description'  => $validated['short_description'] ?? null,
+                'weight'             => $validated['weight'] ?? null,
+                'length'             => $validated['length'] ?? null,
+                'width'              => $validated['width'] ?? null,
+                'height'             => $validated['height'] ?? null,
+                'tags'               => $tags,
+                'label'              => $validated['label'] ?? null,
+                'ingredients'        => $validated['ingredients'] ?? null,
+                'usage_instructions' => $validated['usage_instructions'] ?? null,
+                'warranty_info'      => $validated['warranty_info'] ?? null,
+                'origin_country'     => $validated['origin_country'] ?? null,
+                'certifications'     => $certifications,
+                'material'           => $validated['material'] ?? null,
+                'care_instructions'  => $validated['care_instructions'] ?? null,
+                'specifications'     => $specifications,
+            ];
+
+            $seoFields = [
+                'meta_title'       => $validated['meta_title'] ?? null,
+                'meta_description' => $validated['meta_description'] ?? null,
+                'meta_keywords'    => $validated['meta_keywords'] ?? null,
+            ];
+
+            // Remove detail/seo fields from validated before Product::create
+            $productFields = array_diff_key($validated, array_flip([
+                'description', 'short_description', 'weight', 'length', 'width', 'height',
+                'tags', 'label', 'ingredients', 'usage_instructions', 'warranty_info',
+                'origin_country', 'certifications', 'material', 'care_instructions', 'specifications',
+                'meta_title', 'meta_description', 'meta_keywords', 'og_image',
+            ]));
+
+            // Create core product
+            $product = Product::create($productFields);
+
+            // Create product_details record
+            $product->detail()->create($detailFields);
+
+            // Create product_seos record
+            $product->seo()->create($seoFields);
 
             // Save product attributes
             if ($request->filled('product_attributes')) {
@@ -183,10 +221,10 @@ class ProductController extends Controller
                         foreach ($attributeData['values'] as $valueIndex => $value) {
                             if (!empty(trim($value))) {
                                 ProductAttribute::create([
-                                    'product_id' => $product->id,
+                                    'product_id'   => $product->id,
                                     'attribute_id' => $attributeData['id'],
-                                    'value' => trim($value),
-                                    'order' => $valueIndex
+                                    'value'        => trim($value),
+                                    'order'        => $valueIndex
                                 ]);
                             }
                         }
@@ -199,13 +237,13 @@ class ProductController extends Controller
                 $imagePaths = $this->imageCompressor->bulkCompress(
                     $request->file('image_gallery'),
                     [
-                        'max_size_kb' => 200,
-                        'max_width' => 1200,
-                        'max_height' => 1200,
-                        'target_ratio' => 4 / 3,
-                        'format' => 'jpg',
-                        'storage_path' => 'products/gallery',
-                        'filename_prefix' => 'prod-' . $product->id,
+                        'max_size_kb'    => 200,
+                        'max_width'      => 1200,
+                        'max_height'     => 1200,
+                        'target_ratio'   => 4 / 3,
+                        'format'         => 'jpg',
+                        'storage_path'   => 'products/gallery',
+                        'filename_prefix'=> 'prod-' . $product->id,
                         'strip_metadata' => true,
                     ]
                 );
@@ -214,7 +252,7 @@ class ProductController extends Controller
                     ProductImage::create([
                         'product_id' => $product->id,
                         'image_path' => $path,
-                        'is_primary' => $index === 0, // First image is primary
+                        'is_primary' => $index === 0,
                     ]);
                 }
             }
@@ -243,7 +281,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $allDeals = Deal::active()->ordered()->get();
-        $product->load(['category', 'brand', 'images', 'attributes']);
+        $product->load(['category', 'brand', 'images', 'attributes', 'detail', 'seo']);
 
         $groupedAttributes = $product->attributes
             ->groupBy('id')
@@ -267,7 +305,7 @@ class ProductController extends Controller
         $allAttributes = Attribute::where('is_active', true)->get();
 
         // Load product attributes with pivot values
-        $product->load('attributes');
+        $product->load(['attributes', 'detail', 'seo']);
 
         // Group attributes by attribute_id and collect values
         $groupedAttributes = $product->attributes
@@ -353,25 +391,60 @@ class ProductController extends Controller
             $validated['is_new_arrival'] = $request->boolean('is_new_arrival');
             $validated['is_bestseller'] = $request->boolean('is_bestseller');
 
-            if ($request->filled('tags')) {
-                $validated['tags'] = array_map('trim', explode(',', $request->tags));
-            } else {
-                $validated['tags'] = null;
-            }
+            $tags = $request->filled('tags')
+                ? array_map('trim', explode(',', $request->tags))
+                : null;
 
-            if ($request->filled('certifications')) {
-                $validated['certifications'] = array_map('trim', explode(',', $request->certifications));
-            } else {
-                $validated['certifications'] = null;
-            }
+            $certifications = $request->filled('certifications')
+                ? array_map('trim', explode(',', $request->certifications))
+                : null;
 
-            // Decode specifications JSON
-            if (!empty($validated['specifications'])) {
-                $validated['specifications'] = json_decode($validated['specifications'], true);
-            }
+            $specifications = !empty($validated['specifications'])
+                ? json_decode($validated['specifications'], true)
+                : null;
 
-            // Update product
-            $product->update($validated);
+            // Extract detail & seo fields
+            $detailFields = [
+                'description'        => $validated['description'] ?? null,
+                'short_description'  => $validated['short_description'] ?? null,
+                'weight'             => $validated['weight'] ?? null,
+                'length'             => $validated['length'] ?? null,
+                'width'              => $validated['width'] ?? null,
+                'height'             => $validated['height'] ?? null,
+                'tags'               => $tags,
+                'label'              => $validated['label'] ?? null,
+                'ingredients'        => $validated['ingredients'] ?? null,
+                'usage_instructions' => $validated['usage_instructions'] ?? null,
+                'warranty_info'      => $validated['warranty_info'] ?? null,
+                'origin_country'     => $validated['origin_country'] ?? null,
+                'certifications'     => $certifications,
+                'material'           => $validated['material'] ?? null,
+                'care_instructions'  => $validated['care_instructions'] ?? null,
+                'specifications'     => $specifications,
+            ];
+
+            $seoFields = [
+                'meta_title'       => $validated['meta_title'] ?? null,
+                'meta_description' => $validated['meta_description'] ?? null,
+                'meta_keywords'    => $validated['meta_keywords'] ?? null,
+            ];
+
+            // Remove detail/seo fields from validated before product update
+            $productFields = array_diff_key($validated, array_flip([
+                'description', 'short_description', 'weight', 'length', 'width', 'height',
+                'tags', 'label', 'ingredients', 'usage_instructions', 'warranty_info',
+                'origin_country', 'certifications', 'material', 'care_instructions', 'specifications',
+                'meta_title', 'meta_description', 'meta_keywords', 'og_image',
+            ]));
+
+            // Update core product
+            $product->update($productFields);
+
+            // Upsert product_details
+            $product->detail()->updateOrCreate(['product_id' => $product->id], $detailFields);
+
+            // Upsert product_seos
+            $product->seo()->updateOrCreate(['product_id' => $product->id], $seoFields);
 
             // Handle image removal
             if ($request->has('remove_images') && !empty($request->remove_images)) {
