@@ -13,25 +13,43 @@ class SettingsSeeder extends Seeder
         // API Settings (dynamic)
         // --------------------
         $apis = [
-            // 'openai' => [
-            //     'key' => env('OPENAI_API_KEY', null),
-            //     'enabled' => true,
-            //     'model' => 'gpt-3.5-turbo',
-            // ],
-            // 'mistral' => [
-            //     'key' => env('MISTRAL_API_KEY', null),
-            //     'enabled' => false,
-            //     'model' => 'open-mistral-8x22b',
-            // ],
-            // 'deepseek' => [
-            //     'key' => env('DEEPSEEK_API_KEY', null),
-            //     'enabled' => false,
-            //     'model' => 'deepseek-chat',
-            // ],
+            'active' => [
+                'provider' => env('AI_ACTIVE_PROVIDER', 'gemini'), // gemini, groq, openrouter, deepseek, zai, mistral, openai
+            ],
             'gemini' => [
                 'key' => env('GOOGLE_API_KEY', null),
+                'enabled' => true,
+                'model' => 'gemini-1.5-flash',
+            ],
+            'groq' => [
+                'key' => env('GROQ_API_KEY', null),
                 'enabled' => false,
-                'model' => 'gemini-3-flash-preview',
+                'model' => 'llama-3.3-70b-versatile',
+            ],
+            'openrouter' => [
+                'key' => env('OPENROUTER_API_KEY', null),
+                'enabled' => false,
+                'model' => 'google/gemini-2.0-flash-lite:free',
+            ],
+            'zai' => [
+                'key' => env('ZAI_API_KEY', null),
+                'enabled' => false,
+                'model' => 'glm-4-flash',
+            ],
+            'deepseek' => [
+                'key' => env('DEEPSEEK_API_KEY', null),
+                'enabled' => false,
+                'model' => 'deepseek-chat',
+            ],
+            'mistral' => [
+                'key' => env('MISTRAL_API_KEY', null),
+                'enabled' => false,
+                'model' => 'mistral-small-latest',
+            ],
+            'openai' => [
+                'key' => env('OPENAI_API_KEY', null),
+                'enabled' => false,
+                'model' => 'gpt-4o-mini',
             ],
         ];
 

@@ -99,7 +99,7 @@ Route::middleware('web')->group(function () {
 // ADMIN ROUTES (Require Valid License)
 // =====================================================================
 Route::middleware(['auth', 'license.check', 'role:super_admin|admin|user'])->group(function () {
-    Route::prefix('admin')->group(function () {
+    Route::prefix('sotti-boltece-ami-admin')->group(function () {
         Route::get('/', [HomeController::class, 'index'])->name('admin.index');
 
         // Admin Order Routes
@@ -196,7 +196,7 @@ Route::middleware(['auth', 'license.check', 'role:super_admin|admin|user'])->gro
 // SUPER ADMIN ROUTES (Also Require Valid License)
 // =====================================================================
 Route::middleware(['auth', 'license.check', 'role:super_admin'])->group(function () {
-    Route::prefix('admin')->group(function () {
+    Route::prefix('sotti-boltece-ami-admin')->group(function () {
         // Roles
         Route::get('/role', [RoleController::class, 'role'])->name('admin.role');
         Route::get('/role/create', [RoleController::class, 'roleCreatePage'])->name('admin.role.createPage');

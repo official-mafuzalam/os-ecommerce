@@ -34,17 +34,11 @@ class LicenseService
         }
 
         try {
-            $response = Http::timeout(10)
-                ->retry(2, 100)
+            $response = Http::timeout(3)
+                ->retry(1, 100)
                 ->post($this->apiUrl . '/clients/verify-by-license', [
                     'license_key' => $this->licenseKey
                 ]);
-
-            // Log the full response for debugging
-            // Log::info('License API Response', [
-            //     'status' => $response->status(),
-            //     'body' => $response->body()
-            // ]);
 
             if ($response->successful()) {
                 $data = $response->json();
@@ -65,6 +59,7 @@ class LicenseService
                 $data['is_in_grace_period'] = $this->isInGracePeriod($data);
                 $data['days_until_expiry'] = $this->getDaysUntilExpiry($data);
                 $data['status_level'] = $this->getStatusLevel($data);
+                $data['api_unreachable'] = false;
 
                 // Cache the response
                 Cache::put($cacheKey, $data, now()->addHours($this->cacheDuration));
@@ -119,35 +114,45 @@ class LicenseService
     }
 
     /**
-     * Fallback data when API fails
+     * Fallback data when API fails or is unreachable
      */
     private function getFallbackData($error = '')
     {
-        $cached = Cache::get(config('license.cache.key'));
+        $cacheKey = config('license.cache.key');
+        $cached = Cache::get($cacheKey);
 
         if ($cached) {
             $cached['api_unreachable'] = true;
             $cached['last_verified'] = $cached['verified_at'] ?? null;
             $cached['error'] = $error;
+
+            // Re-cache for 15 minutes to avoid hammering a down API server
+            Cache::put($cacheKey, $cached, now()->addMinutes(15));
             return $cached;
         }
 
-        // Return default structure with all required keys
-        return [
-            'valid' => false,
+        // Default structure when API is unreachable and no previous cache exists:
+        // Treat as valid with api_unreachable flag so site runs normally
+        $fallback = [
+            'valid' => true,
             'is_expired' => false,
-            'status' => 'unknown',
+            'status' => 'active',
             'client' => [],
             'product' => [],
-            'expires_in_days' => 0,
-            'expires_at_human' => '',
+            'expires_in_days' => 365,
+            'expires_at_human' => 'Unknown (Offline)',
             'is_in_grace_period' => false,
-            'days_until_expiry' => 0,
-            'status_level' => 'unknown',
+            'days_until_expiry' => 365,
+            'status_level' => 'success',
             'verified_at' => now()->toISOString(),
             'api_unreachable' => true,
-            'message' => 'Unable to verify license: ' . $error,
+            'message' => 'License API unreachable, running in offline fallback mode: ' . $error,
         ];
+
+        // Cache fallback for 15 minutes
+        Cache::put($cacheKey, $fallback, now()->addMinutes(15));
+
+        return $fallback;
     }
 
     /**

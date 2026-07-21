@@ -65,8 +65,7 @@
                             class="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-secondary-container/30 blur-3xl rounded-full">
                         </div>
                         <div class="w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl relative">
-                            <img class="w-full h-full object-cover"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzbfkMAdMCN1j4im9Lgk0sm_yuIqWg0_YxM1X4cX0mkBOPgj94kcur2oP5mAUWiFvXdFjSRO6ziJ1CAHu8zum7lOaZMgMgKKaVAtPcp3el27OKnYBYeXZD_pFFtJYL2YAZYYpkFMpkx4Puk3prpKSqQSQ7khIQ7I-R9a4MbYDrwDmecfyX_9_cLRSp2WXSz6qiDKsx--u6Nc0-KcjDf_LOfCxxXkqTpEUnKEk7v7sKz7m4tlIyZP6VCzYXfNhDKfXkYUNh9CT17wvo" />
+                            <img class="w-full h-full object-cover" src="{{ asset('assets/percel-box.jpg') }}" />
                         </div>
                     </div>
                 </div>

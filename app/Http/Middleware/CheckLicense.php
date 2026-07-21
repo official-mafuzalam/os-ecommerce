@@ -27,7 +27,12 @@ class CheckLicense
             return $next($request);
         }
 
-        $licenseStatus = $this->licenseService->getStatus();
+        try {
+            $licenseStatus = $this->licenseService->getStatus();
+        } catch (\Throwable $e) {
+            // Fail open if license service throws any exception
+            return $next($request);
+        }
 
         // Use null coalescing operator to avoid undefined key errors
         $isValid = $licenseStatus['valid'] ?? false;
@@ -39,17 +44,17 @@ class CheckLicense
         // Store license status in session for the warning page
         session(['license_status' => $licenseStatus]);
 
+        // If API is unreachable, allow access immediately without blocking or redirecting
+        if ($apiUnreachable) {
+            $request->attributes->set('license_status', $licenseStatus);
+            return $next($request);
+        }
+
         // Check for suspended/cancelled status - these should block immediately
         $isBlockedStatus = in_array($status, ['suspended', 'cancelled', 'revoked', 'terminated']);
 
         // Block if: invalid AND not in grace period, OR has blocked status
         if ((!$isValid && !$isInGracePeriod) || $isBlockedStatus) {
-            // If API is unreachable, show warning but allow access
-            if ($apiUnreachable) {
-                session()->flash('license.warning', 'Unable to verify license. Using cached data.');
-                return $next($request);
-            }
-
             // Add specific message based on why license is invalid
             if ($isBlockedStatus) {
                 $statusMessages = [
@@ -61,7 +66,6 @@ class CheckLicense
 
                 $message = $statusMessages[$status] ?? "License status: $status";
                 session()->flash('license.danger', $message);
-
             } elseif ($isExpired) {
 
                 $daysAgo = abs($licenseStatus['days_until_expiry']

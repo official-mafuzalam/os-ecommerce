@@ -52,20 +52,36 @@ class CartController extends Controller
     public function add(Request $request, Product $product)
     {
         try {
+            $minQty = max(1, (int) ($product->min_order_quantity ?? 1));
+            $maxQty = $product->max_order_quantity && $product->max_order_quantity > 0
+                ? min((int) $product->max_order_quantity, (int) $product->stock_quantity)
+                : (int) $product->stock_quantity;
+
             $request->validate([
-                'quantity' => 'required|integer|min:1|max:' . ($product->stock_quantity ?? 100)
+                'quantity' => 'required|integer|min:' . $minQty . '|max:' . ($maxQty > 0 ? $maxQty : 1)
             ]);
 
             $cart = $this->getCart();
             $item = $cart->items()->where('product_id', $product->id)->first();
 
+            $requestedQty = (int) $request->quantity;
+            $newTotalQty = ($item ? $item->quantity : 0) + $requestedQty;
+
+            if ($maxQty > 0 && $newTotalQty > $maxQty) {
+                $msg = "Maximum allowed quantity for '{$product->name}' is {$maxQty}.";
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $msg], 422);
+                }
+                return back()->with('error', $msg);
+            }
+
             if ($item) {
-                $item->quantity += $request->quantity;
+                $item->quantity = $newTotalQty;
                 $item->save();
             } else {
                 $item = $cart->items()->create([
                     'product_id' => $product->id,
-                    'quantity' => $request->quantity
+                    'quantity' => $requestedQty
                 ]);
             }
 
@@ -119,7 +135,7 @@ class CartController extends Controller
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to add product to cart.'
+                    'message' => $e->getMessage() ?: 'Failed to add product to cart.'
                 ], 422);
             }
 
@@ -131,15 +147,22 @@ class CartController extends Controller
     public function update(Request $request, $itemId)
     {
         try {
-            $request->validate(['quantity' => 'required|integer|min:1']);
-
             $cart = $this->getCart();
-            $item = $cart->items()->find($itemId);
+            $item = $cart->items()->with('product')->find($itemId);
 
-            if (!$item)
+            if (!$item) {
                 return response()->json(['success' => false, 'message' => 'Not found'], 404);
+            }
 
-            $item->quantity = $request->quantity;
+            $product = $item->product;
+            $minQty = max(1, (int) ($product->min_order_quantity ?? 1));
+            $maxQty = $product->max_order_quantity && $product->max_order_quantity > 0
+                ? min((int) $product->max_order_quantity, (int) $product->stock_quantity)
+                : (int) $product->stock_quantity;
+
+            $request->validate(['quantity' => 'required|integer|min:' . $minQty . '|max:' . ($maxQty > 0 ? $maxQty : 1)]);
+
+            $item->quantity = (int) $request->quantity;
             $item->save();
 
             return response()->json([
@@ -148,7 +171,7 @@ class CartController extends Controller
                 'subtotal' => $cart->subtotal,
             ]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
     }
 

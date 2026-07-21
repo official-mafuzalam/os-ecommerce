@@ -1,2 +1,17 @@
 User-agent: *
-Disallow:
+Disallow: /sotti-boltece-ami-admin
+Allow: /sotti-boltece-ami-admin/*.css
+Allow: /sotti-boltece-ami-admin/*.js
+Allow: /sotti-boltece-ami-admin/*.png
+Allow: /sotti-boltece-ami-admin/*.jpg
+Allow: /sotti-boltece-ami-admin/*.jpeg
+Allow: /sotti-boltece-ami-admin/*.gif
+Allow: /sotti-boltece-ami-admin/*.svg
+Allow: /storage/
+
+# Allow all public routes
+Allow: /
+
+# Disallow admin directory access for search engines
+User-agent: *
+Disallow: /sotti-boltece-ami-admin

@@ -187,6 +187,13 @@
                         <div class="space-y-6">
                             <!-- Quantity Selector -->
                             <div>
+                                @php
+                                    $minOrderQty = max(1, (int) ($product->min_order_quantity ?? 1));
+                                    $maxOrderQty = $product->max_order_quantity && $product->max_order_quantity > 0
+                                        ? min((int) $product->max_order_quantity, (int) $product->stock_quantity)
+                                        : (int) $product->stock_quantity;
+                                @endphp
+
                                 <label class="block text-sm font-medium text-gray-700 mb-3">Quantity</label>
                                 <div class="flex items-center gap-4">
                                     <div class="flex items-center border border-gray-300 rounded-lg">
@@ -194,17 +201,23 @@
                                             class="px-4 py-3 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">
                                             <i class="fas fa-minus"></i>
                                         </button>
-                                        <input type="number" id="quantity" value="1" min="1"
-                                            max="{{ $product->stock_quantity }}"
+                                        <input type="number" id="quantity" value="{{ $minOrderQty }}" min="{{ $minOrderQty }}"
+                                            max="{{ $maxOrderQty > 0 ? $maxOrderQty : 1 }}"
                                             class="w-16 text-center border-0 focus:ring-0 text-lg font-medium">
                                         <button type="button" onclick="increaseQuantity()"
                                             class="px-4 py-3 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">
                                             <i class="fas fa-plus"></i>
                                         </button>
                                     </div>
-                                    <span class="text-sm text-gray-500">
-                                        {{ $product->stock_quantity }} items available
-                                    </span>
+                                    <div class="flex flex-col text-sm text-gray-500">
+                                        <span>{{ $product->stock_quantity }} items available</span>
+                                        @if ($minOrderQty > 1)
+                                            <span class="text-xs text-indigo-600 font-medium">Min order: {{ $minOrderQty }}</span>
+                                        @endif
+                                        @if ($product->max_order_quantity)
+                                            <span class="text-xs text-amber-600 font-medium">Max order: {{ $product->max_order_quantity }}</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
 
@@ -213,7 +226,7 @@
                                 <!-- Add to Cart -->
                                 <form action="{{ route('cart.add', $product) }}" method="POST" id="add-to-cart-form">
                                     @csrf
-                                    <input type="hidden" name="quantity" value="1" id="form-quantity">
+                                    <input type="hidden" name="quantity" value="{{ $minOrderQty }}" id="form-quantity">
                                     @if ($groupedAttributes->count() > 0)
                                         @foreach ($groupedAttributes as $attribute)
                                             <input type="hidden" name="attributes[{{ $attribute['id'] }}]"
@@ -713,10 +726,11 @@
             function decreaseQuantity() {
                 const quantityInput = document.getElementById('quantity');
                 const formQuantityInput = document.getElementById('form-quantity');
+                const min = parseInt(quantityInput.min) || 1;
                 let value = parseInt(quantityInput.value);
-                if (value > 1) {
+                if (value > min) {
                     quantityInput.value = value - 1;
-                    formQuantityInput.value = value - 1;
+                    if (formQuantityInput) formQuantityInput.value = value - 1;
                 }
             }
 

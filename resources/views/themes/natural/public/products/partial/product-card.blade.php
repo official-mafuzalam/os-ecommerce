@@ -14,6 +14,21 @@
             </div>
         @endif
 
+        <!-- Badges -->
+        <div class="absolute top-md left-md flex flex-col gap-1 z-10">
+            @if ($product->is_bestseller)
+                <span class="bg-amber-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm uppercase">
+                    BESTSELLER
+                </span>
+            @endif
+
+            @if ($product->is_new_arrival || (isset($product->created_at) && $product->created_at->gt(now()->subDays(7))))
+                <span class="bg-emerald-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm uppercase">
+                    NEW
+                </span>
+            @endif
+        </div>
+
         @if ($product->category)
             <div
                 class="absolute top-md right-md bg-primary text-white px-sm py-xs rounded-full font-label-md text-caption shadow-md">

@@ -232,6 +232,7 @@ class Product extends Model
     public function decreaseStock($quantity)
     {
         $this->stock_quantity -= $quantity;
+        $this->increment('sales_count', $quantity);
         return $this->save();
     }
 
@@ -239,5 +240,15 @@ class Product extends Model
     {
         $this->stock_quantity += $quantity;
         return $this->save();
+    }
+
+    public function incrementViews()
+    {
+        return $this->increment('views_count');
+    }
+
+    public function incrementSales($quantity = 1)
+    {
+        return $this->increment('sales_count', $quantity);
     }
 }

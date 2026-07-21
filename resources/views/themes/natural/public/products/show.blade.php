@@ -95,26 +95,45 @@
                 </p>
 
                 <div class="flex flex-col gap-md mt-base">
+                    @php
+                        $themeMinQty = max(1, (int) ($product->min_order_quantity ?? 1));
+                        $themeMaxQty = $product->max_order_quantity && $product->max_order_quantity > 0
+                            ? min((int) $product->max_order_quantity, (int) $product->stock_quantity)
+                            : (int) $product->stock_quantity;
+                    @endphp
+
                     <!-- Quantity Controller -->
-                    <div
-                        class="flex items-center justify-between border border-outline-variant rounded-full h-14 px-md">
-                        <button type="button"
-                            class="material-symbols-outlined text-primary hover:bg-surface-container rounded-full p-xs transition-colors"
-                            onclick="const el = document.getElementById('qty-{{ $product->id }}'); el.value = Math.max(1, parseInt(el.value) - 1); document.getElementById('buy-now-qty-{{ $product->id }}').value = el.value">remove</button>
-                        <input type="number" id="qty-{{ $product->id }}" name="quantity" value="1"
-                            min="1"
-                            oninput="document.getElementById('buy-now-qty-{{ $product->id }}').value = this.value"
-                            class="font-label-md text-label-md w-12 text-center bg-transparent border-none focus:ring-0 p-0" />
-                        <button type="button"
-                            class="material-symbols-outlined text-primary hover:bg-surface-container rounded-full p-xs transition-colors"
-                            onclick="const el = document.getElementById('qty-{{ $product->id }}'); el.value = parseInt(el.value) + 1; document.getElementById('buy-now-qty-{{ $product->id }}').value = el.value">add</button>
+                    <div class="flex flex-col gap-1">
+                        <div
+                            class="flex items-center justify-between border border-outline-variant rounded-full h-14 px-md">
+                            <button type="button"
+                                class="material-symbols-outlined text-primary hover:bg-surface-container rounded-full p-xs transition-colors"
+                                onclick="const el = document.getElementById('qty-{{ $product->id }}'); el.value = Math.max({{ $themeMinQty }}, parseInt(el.value) - 1); document.getElementById('buy-now-qty-{{ $product->id }}').value = el.value">remove</button>
+                            <input type="number" id="qty-{{ $product->id }}" name="quantity" value="{{ $themeMinQty }}"
+                                min="{{ $themeMinQty }}" max="{{ $themeMaxQty > 0 ? $themeMaxQty : 1 }}"
+                                oninput="document.getElementById('buy-now-qty-{{ $product->id }}').value = this.value"
+                                class="font-label-md text-label-md w-12 text-center bg-transparent border-none focus:ring-0 p-0" />
+                            <button type="button"
+                                class="material-symbols-outlined text-primary hover:bg-surface-container rounded-full p-xs transition-colors"
+                                onclick="const el = document.getElementById('qty-{{ $product->id }}'); el.value = Math.min({{ $themeMaxQty > 0 ? $themeMaxQty : 9999 }}, parseInt(el.value) + 1); document.getElementById('buy-now-qty-{{ $product->id }}').value = el.value">add</button>
+                        </div>
+                        @if ($themeMinQty > 1 || $product->max_order_quantity)
+                            <div class="flex justify-between px-md text-xs text-on-surface-variant font-medium">
+                                @if ($themeMinQty > 1)
+                                    <span>Min order: {{ $themeMinQty }}</span>
+                                @endif
+                                @if ($product->max_order_quantity)
+                                    <span>Max order: {{ $product->max_order_quantity }}</span>
+                                @endif
+                            </div>
+                        @endif
                     </div>
                     <div class="flex flex-col sm:flex-row items-stretch gap-sm">
                         <!-- Add to Ritual -->
                         <form action="{{ route('cart.add', $product) }}" method="POST"
                             class="flex-1 flex items-stretch">
                             @csrf
-                            <input type="hidden" name="quantity" value="1"
+                            <input type="hidden" name="quantity" value="{{ $themeMinQty }}"
                                 id="add-to-cart-qty-{{ $product->id }}">
                             @if ($groupedAttributes->count() > 0)
                                 @foreach ($groupedAttributes as $attribute)
@@ -134,7 +153,7 @@
                         <!-- Buy Now -->
                         <form action="{{ route('public.products.buy-now', $product) }}" method="GET"
                             class="flex-1 flex items-stretch">
-                            <input type="hidden" name="quantity" value="1" id="buy-now-qty-{{ $product->id }}">
+                            <input type="hidden" name="quantity" value="{{ $themeMinQty }}" id="buy-now-qty-{{ $product->id }}">
                             @if ($groupedAttributes->count() > 0)
                                 @foreach ($groupedAttributes as $attribute)
                                     <input type="hidden" name="attributes[{{ $attribute['id'] }}]"

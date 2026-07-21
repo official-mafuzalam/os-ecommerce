@@ -22,9 +22,15 @@
         </a>
 
         <!-- Badges -->
-        <div class="absolute top-2 left-2 flex flex-col gap-1">
-            @if ($product->created_at->gt(now()->subDays(7)))
-                <span class="bg-green-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+        <div class="absolute top-2 left-2 flex flex-col gap-1 z-10">
+            @if ($product->is_bestseller)
+                <span class="bg-amber-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+                    BESTSELLER
+                </span>
+            @endif
+
+            @if ($product->is_new_arrival || $product->created_at->gt(now()->subDays(7)))
+                <span class="bg-emerald-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
                     NEW
                 </span>
             @endif
@@ -33,7 +39,7 @@
                 @php
                     $discountPercent = round(($product->discount / $product->price) * 100);
                 @endphp
-                <span class="bg-red-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                <span class="bg-red-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
                     -{{ $discountPercent }}%
                 </span>
             @endif

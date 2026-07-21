@@ -68,16 +68,46 @@ Use this JSON schema:
   \"care_instructions\": \"Care/maintenance instructions if fashion\"
 }";
 
+        $activeProvider = setting('api_active_provider', 'gemini');
         $apiKey = null;
         $model = null;
         $url = null;
         $apiName = null;
         $postData = [];
+        $headers = ['Content-Type' => 'application/json'];
 
-        if (setting('api_gemini_enabled') === '1') {
-            $apiKey = setting('api_gemini_key');
-            $model = setting('api_gemini_model', 'gemini-1.5-flash');
+        // Use configured active provider, or fallback to first enabled provider with an API key
+        $checkProviders = array_unique(array_merge([$activeProvider], ['gemini', 'groq', 'openrouter', 'zai', 'deepseek', 'mistral', 'openai']));
+        $selectedProvider = null;
 
+        foreach ($checkProviders as $p) {
+            $key = setting("api_{$p}_key");
+            $enabled = setting("api_{$p}_enabled");
+            if ($p === $activeProvider && $key) {
+                $selectedProvider = $p;
+                break;
+            }
+            if ($enabled === '1' && $key && !$selectedProvider) {
+                $selectedProvider = $p;
+            }
+        }
+
+        if (!$selectedProvider) {
+            $selectedProvider = $activeProvider;
+        }
+
+        $activeProvider = $selectedProvider;
+        $apiKey = setting("api_{$activeProvider}_key");
+        $model = setting("api_{$activeProvider}_model");
+
+        if (!$apiKey) {
+            return response()->json([
+                'error' => "API key for '{$activeProvider}' is not configured in settings."
+            ], 400);
+        }
+
+        if ($activeProvider === 'gemini') {
+            $model = $model ?: 'gemini-1.5-flash';
             $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
             $apiName = 'gemini';
 
@@ -90,7 +120,7 @@ Use this JSON schema:
                     ]
                 ],
                 'generationConfig' => [
-                    'maxOutputTokens' => 1500,
+                    'maxOutputTokens' => 4096,
                     'temperature' => 0.7,
                     'topP' => 0.95,
                     'topK' => 40,
@@ -104,11 +134,55 @@ Use this JSON schema:
                 ]
             ];
         } else {
-            return response()->json(['error' => 'No API is enabled in settings'], 500);
-        }
+            // Standard OpenAI Chat Completion Compatible Endpoints (Groq, OpenRouter, Z.ai, DeepSeek, Mistral, OpenAI)
+            $apiName = $activeProvider;
+            $headers['Authorization'] = "Bearer {$apiKey}";
 
-        if (!$apiKey) {
-            return response()->json(['error' => 'Gemini API key is not configured.'], 500);
+            switch ($activeProvider) {
+                case 'groq':
+                    $url = 'https://api.groq.com/openai/v1/chat/completions';
+                    $model = $model ?: 'llama-3.3-70b-versatile';
+                    break;
+                case 'openrouter':
+                    $url = 'https://openrouter.ai/api/v1/chat/completions';
+                    $model = $model ?: 'google/gemini-2.0-flash-lite:free';
+                    $headers['HTTP-Referer'] = config('app.url', 'http://localhost');
+                    $headers['X-Title'] = config('app.name', 'OS-Ecommerce');
+                    break;
+                case 'zai':
+                    // Z.ai / Zhipu API
+                    $url = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+                    $model = $model ?: 'glm-4-flash';
+                    break;
+                case 'deepseek':
+                    $url = 'https://api.deepseek.com/chat/completions';
+                    $model = $model ?: 'deepseek-chat';
+                    break;
+                case 'mistral':
+                    $url = 'https://api.mistral.ai/v1/chat/completions';
+                    $model = $model ?: 'mistral-small-latest';
+                    break;
+                case 'openai':
+                default:
+                    $url = 'https://api.openai.com/v1/chat/completions';
+                    $model = $model ?: 'gpt-4o-mini';
+                    break;
+            }
+
+            $postData = [
+                'model' => $model,
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are an expert e-commerce copywriter. You must always return pure valid JSON without markdown formatting wrappers.'],
+                    ['role' => 'user', 'content' => $prompt]
+                ],
+                'temperature' => 0.7,
+                'max_tokens' => 4096
+            ];
+
+            // Add response_format only for providers that strictly support it
+            if (in_array($activeProvider, ['openai', 'groq', 'openrouter'])) {
+                $postData['response_format'] = ['type' => 'json_object'];
+            }
         }
 
         if (session()->isStarted()) {
@@ -116,18 +190,24 @@ Use this JSON schema:
         }
 
         try {
-            $response = Http::withHeaders(['Content-Type' => 'application/json'])
+            $response = Http::withHeaders($headers)
                 ->withOptions([
-                    'verify' => !app()->environment('local'),
+                    'verify' => false, // Prevents local SSL issues
                     'timeout' => 90,
                 ])
                 ->post($url, $postData);
 
             if ($response->failed()) {
+                $errBody = $response->json();
+                $errorMessage = $errBody['error']['message'] 
+                             ?? $errBody['message'] 
+                             ?? $errBody['error'] 
+                             ?? $response->body();
+
                 return response()->json([
-                    'error' => 'API call failed',
-                    'details' => $response->json()['error']['message'] ?? 'Unknown error'
-                ], $response->status());
+                    'error' => "API call failed for '{$apiName}' (HTTP {$response->status()})",
+                    'details' => $errorMessage
+                ], 400);
             }
 
             $result = $response->json();
@@ -144,9 +224,14 @@ Use this JSON schema:
             $usageInstructions = '';
             $careInstructions = '';
 
-            if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+            $text = null;
+            if ($apiName === 'gemini' && isset($result['candidates'][0]['content']['parts'][0]['text'])) {
                 $text = trim($result['candidates'][0]['content']['parts'][0]['text']);
-                
+            } elseif (isset($result['choices'][0]['message']['content'])) {
+                $text = trim($result['choices'][0]['message']['content']);
+            }
+
+            if ($text) {
                 // Parse JSON response
                 $jsonStr = $text;
                 if (preg_match('/```json\s*(.*?)\s*```/s', $text, $matches)) {

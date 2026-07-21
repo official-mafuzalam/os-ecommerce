@@ -272,6 +272,9 @@ class ProductController extends Controller
     {
         $product = Product::where('slug', $slug)->firstOrFail();
 
+        // Auto-increment view count
+        $product->increment('views_count');
+
         // Share product globally so components like <x-meta /> can access it
         view()->share('product', $product);
 
