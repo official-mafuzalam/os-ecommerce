@@ -21,14 +21,30 @@
     <link rel="modulepreload" href="{{ asset('build/assets/app-37a11075.js') }}" />
     <script type="module" src="{{ asset('build/assets/app-37a11075.js') }}"></script> --}}
 
+    <style>[x-cloak] { display: none !important; }</style>
+    <script>
+        if (localStorage.getItem('sidebarOpen') === 'false') {
+            document.documentElement.classList.add('sidebar-closed');
+        }
+    </script>
 </head>
 
-<body class="bg-gray-200 dark:bg-slate-900">
+<body class="bg-gray-200 dark:bg-slate-900" x-data="{ sidebarOpen: localStorage.getItem('sidebarOpen') === null ? true : localStorage.getItem('sidebarOpen') === 'true' }" x-init="$watch('sidebarOpen', val => localStorage.setItem('sidebarOpen', val))">
     <!-- ========== HEADER ========== -->
     <header
-        class="sticky top-0 inset-x-0 flex flex-wrap sm:justify-start sm:flex-nowrap z-[48] w-full bg-white border-b text-sm py-2.5 sm:py-4 lg:pl-64 dark:bg-gray-800 dark:border-gray-700">
+        class="sticky top-0 inset-x-0 flex flex-wrap sm:justify-start sm:flex-nowrap z-[48] w-full bg-white border-b text-sm py-2.5 sm:py-4 transition-all duration-300 dark:bg-gray-800 dark:border-gray-700"
+        :class="sidebarOpen ? 'lg:pl-64' : 'lg:pl-0'">
         <nav class="flex basis-full items-center w-full mx-auto px-4 sm:px-6 md:px-8" aria-label="Global">
-            <div class="mr-5 lg:mr-0 lg:hidden">
+            <div class="mr-5 flex items-center gap-x-2">
+                <button type="button"
+                    class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+                    @click="sidebarOpen = !sidebarOpen" aria-label="Toggle navigation">
+                    <span class="sr-only">Toggle Navigation</span>
+                    <svg class="w-5 h-5" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+                    </svg>
+                </button>
                 <a class="flex-none text-xl font-semibold dark:text-white" href="{{ route('admin.index') }}"
                     aria-label="{{ setting('site_name', 'Octosync Software Ltd') }}">
                     {{ setting('site_name', 'Octosync Software Ltd') }}
@@ -38,19 +54,6 @@
             <div class="w-full flex items-center justify-end sm:order-3">
 
                 <div class="flex flex-row items-center justify-end gap-2">
-
-                    <div id="visitor-count" class="p-2">Loading...</div>
-
-                    <script>
-                        setInterval(() => {
-                            fetch('/api/active-visitors')
-                                .then(res => res.json())
-                                .then(data => {
-                                    document.getElementById('visitor-count').innerText = data.activeVisitors;
-                                });
-                        }, 5000); // updates every 5 seconds
-                    </script>
-
                     <a class="hs-dark-mode-active:hidden block hs-dark-mode group items-center text-gray-600 hover:text-blue-600 font-medium dark:text-gray-400 dark:hover:text-gray-500"
                         data-hs-theme-click-value="dark">
                         <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -136,28 +139,6 @@
                                         <span>Logout</span>
                                     </button>
                                 </form>
-
-
-                                {{-- <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-md text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-                                    href="#">
-                                    <svg class="flex-none" width="16" height="16" viewBox="0 0 16 16"
-                                        fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M7.646 10.854a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 9.293V5.5a.5.5 0 0 0-1 0v3.793L6.354 8.146a.5.5 0 1 0-.708.708l2 2z" />
-                                        <path
-                                            d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383zm.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z" />
-                                    </svg>
-                                    Downloads
-                                </a>
-                                <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-md text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-                                    href="#">
-                                    <svg class="flex-none" width="16" height="16" viewBox="0 0 16 16"
-                                        fill="currentColor">
-                                        <path
-                                            d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
-                                    </svg>
-                                    Team Account
-                                </a> --}}
                             </div>
                         </div>
                     </div>
@@ -172,17 +153,6 @@
     <div
         class="sticky top-0 inset-x-0 z-20 bg-white border-y px-4 sm:px-6 md:px-8 lg:hidden dark:bg-gray-800 dark:border-gray-700">
         <div class="flex items-center py-4">
-            <!-- Navigation Toggle -->
-            <button type="button" class="text-gray-500 hover:text-gray-600" data-hs-overlay="#application-sidebar"
-                aria-controls="application-sidebar" aria-label="Toggle navigation">
-                <span class="sr-only">Toggle Navigation</span>
-                <svg class="w-5 h-5" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd"
-                        d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
-                </svg>
-            </button>
-            <!-- End Navigation Toggle -->
-
             <!-- Breadcrumb -->
             {{-- <ol class="ml-3 flex items-center whitespace-nowrap min-w-0" aria-label="Breadcrumb">
                 <li class="flex items-center text-sm text-gray-800 dark:text-gray-400">

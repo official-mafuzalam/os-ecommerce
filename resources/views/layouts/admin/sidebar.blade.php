@@ -1,11 +1,18 @@
 <!-- Sidebar -->
 <div id="application-sidebar"
-    class="hs-overlay hs-overlay-open:translate-x-0 -translate-x-full transition-all duration-300 transform hidden fixed top-0 left-0 bottom-0 z-[60] w-64 bg-white border-r border-gray-200 pt-7 pb-10 overflow-y-auto scrollbar-y lg:block lg:translate-x-0 lg:right-auto lg:bottom-0 dark:scrollbar-y dark:bg-gray-800 dark:border-gray-700">
-    <div class="px-6">
+    x-cloak
+    class="transition-all duration-300 transform fixed top-0 left-0 bottom-0 z-[60] w-64 bg-white border-r border-gray-200 pt-7 pb-10 overflow-y-auto scrollbar-y dark:scrollbar-y dark:bg-gray-800 dark:border-gray-700"
+    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+    <div class="px-6 flex items-center justify-between">
         <a class="flex-none text-xl font-semibold dark:text-white" href="{{ route('admin.index') }}"
             aria-label="{{ setting('site_name', 'Octosync Software Ltd') }}">
             {{ setting('site_name', 'Octosync Software Ltd') }}
         </a>
+        <button type="button" class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300" @click="sidebarOpen = false" aria-label="Close sidebar">
+            <svg class="w-4 h-4" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+            </svg>
+        </button>
     </div>
 
     <nav class="hs-accordion-group p-6 w-full flex flex-col flex-wrap" data-hs-accordion-always-open>

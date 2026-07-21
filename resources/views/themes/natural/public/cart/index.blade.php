@@ -229,79 +229,78 @@
                     </div>
 
                     <!-- Summary Sidebar -->
-                    <aside class="lg:col-span-5 xl:col-span-4">
-                        <div class="glass-panel sticky top-32 p-xl rounded-[24px] shadow-xl overflow-hidden relative">
+                    <aside class="w-full lg:col-span-5 xl:col-span-4">
+                        <div class="glass-panel lg:sticky lg:top-32 p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-[24px] shadow-xl overflow-hidden relative">
                             <!-- Subtle background decoration -->
                             <div
                                 class="absolute -top-10 -right-10 w-40 h-40 bg-secondary-fixed/20 rounded-full blur-3xl -z-10">
                             </div>
 
-                            <h2 class="font-cormorant text-[32px] text-primary mb-xl">Order Summary</h2>
+                            <h2 class="font-cormorant text-2xl sm:text-[32px] text-primary mb-4 sm:mb-6">Order Summary</h2>
 
-                            <div class="space-y-6 mb-xl">
-                                <div class="flex justify-between items-center">
+                            <div class="space-y-4 sm:space-y-6 mb-6">
+                                <div class="flex justify-between items-center text-sm sm:text-base">
                                     <span class="font-body-md text-on-surface-variant">Subtotal</span>
-                                    <span class="font-label-md text-on-surface">৳
+                                    <span class="font-label-md text-on-surface font-semibold">৳
                                         {{ number_format($cart->subtotal, 2) }}</span>
                                 </div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-center text-sm sm:text-base">
                                     <span class="font-body-md text-on-surface-variant">Items
                                         ({{ $cart->total_quantity }})</span>
-                                    <span class="font-label-md text-on-surface">{{ $cart->total_quantity }}</span>
+                                    <span class="font-label-md text-on-surface font-semibold">{{ $cart->total_quantity }}</span>
                                 </div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-center text-sm sm:text-base">
                                     <span class="font-body-md text-on-surface-variant">Shipping</span>
-                                    <span class="font-label-md text-secondary uppercase tracking-wider">On checkout
-                                        page</span>
+                                    <span class="font-label-md text-secondary text-xs sm:text-sm">On checkout page</span>
                                 </div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-center text-sm sm:text-base">
                                     <span class="font-body-md text-on-surface-variant">Tax</span>
                                     <span class="font-label-md text-on-surface">Included</span>
                                 </div>
-                                <div class="pt-6 border-t border-outline-variant/30 flex justify-between items-center">
-                                    <span class="font-cormorant text-[24px] text-primary">Total</span>
-                                    <span class="font-cormorant text-[24px] text-primary">৳
+                                <div class="pt-4 sm:pt-6 border-t border-outline-variant/30 flex justify-between items-center">
+                                    <span class="font-cormorant text-xl sm:text-[24px] text-primary font-bold">Total</span>
+                                    <span class="font-cormorant text-xl sm:text-[24px] text-primary font-bold">৳
                                         {{ number_format($cart->subtotal, 2) }}</span>
                                 </div>
                             </div>
 
                             <!-- Checkout Button -->
                             <a href="{{ route('public.checkout') }}"
-                                class="w-full bg-primary text-white font-label-md h-14 rounded-[16px] hover:bg-primary-container active:scale-[0.98] transition-all flex items-center justify-center gap-2 mb-gutter shadow-lg shadow-primary/20">
+                                class="w-full bg-primary text-white font-label-md min-h-[48px] sm:min-h-[56px] py-3 rounded-xl sm:rounded-[16px] hover:bg-primary-container active:scale-[0.98] transition-all flex items-center justify-center gap-2 mb-6 shadow-lg shadow-primary/20 text-sm sm:text-base">
                                 <span class="material-symbols-outlined"
                                     style="font-variation-settings: 'FILL' 1;">lock</span>
                                 Proceed to Checkout
                             </a>
 
                             <!-- Trust Badges -->
-                            <div class="grid grid-cols-2 gap-4 mt-gutter">
-                                <div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl">
-                                    <span class="material-symbols-outlined text-primary">verified_user</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-6">
+                                <div class="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 bg-surface-container-low rounded-xl">
+                                    <span class="material-symbols-outlined text-primary text-xl sm:text-2xl shrink-0">verified_user</span>
                                     <span
-                                        class="text-[10px] font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">Secure
+                                        class="text-[10px] sm:text-xs font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">Secure
                                         SSL Encryption</span>
                                 </div>
-                                <div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl">
-                                    <span class="material-symbols-outlined text-primary">biotech</span>
+                                <div class="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 bg-surface-container-low rounded-xl">
+                                    <span class="material-symbols-outlined text-primary text-xl sm:text-2xl shrink-0">biotech</span>
                                     <span
-                                        class="text-[10px] font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">100%
+                                        class="text-[10px] sm:text-xs font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">100%
                                         Lab Tested</span>
                                 </div>
-                                <div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl">
-                                    <span class="material-symbols-outlined text-primary">payments</span>
+                                <div class="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 bg-surface-container-low rounded-xl">
+                                    <span class="material-symbols-outlined text-primary text-xl sm:text-2xl shrink-0">payments</span>
                                     <span
-                                        class="text-[10px] font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">Multiple
+                                        class="text-[10px] sm:text-xs font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">Multiple
                                         Payment Options</span>
                                 </div>
-                                <div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl">
-                                    <span class="material-symbols-outlined text-primary">local_shipping</span>
+                                <div class="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 bg-surface-container-low rounded-xl">
+                                    <span class="material-symbols-outlined text-primary text-xl sm:text-2xl shrink-0">local_shipping</span>
                                     <span
-                                        class="text-[10px] font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">Fast
+                                        class="text-[10px] sm:text-xs font-label-md leading-tight text-on-surface-variant uppercase tracking-tighter">Fast
                                         Delivery</span>
                                 </div>
                             </div>
 
-                            <p class="text-center font-caption text-on-surface-variant mt-xl px-4">
+                            <p class="text-center text-xs sm:text-sm font-caption text-on-surface-variant mt-6 px-2 sm:px-4">
                                 Free shipping on all wellness bundles. 30-day purity guarantee.
                             </p>
                         </div>

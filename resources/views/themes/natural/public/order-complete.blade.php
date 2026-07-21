@@ -77,14 +77,6 @@
     <x-slot name="main">
         <canvas id="confetti"></canvas>
         <div class="max-w-container-max mx-auto px-gutter py-md botanical-bg min-h-screen">
-            <!-- Breadcrumb -->
-            <nav class="flex items-center gap-xs text-caption text-on-surface-variant/60 mb-lg">
-                <a class="hover:text-primary" href="{{ route('public.welcome') }}">Home</a>
-                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <a class="hover:text-primary" href="{{ route('public.checkout') }}">Checkout</a>
-                <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                <span class="text-primary font-medium">Order Confirmed</span>
-            </nav>
             <div class="grid grid-cols-12 gap-md items-start">
                 <!-- Hero Success Card -->
                 <section class="col-span-12 fade-in">

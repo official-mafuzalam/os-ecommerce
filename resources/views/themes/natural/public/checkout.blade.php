@@ -45,7 +45,7 @@
 
         <div class="pb-xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto botanical-bg">
             <div class="mb-lg">
-                <h1 class="font-headline-lg text-headline-lg text-primary">
+                <h1 class="font-cormorant text-[56px] leading-tight text-primary italic mb-0">
                     @if ($lang === '1')
                         চেকআউট
                     @else
@@ -66,11 +66,11 @@
                 <div class="lg:col-span-7 space-y-xl">
 
                     <!-- 1. Customer Information -->
-                    <section class="space-y-md">
-                        <div class="flex items-center gap-sm">
+                    <section class="space-y-sm">
+                        <div class="flex items-center gap-2">
                             <span
-                                class="flex items-center justify-center w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-label-md">1</span>
-                            <h2 class="font-headline-md text-[24px] text-primary">
+                                class="flex items-center justify-center w-6 h-6 rounded-full bg-primary-container text-on-primary-container font-label-md text-xs">1</span>
+                            <h2 class="font-headline-md text-lg sm:text-xl text-primary">
                                 @if ($lang === '1')
                                     বিলিং তথ্য
                                 @else
@@ -83,10 +83,10 @@
                             @csrf
 
                             <div
-                                class="grid grid-cols-1 md:grid-cols-2 gap-gutter bg-surface-container-low p-md rounded-xl">
+                                class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface-container-low p-4 rounded-xl">
                                 <!-- Full Name -->
                                 <div class="space-y-xs">
-                                    <label class="font-label-md text-label-md text-on-surface-variant">
+                                    <label class="font-label-md text-sm text-on-surface-variant">
                                         @if ($lang === '1')
                                             আপনার নাম *
                                         @else
@@ -94,28 +94,29 @@
                                         @endif
                                     </label>
                                     <input type="text" name="full_name" required autocomplete="name"
-                                        class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-2 placeholder:text-outline/50"
+                                        class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-1.5 text-sm placeholder:text-outline/50"
                                         placeholder="@if ($lang === '1') আপনার সম্পূর্ণ নাম লিখুন @else Enter your full name @endif" />
                                 </div>
 
                                 <!-- Phone -->
                                 <div class="space-y-xs">
-                                    <label class="font-label-md text-label-md text-on-surface-variant">
+                                    <label class="font-label-md text-sm text-on-surface-variant">
                                         @if ($lang === '1')
                                             ফোন নম্বর *
                                         @else
                                             Phone Number *
                                         @endif
                                     </label>
-                                    <input type="tel" name="phone" required autocomplete="tel" pattern="[0-9]{11}"
-                                        class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-2 placeholder:text-outline/50"
+                                    <input type="tel" name="phone" required autocomplete="tel" pattern="^01[3-9]\d{8}$" maxlength="11"
+                                        title="Please enter a valid 11-digit Bangladeshi phone number starting with 01 (e.g. 01712345678)"
+                                        class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-1.5 text-sm placeholder:text-outline/50"
                                         placeholder="@if ($lang === '1') ০১XXXXXXXXX @else 01XXXXXXXXX @endif" />
                                 </div>
 
                                 <!-- Email (optional) -->
                                 @if (setting('order_email_need'))
                                     <div class="md:col-span-2 space-y-xs">
-                                        <label class="font-label-md text-label-md text-on-surface-variant">
+                                        <label class="font-label-md text-sm text-on-surface-variant">
                                             @if ($lang === '1')
                                                 ইমেইল ঠিকানা
                                             @else
@@ -123,18 +124,18 @@
                                             @endif
                                         </label>
                                         <input type="email" name="email" autocomplete="email"
-                                            class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-2 placeholder:text-outline/50"
+                                            class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-1.5 text-sm placeholder:text-outline/50"
                                             placeholder="your.email@example.com" />
                                     </div>
                                 @endif
                             </div>
 
                             <!-- 2. Shipping Address -->
-                            <div class="space-y-md mt-xl">
-                                <div class="flex items-center gap-sm">
+                            <div class="space-y-sm mt-6">
+                                <div class="flex items-center gap-2">
                                     <span
-                                        class="flex items-center justify-center w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-label-md">2</span>
-                                    <h2 class="font-headline-md text-[24px] text-primary">
+                                        class="flex items-center justify-center w-6 h-6 rounded-full bg-primary-container text-on-primary-container font-label-md text-xs">2</span>
+                                    <h2 class="font-headline-md text-lg sm:text-xl text-primary">
                                         @if ($lang === '1')
                                             ডেলিভারি ঠিকানা
                                         @else
@@ -144,38 +145,38 @@
                                 </div>
 
                                 <div
-                                    class="grid grid-cols-1 md:grid-cols-2 gap-gutter bg-surface-container-low p-md rounded-xl">
+                                    class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface-container-low p-4 rounded-xl">
                                     <!-- Address -->
                                     <div class="md:col-span-2 space-y-xs">
-                                        <label class="font-label-md text-label-md text-on-surface-variant">
+                                        <label class="font-label-md text-sm text-on-surface-variant">
                                             @if ($lang === '1')
                                                 বিস্তারিত ঠিকানা *
                                             @else
                                                 Delivery Address *
                                             @endif
                                         </label>
-                                        <textarea name="full_address" required rows="3" autocomplete="street-address"
-                                            class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-2 placeholder:text-outline/50 resize-none"
+                                        <textarea name="full_address" required rows="2" autocomplete="street-address"
+                                            class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-1.5 text-sm placeholder:text-outline/50 resize-none"
                                             placeholder="@if ($lang === '1') বাড়ি/রোড নং, এলাকা, সিটি @else House/Road No, Area, City @endif"></textarea>
                                     </div>
 
                                     <!-- Delivery Area -->
                                     <div class="md:col-span-2 space-y-sm">
-                                        <label class="font-label-md text-label-md text-on-surface-variant">
+                                        <label class="font-label-md text-sm text-on-surface-variant">
                                             @if ($lang === '1')
                                                 ডেলিভারি এলাকা *
                                             @else
                                                 Delivery Area *
                                             @endif
                                         </label>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-sm">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div class="relative">
                                                 <input class="sr-only peer" type="radio" name="delivery_area"
                                                     id="inside_dhaka" value="inside_dhaka" checked>
                                                 <label for="inside_dhaka"
-                                                    class="flex p-md border border-outline-variant rounded-xl cursor-pointer hover:border-primary/50 transition-all duration-300 bg-surface-container-low peer-checked:border-primary peer-checked:bg-primary/5">
+                                                    class="flex items-start justify-between p-3 border-2 border-outline-variant/60 rounded-xl cursor-pointer hover:border-primary/60 transition-all duration-300 bg-surface-container-low peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:ring-2 peer-checked:ring-primary/20 peer-checked:shadow-sm">
                                                     <div>
-                                                        <span class="block font-label-md text-on-surface">
+                                                        <span class="block font-label-md text-sm text-on-surface font-bold">
                                                             @if ($lang === '1')
                                                                 ঢাকার ভিতরে
                                                             @else
@@ -183,21 +184,23 @@
                                                             @endif
                                                         </span>
                                                         <span
-                                                            class="block font-caption text-caption text-on-surface-variant mt-1">
+                                                            class="block font-caption text-xs text-on-surface-variant mt-0.5 font-medium">
                                                             <span
                                                                 id="inside_dhaka_price">{{ setting('delivery_charge_inside_dhaka') }}</span>
                                                             TK • 1-2 business days
                                                         </span>
                                                     </div>
+                                                    <span
+                                                        class="material-symbols-outlined text-primary text-xl opacity-0 peer-checked:opacity-100 transition-opacity">check_circle</span>
                                                 </label>
                                             </div>
                                             <div class="relative">
                                                 <input class="sr-only peer" type="radio" name="delivery_area"
                                                     id="outside_dhaka" value="outside_dhaka">
                                                 <label for="outside_dhaka"
-                                                    class="flex p-md border border-outline-variant rounded-xl cursor-pointer hover:border-primary/50 transition-all duration-300 bg-surface-container-low peer-checked:border-primary peer-checked:bg-primary/5">
+                                                    class="flex items-start justify-between p-3 border-2 border-outline-variant/60 rounded-xl cursor-pointer hover:border-primary/60 transition-all duration-300 bg-surface-container-low peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:ring-2 peer-checked:ring-primary/20 peer-checked:shadow-sm">
                                                     <div>
-                                                        <span class="block font-label-md text-on-surface">
+                                                        <span class="block font-label-md text-sm text-on-surface font-bold">
                                                             @if ($lang === '1')
                                                                 ঢাকার বাইরে
                                                             @else
@@ -205,12 +208,14 @@
                                                             @endif
                                                         </span>
                                                         <span
-                                                            class="block font-caption text-caption text-on-surface-variant mt-1">
+                                                            class="block font-caption text-xs text-on-surface-variant mt-0.5 font-medium">
                                                             <span
                                                                 id="outside_dhaka_price">{{ setting('delivery_charge_outside_dhaka') }}</span>
                                                             TK • 3-5 business days
                                                         </span>
                                                     </div>
+                                                    <span
+                                                        class="material-symbols-outlined text-primary text-xl opacity-0 peer-checked:opacity-100 transition-opacity">check_circle</span>
                                                 </label>
                                             </div>
                                         </div>
@@ -220,22 +225,20 @@
 
                             <!-- Notes (Optional) -->
                             @if (setting('order_notes_need'))
-                                <div class="space-y-xs mt-gutter">
-                                    <label class="font-label-md text-label-md text-on-surface-variant">
+                                <div class="space-y-xs mt-4">
+                                    <label class="font-label-md text-sm text-on-surface-variant">
                                         @if ($lang === '1')
                                             অতিরিক্ত নোট
                                         @else
                                             Additional Notes
                                         @endif
                                     </label>
-                                    <textarea name="notes" rows="3"
-                                        class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-2 placeholder:text-outline/50 resize-none"
+                                    <textarea name="notes" rows="2"
+                                        class="w-full bg-transparent border-0 border-b border-outline-variant focus:ring-0 focus:border-primary px-0 py-1.5 text-sm placeholder:text-outline/50 resize-none"
                                         placeholder="@if ($lang === '1') গেটের রং, বিকল্প ফোন নম্বর, বিশেষ নির্দেশনা ইত্যাদি @else Gate color, alternative phone number, special instructions, etc. @endif"></textarea>
                                 </div>
                             @endif
-
-                            <!-- Submit -->
-                            <div class="mt-xl">
+                            {{-- <div class="mt-xl">
                                 <button type="submit" id="place-order-btn"
                                     class="w-full h-[56px] bg-primary text-white rounded-lg font-label-md text-lg hover:bg-primary-container transition-all duration-300 shadow-md active:scale-[0.98] flex items-center justify-center gap-2">
                                     <span class="material-symbols-outlined text-[20px]"
@@ -254,7 +257,7 @@
                                         Your information is securely protected
                                     @endif
                                 </p>
-                            </div>
+                            </div> --}}
                         </form>
                     </section>
 
@@ -272,27 +275,28 @@
                             </h2>
                         </div>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-sm">
-                            <div class="payment-card-active relative cursor-pointer p-md border border-outline-variant rounded-xl flex flex-col items-center gap-2 transition-all duration-300"
+                            <div class="payment-card payment-card-active relative cursor-pointer p-md border-2 border-primary bg-primary/10 ring-2 ring-primary/20 shadow-md rounded-2xl flex flex-col items-center gap-2 transition-all duration-300"
+                                onclick="selectPayment(this)">
+                                <span class="material-symbols-outlined text-primary text-[32px]">local_shipping</span>
+                                <span class="font-label-md text-[12px] uppercase tracking-wider font-bold">C.O.D</span>
+                                <span
+                                    class="payment-dot material-symbols-outlined text-primary text-base absolute top-2 right-2">check_circle</span>
+                            </div>
+                            <div class="disable payment-card relative cursor-pointer p-md border-2 border-outline-variant/60 rounded-2xl flex flex-col items-center gap-2 transition-all duration-300 bg-surface-container-low"
                                 onclick="selectPayment(this)">
                                 <span
                                     class="material-symbols-outlined text-primary text-[32px]">account_balance_wallet</span>
-                                <span class="font-label-md text-[12px] uppercase tracking-wider">bKash</span>
-                                <div class="absolute top-2 right-2 w-2 h-2 rounded-full bg-tertiary-fixed-dim"></div>
+                                <span class="font-label-md text-[12px] uppercase tracking-wider font-bold">bKash</span>
                             </div>
-                            <div class="relative cursor-pointer p-md border border-outline-variant rounded-xl flex flex-col items-center gap-2 hover:border-primary/50 transition-all duration-300 bg-surface-container-low"
+                            <div class="payment-card relative cursor-pointer p-md border-2 border-outline-variant/60 rounded-2xl flex flex-col items-center gap-2 hover:border-primary/60 transition-all duration-300 bg-surface-container-low"
                                 onclick="selectPayment(this)">
                                 <span class="material-symbols-outlined text-primary text-[32px]">payments</span>
-                                <span class="font-label-md text-[12px] uppercase tracking-wider">Nagad</span>
+                                <span class="font-label-md text-[12px] uppercase tracking-wider font-bold">Nagad</span>
                             </div>
-                            <div class="relative cursor-pointer p-md border border-outline-variant rounded-xl flex flex-col items-center gap-2 hover:border-primary/50 transition-all duration-300 bg-surface-container-low"
+                            <div class="payment-card relative cursor-pointer p-md border-2 border-outline-variant/60 rounded-2xl flex flex-col items-center gap-2 hover:border-primary/60 transition-all duration-300 bg-surface-container-low"
                                 onclick="selectPayment(this)">
                                 <span class="material-symbols-outlined text-primary text-[32px]">credit_card</span>
-                                <span class="font-label-md text-[12px] uppercase tracking-wider">Card</span>
-                            </div>
-                            <div class="relative cursor-pointer p-md border border-outline-variant rounded-xl flex flex-col items-center gap-2 hover:border-primary/50 transition-all duration-300 bg-surface-container-low"
-                                onclick="selectPayment(this)">
-                                <span class="material-symbols-outlined text-primary text-[32px]">local_shipping</span>
-                                <span class="font-label-md text-[12px] uppercase tracking-wider">C.O.D</span>
+                                <span class="font-label-md text-[12px] uppercase tracking-wider font-bold">Card</span>
                             </div>
                         </div>
                     </section>
@@ -484,15 +488,18 @@
         <script>
             function selectPayment(element) {
                 document.querySelectorAll('[onclick="selectPayment(this)"]').forEach(card => {
-                    card.classList.remove('payment-card-active');
-                    card.classList.add('bg-surface-container-low');
+                    card.classList.remove('payment-card-active', 'border-primary', 'bg-primary/10', 'ring-2',
+                        'ring-primary/20', 'shadow-md');
+                    card.classList.add('bg-surface-container-low', 'border-outline-variant/60');
                     const dot = card.querySelector('.payment-dot');
                     if (dot) dot.remove();
                 });
-                element.classList.add('payment-card-active');
-                element.classList.remove('bg-surface-container-low');
-                const dot = document.createElement('div');
-                dot.className = 'payment-dot absolute top-2 right-2 w-2 h-2 rounded-full bg-tertiary-fixed-dim';
+                element.classList.add('payment-card-active', 'border-primary', 'bg-primary/10', 'ring-2', 'ring-primary/20',
+                    'shadow-md');
+                element.classList.remove('bg-surface-container-low', 'border-outline-variant/60');
+                const dot = document.createElement('span');
+                dot.className = 'payment-dot material-symbols-outlined text-primary text-base absolute top-2 right-2';
+                dot.textContent = 'check_circle';
                 element.appendChild(dot);
             }
 
@@ -531,7 +538,7 @@
                         const fullName = checkoutForm.querySelector('input[name="full_name"]').value.trim();
                         const phone = checkoutForm.querySelector('input[name="phone"]').value.trim();
                         const address = checkoutForm.querySelector('textarea[name="full_address"]').value
-                    .trim();
+                            .trim();
 
                         if (!fullName || !phone || !address) {
                             e.preventDefault();
@@ -543,7 +550,8 @@
                         if (!phoneRegex.test(phone)) {
                             e.preventDefault();
                             alert(
-                            'Please enter a valid Bangladeshi phone number (11 digits starting with 01).');
+                                'Please enter a valid Bangladeshi phone number (11 digits starting with 01).'
+                                );
                             return;
                         }
 
@@ -565,7 +573,7 @@
                     phoneInput.addEventListener('input', function(e) {
                         let value = e.target.value.replace(/\D/g, '');
                         if (value.length > 0 && !value.startsWith('01')) {
-                            value = '01' + value;
+                            value = value;
                         }
                         if (value.length > 11) {
                             value = value.substring(0, 11);

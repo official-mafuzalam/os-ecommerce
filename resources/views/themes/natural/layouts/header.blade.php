@@ -119,10 +119,9 @@
                 <a href="{{ route('public.cart') }}"
                     class="hidden md:inline relative material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform">
                     shopping_cart
-                    @if ($cartCount > 0)
-                        <span
-                            class="absolute -top-2 -right-2 bg-tertiary-fixed text-on-tertiary-fixed px-sm py-1 rounded-full font-label-md text-[10px] uppercase tracking-tighter">{{ $cartCount }}</span>
-                    @endif
+                    <span
+                        class="cart-count data-cart-count absolute -top-2 -right-2 bg-tertiary-fixed text-on-tertiary-fixed px-sm py-1 rounded-full font-label-md text-[10px] uppercase tracking-tighter {{ $cartCount > 0 ? '' : 'hidden' }}"
+                        data-cart-count>{{ $cartCount }}</span>
                 </a>
                 <button id="mobile-menu-btn"
                     class="md:hidden material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform">menu</button>

@@ -364,25 +364,9 @@
                     </div>
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-gutter">
                         @foreach ($recommendedProducts as $product)
-                            <!-- Product Card -->
-                            <a href="{{ route('public.products.show', $product->slug) }}"
-                                class="group cursor-pointer block">
-                                <div
-                                    class="aspect-[4/5] rounded-3xl overflow-hidden mb-4 bg-surface-container shadow-sm group-hover:shadow-xl transition-all duration-500 relative">
-                                    <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                        alt="{{ $product->name }}"
-                                        src="{{ $product->primary_image ? Storage::url($product->primary_image->image_path) : 'https://placehold.co/400x500?text=No+Image' }}" />
-                                    <button
-                                        class="absolute bottom-4 right-4 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0"
-                                        onclick="event.preventDefault(); window.location.href='{{ route('public.products.show', $product->slug) }}';">
-                                        <span class="material-symbols-outlined text-primary">add_shopping_cart</span>
-                                    </button>
-                                </div>
-                                <h3 class="font-label-md text-on-surface group-hover:text-primary transition-colors">
-                                    {{ $product->name }}</h3>
-                                <p class="font-headline-sm text-primary font-bold">
-                                    ৳{{ number_format($product->final_price, 2) }}</p>
-                            </a>
+                            @include('themes.natural.public.products.partial.product-card', [
+                                'product' => $product,
+                            ])
                         @endforeach
                     </div>
                 </section>

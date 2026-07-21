@@ -7,16 +7,31 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center w-full py-xl">
                 <div class="lg:col-span-6 z-10">
                     <span
-                        class="inline-block font-label-md text-label-md text-secondary uppercase tracking-widest mb-md">Pure
-                        Bangladeshi Apothecary</span>
+                        class="inline-block font-label-md text-label-md text-secondary uppercase tracking-widest mb-md">
+                        প্রকৃতির বিশুদ্ধ পুষ্টি
+                    </span>
+
                     <h1
                         class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary leading-tight mb-lg">
-                        Nature's Purest Essence for <span class="italic text-tertiary">Modern Vitality.</span>
+                        সুস্থ জীবনের জন্য <span class="italic text-tertiary">প্রকৃতির সেরা উপহার</span>
                     </h1>
-                    <a href="{{ route('public.products') }}"
-                        class="inline-flex items-center justify-center bg-primary text-white px-xl py-base h-[56px] rounded-full font-label-md text-label-md hover:bg-primary-container transition-all duration-300 active:scale-95 shadow-lg shadow-primary/10">
-                        Explore the Collection
-                    </a>
+
+                    <p class="text-body-lg text-on-surface-variant max-w-2xl mb-xl leading-relaxed">
+                        বিশুদ্ধ উপাদান, যত্নশীল প্রস্তুতি এবং প্রিমিয়াম মানের সুপার ফুড—
+                        আপনার প্রতিদিনের স্বাস্থ্যকর জীবনযাত্রার বিশ্বস্ত সঙ্গী।
+                    </p>
+
+                    <div class="flex flex-wrap gap-4">
+                        <a href="{{ route('public.products') }}"
+                            class="inline-flex items-center justify-center bg-primary text-white px-xl py-base h-[56px] rounded-full font-label-md text-label-md hover:bg-primary-container transition-all duration-300 active:scale-95 shadow-lg shadow-primary/10">
+                            পণ্যসমূহ দেখুন
+                        </a>
+
+                        {{-- <a href="{{ route('public.blog.index') }}"
+                            class="inline-flex items-center justify-center border border-primary text-primary px-xl py-base h-[56px] rounded-full font-label-md text-label-md hover:bg-primary/5 transition-all duration-300">
+                            সুপার ফুড সম্পর্কে জানুন
+                        </a> --}}
+                    </div>
                 </div>
                 <div class="lg:col-span-6 relative mt-xl lg:mt-0">
                     <div class="relative w-full aspect-square max-w-[600px] mx-auto">
@@ -56,11 +71,14 @@
             <section class="py-xl px-margin-desktop max-w-container-max mx-auto">
                 <div class="flex justify-between items-end mb-xl">
                     <div class="max-w-[480px]">
-                        <h2 class="font-headline-lg text-headline-lg text-primary mb-md">Featured Superfoods</h2>
-                        <p class="font-body-md text-body-md text-on-surface-variant">Carefully selected adaptogens and
-                            minerals from the heart of nature, processed with artisanal precision to preserve their
-                            vital
-                            force.</p>
+                        <h2 class="font-headline-lg text-headline-lg text-primary mb-md">
+                            আমাদের প্রিমিয়াম সংগ্রহ
+                        </h2>
+
+                        <p class="font-body-md text-body-md text-on-surface-variant">
+                            প্রকৃতির সেরা উপাদান থেকে তৈরি বিশুদ্ধ ও মানসম্মত পণ্য—
+                            স্বাস্থ্যকর ও সচেতন জীবনযাপনের জন্য যত্নের সঙ্গে নির্বাচিত।
+                        </p>
                     </div>
                     <a class="hidden md:flex items-center gap-xs font-label-md text-primary hover:gap-base transition-all"
                         href="{{ route('public.products') }}">
@@ -70,59 +88,9 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
                     @foreach ($featuredProducts->take(3) as $product)
-                        <div
-                            class="group bg-white rounded-2xl overflow-hidden hover-lift p-base {{ $loop->index > 0 ? 'mt-lg md:mt-0' : '' }} shadow-sm hover:shadow-md transition-shadow">
-                            <a href="{{ route('public.products.show', $product->slug) }}"
-                                class="block relative aspect-[4/5] rounded-xl overflow-hidden mb-md bg-surface-container-low">
-                                @if ($product->images->where('is_primary', true)->first())
-                                    <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                        alt="{{ $product->name }}"
-                                        src="{{ Storage::url($product->images->where('is_primary', true)->first()->image_path) }}" />
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-primary/30">
-                                        <span class="material-symbols-outlined text-[64px]">image</span>
-                                    </div>
-                                @endif
-
-                                @if ($product->category)
-                                    <div
-                                        class="absolute top-md right-md {{ $loop->index % 3 == 0 ? 'bg-secondary' : ($loop->index % 3 == 1 ? 'bg-tertiary' : 'bg-primary') }} text-white px-sm py-xs rounded-full font-label-md text-caption shadow-md">
-                                        {{ $product->category->name }}
-                                    </div>
-                                @endif
-                            </a>
-                            <div class="px-sm pb-md">
-                                <a href="{{ route('public.products.show', $product->slug) }}" class="block">
-                                    <h3
-                                        class="font-headline-md text-[24px] text-primary mb-xs group-hover:text-secondary transition-colors truncate">
-                                        {{ $product->name }}</h3>
-                                </a>
-                                <p
-                                    class="font-body-md text-on-surface-variant text-sm mb-md leading-relaxed line-clamp-2">
-                                    {{ strip_tags($product->description) }}
-                                </p>
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        @if ($product->discount_price)
-                                            <span
-                                                class="font-label-md text-primary text-lg font-bold mr-2">৳{{ number_format($product->discount_price, 2) }}</span>
-                                            <span
-                                                class="font-caption text-on-surface-variant line-through">৳{{ number_format($product->base_price, 2) }}</span>
-                                        @else
-                                            <span
-                                                class="font-label-md text-primary text-lg font-bold">৳{{ number_format($product->base_price, 2) }}</span>
-                                        @endif
-                                    </div>
-                                    <form action="{{ route('cart.add', $product) }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                        <input type="hidden" name="quantity" value="1">
-                                        <button type="submit"
-                                            class="material-symbols-outlined text-primary border border-primary/20 rounded-full p-xs hover:bg-primary hover:text-white transition-all active:scale-95 shadow-sm">add</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
+                        @include('themes.natural.public.products.partial.product-card', [
+                            'product' => $product,
+                        ])
                     @endforeach
                 </div>
             </section>
@@ -140,38 +108,74 @@
                     </div>
                     <div class="order-1 lg:order-2">
                         <span
-                            class="font-label-md text-label-md text-tertiary-fixed-variant uppercase tracking-widest mb-md block">Our
-                            Philosophy</span>
-                        <h2 class="font-headline-lg text-headline-lg text-primary mb-lg leading-tight">Grounded in
-                            Ancient Wisdom, Refined by Modern Science.</h2>
+                            class="font-label-md text-label-md text-tertiary-fixed-variant uppercase tracking-widest mb-md block">
+                            আমাদের অঙ্গীকার
+                        </span>
+
+                        <h2 class="font-headline-lg text-headline-lg text-primary mb-lg leading-tight">
+                            প্রকৃতির বিশুদ্ধতা, আপনার সুস্থতার জন্য।
+                        </h2>
+
                         <p class="font-body-lg text-body-lg text-on-surface-variant mb-lg leading-relaxed">
-                            OS Ecommerce is more than a brand; it is a bridge between the lush, fertile lands of
-                            Bangladesh and the modern pursuit of longevity. We believe that true vitality comes from
-                            respect—for the soil, for the season, and for the complex intelligence of the plant kingdom.
+                            Prokiti Sudha-তে আমরা বিশ্বাস করি, সুস্থ জীবনের ভিত্তি হলো বিশুদ্ধ ও মানসম্মত প্রাকৃতিক
+                            পুষ্টি।
+                            তাই প্রতিটি পণ্য যত্নের সঙ্গে নির্বাচিত উপাদান, নিরাপদ প্রক্রিয়াকরণ এবং মান নিয়ন্ত্রণের
+                            মাধ্যমে
+                            প্রস্তুত করা হয়, যাতে আপনি প্রতিদিন আত্মবিশ্বাসের সঙ্গে ব্যবহার করতে পারেন।
                         </p>
+
                         <ul class="space-y-md mb-xl">
                             <li class="flex items-start gap-md">
                                 <span class="material-symbols-outlined text-tertiary-fixed-dim mt-1"
                                     style="font-variation-settings: 'FILL' 1;">eco</span>
+
                                 <div>
-                                    <h4 class="font-label-md text-primary">Ethically Wild-Harvested</h4>
-                                    <p class="text-on-surface-variant text-sm">Working directly with local farmers to
-                                        ensure biodiversity and fair wages.</p>
+                                    <h4 class="font-label-md text-primary">
+                                        যত্নে নির্বাচিত প্রাকৃতিক উপাদান
+                                    </h4>
+
+                                    <p class="text-on-surface-variant text-sm">
+                                        বিশ্বস্ত উৎস থেকে সংগ্রহ করা মানসম্মত উপাদান দিয়ে তৈরি প্রতিটি পণ্য।
+                                    </p>
                                 </div>
                             </li>
+
                             <li class="flex items-start gap-md">
                                 <span class="material-symbols-outlined text-tertiary-fixed-dim mt-1"
-                                    style="font-variation-settings: 'FILL' 1;">science</span>
+                                    style="font-variation-settings: 'FILL' 1;">verified</span>
+
                                 <div>
-                                    <h4 class="font-label-md text-primary">Precision Extraction</h4>
-                                    <p class="text-on-surface-variant text-sm">Cold-processed methods to preserve
-                                        delicate enzymes and phytonutrients.</p>
+                                    <h4 class="font-label-md text-primary">
+                                        বিশুদ্ধতা ও মানের প্রতি অঙ্গীকার
+                                    </h4>
+
+                                    <p class="text-on-surface-variant text-sm">
+                                        পরিচ্ছন্ন প্রক্রিয়াকরণ, নিরাপদ প্যাকেজিং এবং প্রতিটি ধাপে গুণগত মান বজায় রাখার
+                                        চেষ্টা।
+                                    </p>
+                                </div>
+                            </li>
+
+                            <li class="flex items-start gap-md">
+                                <span class="material-symbols-outlined text-tertiary-fixed-dim mt-1"
+                                    style="font-variation-settings: 'FILL' 1;">favorite</span>
+
+                                <div>
+                                    <h4 class="font-label-md text-primary">
+                                        স্বাস্থ্যকর জীবনযাপনের সঙ্গী
+                                    </h4>
+
+                                    <p class="text-on-surface-variant text-sm">
+                                        প্রতিদিনের খাদ্যাভ্যাসকে আরও পুষ্টিকর ও স্বাস্থ্যসচেতন করতে প্রাকৃতিক ওয়েলনেস
+                                        পণ্য।
+                                    </p>
                                 </div>
                             </li>
                         </ul>
+
                         <a href="{{ route('public.about') }}"
                             class="inline-flex items-center justify-center border-2 border-primary text-primary px-lg py-base rounded-full font-label-md text-label-md hover:bg-primary hover:text-white transition-all duration-300">
-                            Learn Our Story
+                            আমাদের সম্পর্কে জানুন
                         </a>
                     </div>
                 </div>

@@ -162,69 +162,9 @@
                     @if ($products->count() > 0)
                         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
                             @foreach ($products as $product)
-                                <!-- Product Card -->
-                                <div
-                                    class="product-card bg-surface-container-lowest rounded-xl p-md flex flex-col group border border-outline-variant/30">
-                                    <div
-                                        class="relative overflow-hidden rounded-lg aspect-[4/5] mb-md bg-surface-container">
-                                        <a href="{{ route('public.products.show', $product->slug ?? $product->id) }}"
-                                            class="block w-full h-full">
-                                            @php $productImage = $product->images->first(); @endphp
-                                            @if ($productImage)
-                                                <img class="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
-                                                    alt="{{ $product->name }}"
-                                                    src="{{ Storage::url($productImage->image_path) }}" />
-                                            @else
-                                                <div
-                                                    class="w-full h-full flex items-center justify-center text-primary/30">
-                                                    <span class="material-symbols-outlined text-[48px]">image</span>
-                                                </div>
-                                            @endif
-                                        </a>
-
-                                        @if ($product->discount_price)
-                                            <span
-                                                class="absolute top-sm left-sm bg-error text-white px-sm py-1 rounded-full font-label-md text-[10px] uppercase tracking-tighter">Sale</span>
-                                        @endif
-                                        @if ($product->category)
-                                            <span
-                                                class="absolute top-sm right-sm bg-tertiary-fixed text-on-tertiary-fixed px-sm py-1 rounded-full font-label-md text-[10px] uppercase tracking-tighter">{{ $product->category->name }}</span>
-                                        @endif
-                                    </div>
-                                    <a href="{{ route('public.products.show', $product->slug ?? $product->id) }}"
-                                        class="font-cormorant text-headline-md text-[24px] text-on-surface mb-xs hover:text-primary transition-colors line-clamp-1">{{ $product->name }}</a>
-                                    <p
-                                        class="font-caption text-caption text-on-surface-variant mb-md line-clamp-2 min-h-[3rem]">
-                                        {{ strip_tags($product->short_description ?? $product->description) }}
-                                    </p>
-                                    <div class="mt-auto flex justify-between items-end">
-                                        <div>
-                                            @if ($product->discount_price)
-                                                <span
-                                                    class="font-label-md text-primary text-lg mr-1 block">৳{{ number_format($product->discount_price) }}</span>
-                                                <span
-                                                    class="font-caption text-outline line-through text-xs">৳{{ number_format($product->base_price ?? $product->price) }}</span>
-                                            @else
-                                                <span
-                                                    class="font-label-md text-primary text-lg">৳{{ number_format($product->final_price ?? ($product->base_price ?? $product->price)) }}</span>
-                                            @endif
-                                        </div>
-
-                                        <form action="{{ route('cart.add', $product->id) }}" method="POST">
-                                            @csrf
-                                            <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                            <input type="hidden" name="quantity" value="1">
-                                            <button type="submit"
-                                                class="bg-primary text-on-primary h-12 px-md rounded-xl flex items-center gap-xs active:scale-95 transition-transform hover:bg-primary-container disabled:opacity-50"
-                                                {{ ($product->stock_quantity ?? 1) <= 0 ? 'disabled' : '' }}>
-                                                <span class="material-symbols-outlined text-[20px]"
-                                                    data-icon="add_shopping_cart">add_shopping_cart</span>
-                                                <span
-                                                    class="font-label-md">{{ ($product->stock_quantity ?? 1) <= 0 ? 'Out' : 'Add' }}</span>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
+                                @include('themes.natural.public.products.partial.product-card', [
+                                    'product' => $product,
+                                ])
                             @endforeach
                         </section>
 

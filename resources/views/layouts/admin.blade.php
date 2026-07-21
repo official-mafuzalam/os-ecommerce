@@ -4,7 +4,7 @@
 
 
 <!-- Content -->
-<div class="w-full pt-10 px-4 sm:px-6 md:px-8 lg:pl-72">
+<div class="w-full pt-10 px-4 sm:px-6 md:px-8 transition-all duration-300" :class="sidebarOpen ? 'lg:pl-72' : 'lg:pl-8'">
     @if ($errors->any())
         <div id="notification-error"
             class="fixed bottom-4 right-4 z-50 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex flex-col transition-all duration-300">

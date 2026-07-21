@@ -280,6 +280,54 @@
                 notification.remove();
             }, 5000); // 5 seconds
         });
+
+        // Global AJAX Add to Cart handler for Default Theme
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (form && form.action && form.action.includes('/cart/add')) {
+                e.preventDefault();
+                const btn = form.querySelector('button[type="submit"]');
+                const origText = btn ? btn.innerHTML : '';
+                if (btn) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.7';
+                }
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    },
+                    body: new FormData(form)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-300';
+                        toast.innerText = data.message || 'Product added to cart!';
+                        document.body.appendChild(toast);
+                        setTimeout(() => toast.remove(), 3000);
+
+                        if (data.cart_count !== undefined) {
+                            document.querySelectorAll('.cart-count, [data-cart-count]').forEach(el => {
+                                el.textContent = data.cart_count;
+                                el.classList.remove('hidden');
+                            });
+                        }
+                    }
+                })
+                .catch(err => console.error('Add to cart error:', err))
+                .finally(() => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btn.innerHTML = origText;
+                    }
+                });
+            }
+        });
     });
 
     // Add animation classes

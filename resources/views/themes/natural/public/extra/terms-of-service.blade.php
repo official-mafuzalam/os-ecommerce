@@ -13,7 +13,7 @@
                     </div>
                     <h1 class="text-4xl font-bold text-gray-900 mb-4 elegant-heading">Terms of Service</h1>
                     <div class="flex items-center justify-center gap-4 text-gray-600">
-                        <span>Last Updated: {{ date('F j, Y') }}</span>
+                        <span>Last Updated: June 2026</span>
                         <span class="text-gray-300">•</span>
                         <span>Effective Immediately</span>
                     </div>
@@ -550,7 +550,7 @@
                 <!-- Last Updated -->
                 <div class="mt-8 pt-6 border-t border-gray-200 text-center">
                     <p class="text-sm text-gray-600">
-                        These Terms of Service were last updated on <strong>{{ date('F j, Y') }}</strong>.
+                        These Terms of Service were last updated on <strong>June 2026</strong>.
                         For previous versions, please contact our support team.
                     </p>
                 </div>

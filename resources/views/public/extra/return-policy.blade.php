@@ -13,7 +13,7 @@
                     </div>
                     <h1 class="text-4xl font-bold text-gray-900 mb-4 elegant-heading">Return & Exchange Policy</h1>
                     <div class="flex items-center justify-center gap-4 text-gray-600">
-                        <span>Last Updated: {{ date('F j, Y') }}</span>
+                        <span>Last Updated: June 2026</span>
                         <span class="text-gray-300">•</span>
                         <span>Free Returns Within 30 Days</span>
                     </div>
@@ -656,7 +656,7 @@
                 <div class="mt-12 pt-6 border-t border-gray-200">
                     <div class="flex items-center justify-between">
                         <div class="text-sm text-gray-600">
-                            <p>This Return Policy was last updated on {{ date('F j, Y') }}</p>
+                            <p>This Return Policy was last updated on June 2026</p>
                         </div>
                         <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
                             class="text-gray-700 hover:text-gray-900 font-medium flex items-center gap-2 transition-colors">

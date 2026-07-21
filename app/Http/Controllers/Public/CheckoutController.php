@@ -150,12 +150,21 @@ class CheckoutController extends Controller
         $request->validate([
             'full_name' => 'required|string|max:255',
             'email' => 'nullable|email',
-            'phone' => 'required|string|size:11',
+            'phone' => ['required', 'string', 'regex:/^01[3-9]\d{8}$/'],
             'full_address' => 'required|string|max:500',
             'delivery_area' => 'required|in:inside_dhaka,outside_dhaka',
             'payment_method' => 'nullable|in:cash_on_delivery,bkash,nagad,sslcommerz',
             'notes' => 'nullable|string|max:1000',
         ]);
+
+        // Duplicate order check (prevent same phone order within 5 minutes)
+        $recentOrder = Order::where('customer_phone', $request->phone)
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->first();
+
+        if ($recentOrder) {
+            return back()->withInput()->with('error', 'An order with this phone number was placed recently. Please wait a few minutes before trying again.');
+        }
 
         $deliveryCharge = $request->delivery_area === 'inside_dhaka'
             ? setting('delivery_charge_inside_dhaka', 80)

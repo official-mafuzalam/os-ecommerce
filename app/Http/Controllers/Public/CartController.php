@@ -103,10 +103,26 @@ class CartController extends Controller
                 ]
             ]);
 
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Product added to cart!',
+                    'cart_count' => $cart->items()->sum('quantity')
+                ]);
+            }
+
             return back()->with('success', 'Product added to cart!');
 
         } catch (\Exception $e) {
             Log::error('Add to cart error: ' . $e->getMessage());
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to add product to cart.'
+                ], 422);
+            }
+
             return back()->with('error', 'Failed to add product to cart.');
         }
     }

@@ -13,7 +13,7 @@
                     </div>
                     <h1 class="text-4xl font-bold text-gray-900 mb-4 elegant-heading">Privacy Policy</h1>
                     <div class="flex items-center justify-center gap-4 text-gray-600">
-                        <span>Last Updated: {{ date('F j, Y') }}</span>
+                        <span>Last Updated: June 2026</span>
                         <span class="text-gray-300">•</span>
                         <span>Version 2.0</span>
                     </div>
@@ -505,7 +505,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600">
-                                This Privacy Policy was last updated on {{ date('F j, Y') }}
+                                This Privacy Policy was last updated on June 2026
                             </p>
                         </div>
                         <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})"

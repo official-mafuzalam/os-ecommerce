@@ -634,10 +634,9 @@
                     <a href="{{ route('public.cart') }}"
                         class="text-gray-700 hover:text-gray-900 transition-colors relative">
                         <i class="fas fa-shopping-bag text-lg"></i>
-                        @if ($cartCount > 0)
-                            <span
-                                class="absolute -top-2 -right-2 bg-gray-900 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">{{ $cartCount }}</span>
-                        @endif
+                        <span
+                            class="cart-count data-cart-count absolute -top-2 -right-2 bg-gray-900 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center {{ $cartCount > 0 ? '' : 'hidden' }}"
+                            data-cart-count>{{ $cartCount }}</span>
                     </a>
 
                     <!-- Mobile Menu Button -->
