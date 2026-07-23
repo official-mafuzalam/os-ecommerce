@@ -92,6 +92,10 @@ Route::middleware('web')->group(function () {
         Route::post('/license/refresh', [LicenseController::class, 'refresh'])->name('license.refresh');
         Route::post('/license/update', [LicenseController::class, 'update'])->name('license.update');
         Route::get('/license/status', [LicenseController::class, 'status'])->name('license.status');
+        Route::get('/license/invoices', [LicenseController::class, 'invoices'])->name('license.invoices');
+        Route::get('/license/invoices/{invoiceNumber}', [LicenseController::class, 'invoiceDetail'])->name('license.invoice-detail');
+        Route::post('/license/submit-payment', [LicenseController::class, 'submitPayment'])->name('license.submit-payment');
+        Route::post('/license/submission-status', [LicenseController::class, 'checkSubmissionStatus'])->name('license.submission-status');
     });
 });
 
@@ -176,6 +180,18 @@ Route::middleware(['auth', 'license.check', 'role:super_admin|admin|user'])->gro
         // Settings Routes
         Route::get('settings', [SettingController::class, 'index'])->name('admin.settings.index');
         Route::put('settings', [SettingController::class, 'update'])->name('admin.settings.update');
+
+        // License & Subscription Admin Routes
+        Route::prefix('license')->group(function () {
+            Route::get('/', [LicenseController::class, 'index'])->name('admin.license.index');
+            Route::post('/refresh', [LicenseController::class, 'refresh'])->name('admin.license.refresh');
+            Route::post('/update', [LicenseController::class, 'update'])->name('admin.license.update');
+            Route::get('/status', [LicenseController::class, 'status'])->name('admin.license.status');
+            Route::get('/invoices', [LicenseController::class, 'invoices'])->name('admin.license.invoices');
+            Route::get('/invoices/{invoiceNumber}', [LicenseController::class, 'invoiceDetail'])->name('admin.license.invoice-detail');
+            Route::post('/submit-payment', [LicenseController::class, 'submitPayment'])->name('admin.license.submit-payment');
+            Route::post('/submission-status', [LicenseController::class, 'checkSubmissionStatus'])->name('admin.license.submission-status');
+        });
 
         // Carousel Routes
         Route::resource('carousels', CarouselController::class)->names('admin.carousels');
