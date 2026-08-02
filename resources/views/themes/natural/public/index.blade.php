@@ -2,69 +2,322 @@
     @section('title', setting('site_name', 'OS Ecommerce'))
     <x-slot name="main">
         <!-- Hero Section -->
-        <section
-            class="relative min-h-[921px] flex items-center px-margin-desktop max-w-container-max mx-auto overflow-visible">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center w-full py-xl">
-                <div class="lg:col-span-6 z-10">
-                    <span
-                        class="inline-block font-label-md text-label-md text-secondary uppercase tracking-widest mb-md">
-                        প্রকৃতির বিশুদ্ধ পুষ্টি
-                    </span>
+        <style>
+            /* Attractive blob frame for hero image */
+            .hero-blob-frame {
+                border-radius: 60% 40% 55% 45% / 45% 55% 40% 60%;
+                transition: border-radius 0.8s ease-in-out;
+            }
+            .hero-blob-frame:hover {
+                border-radius: 45% 55% 40% 60% / 60% 40% 55% 45%;
+            }
 
-                    <h1
-                        class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary leading-tight mb-lg">
-                        সুস্থ জীবনের জন্য <span class="italic text-tertiary">প্রকৃতির সেরা উপহার</span>
-                    </h1>
+            /* Slowly rotating conic-gradient ring */
+            .hero-spin-ring {
+                background: conic-gradient(
+                    from 0deg,
+                    var(--color-primary, #4a7c59) 0%,
+                    var(--color-secondary, #8fbc8f) 25%,
+                    var(--color-tertiary, #c8a96e) 50%,
+                    var(--color-primary, #4a7c59) 75%,
+                    var(--color-secondary, #8fbc8f) 100%
+                );
+                animation: hero-ring-spin 8s linear infinite;
+            }
+            @keyframes hero-ring-spin {
+                from { transform: rotate(0deg); }
+                to   { transform: rotate(360deg); }
+            }
 
-                    <p class="text-body-lg text-on-surface-variant max-w-2xl mb-xl leading-relaxed">
-                        বিশুদ্ধ উপাদান, যত্নশীল প্রস্তুতি এবং প্রিমিয়াম মানের সুপার ফুড—
-                        আপনার প্রতিদিনের স্বাস্থ্যকর জীবনযাত্রার বিশ্বস্ত সঙ্গী।
-                    </p>
+            /* Slow ping for the live indicator dot */
+            @keyframes ping-slow {
+                0%, 100% { transform: scale(1); opacity: 1; }
+                60%       { transform: scale(1.8); opacity: 0; }
+            }
+            .animate-ping-slow {
+                animation: ping-slow 2s ease-in-out infinite;
+            }
 
-                    <div class="flex flex-wrap gap-4">
-                        <a href="{{ route('public.products') }}"
-                            class="inline-flex items-center justify-center bg-primary text-white px-xl py-base h-[56px] rounded-full font-label-md text-label-md hover:bg-primary-container transition-all duration-300 active:scale-95 shadow-lg shadow-primary/10">
-                            পণ্যসমূহ দেখুন
-                        </a>
+            /* Slow pulse for background aura */
+            @keyframes pulse-slow {
+                0%, 100% { opacity: 0.6; transform: scale(1.08); }
+                50%       { opacity: 1;   transform: scale(1.14); }
+            }
+            .animate-pulse-slow {
+                animation: pulse-slow 4s ease-in-out infinite;
+            }
+        </style>
 
-                        {{-- <a href="{{ route('public.blog.index') }}"
-                            class="inline-flex items-center justify-center border border-primary text-primary px-xl py-base h-[56px] rounded-full font-label-md text-label-md hover:bg-primary/5 transition-all duration-300">
-                            সুপার ফুড সম্পর্কে জানুন
-                        </a> --}}
-                    </div>
+        <!-- Hero Carousel Section -->
+        <section class="relative overflow-hidden" id="hero-carousel">
+
+            @if ($carousels && $carousels->count() > 0)
+
+                {{-- Slides --}}
+                <div id="carousel-track" class="relative">
+                    @foreach ($carousels as $index => $carousel)
+                        <div class="carousel-slide {{ $index === 0 ? 'opacity-100 translate-x-0 z-10' : 'opacity-0 translate-x-full z-0' }} absolute inset-0 transition-all duration-700 ease-in-out"
+                            style="position: {{ $index === 0 ? 'relative' : 'absolute' }}; top:0; left:0; width:100%;"
+                            data-index="{{ $index }}">
+
+                            <div
+                                class="min-h-[921px] flex items-center px-margin-desktop max-w-container-max mx-auto overflow-visible">
+                                <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center w-full py-xl">
+
+                                    {{-- Text Content --}}
+                                    <div class="lg:col-span-6 z-10">
+                                        <!-- <span
+                                                    class="inline-block font-label-md text-label-md text-secondary uppercase tracking-widest mb-md">
+                                                    প্রকৃতির বিশুদ্ধ পুষ্টি
+                                                </span> -->
+
+                                        <h1
+                                            class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary leading-tight mb-lg">
+                                            {{ $carousel->title }}
+                                        </h1>
+
+                                        @if ($carousel->description)
+                                            <p class="text-body-lg text-on-surface-variant max-w-2xl mb-xl leading-relaxed">
+                                                {{ $carousel->description }}
+                                            </p>
+                                        @endif
+
+                                        <div class="flex flex-wrap gap-4">
+                                            @if ($carousel->button_text && $carousel->button_url)
+                                                <a href="{{ $carousel->button_url }}"
+                                                    class="inline-flex items-center justify-center bg-primary text-white px-xl py-base h-[56px] rounded-full font-label-md text-label-md hover:bg-primary-container transition-all duration-300 active:scale-95 shadow-lg shadow-primary/10">
+                                                    {{ $carousel->button_text }}
+                                                </a>
+                                            @else
+                                                <a href="{{ route('public.products') }}"
+                                                    class="inline-flex items-center justify-center bg-primary text-white px-xl py-base h-[56px] rounded-full font-label-md text-label-md hover:bg-primary-container transition-all duration-300 active:scale-95 shadow-lg shadow-primary/10">
+                                                    পণ্যসমূহ দেখুন
+                                                </a>
+                                            @endif
+
+                                            @if ($carousel->secondary_button_text && $carousel->secondary_button_url)
+                                                <a href="{{ $carousel->secondary_button_url }}"
+                                                    class="inline-flex items-center justify-center border border-primary text-primary px-xl py-base h-[56px] rounded-full font-label-md text-label-md hover:bg-primary/5 transition-all duration-300">
+                                                    {{ $carousel->secondary_button_text }}
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    {{-- Image --}}
+                                    <div class="lg:col-span-6 relative mt-xl lg:mt-0">
+                                        <div class="relative w-full aspect-square max-w-[560px] mx-auto">
+
+                                            <!-- Glowing background aura -->
+                                            <div class="absolute inset-0 bg-gradient-to-br from-secondary-container/40 via-tertiary-container/20 to-primary-container/30 rounded-full blur-3xl scale-110 -z-10 animate-pulse-slow"></div>
+
+                                            <!-- Outer rotating gradient ring -->
+                                            <div class="absolute inset-0 rounded-full p-[3px] hero-spin-ring">
+                                                <div class="w-full h-full rounded-full bg-surface"></div>
+                                            </div>
+
+                                            <!-- Decorative dashed ring -->
+                                            <div class="absolute -inset-3 rounded-full border-2 border-dashed border-primary/20"></div>
+
+                                            <!-- Decorative solid ring -->
+                                            <div class="absolute -inset-6 rounded-full border border-secondary/10"></div>
+
+                                            <!-- Main blob image frame -->
+                                            <div class="absolute inset-[3px] overflow-hidden hero-blob-frame shadow-2xl">
+                                                <img class="w-full h-full object-cover transform hover:scale-108 transition-transform duration-700 ease-out"
+                                                    alt="{{ $carousel->title }}" src="{{ Storage::url($carousel->image) }}" />
+                                                <!-- Subtle inner gradient overlay -->
+                                                <div class="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-transparent"></div>
+                                            </div>
+
+                                            <!-- Floating badge — bottom left -->
+                                            <div class="absolute -bottom-4 -left-4 z-10 hidden md:flex items-center gap-2 bg-white/90 backdrop-blur-md pl-2 pr-4 py-2 rounded-2xl shadow-xl border border-surface-container-high">
+                                                <div class="relative w-8 h-8 bg-tertiary-container rounded-xl flex items-center justify-center shrink-0">
+                                                    <span class="material-symbols-outlined text-tertiary text-[18px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                                    <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-white animate-ping-slow"></span>
+                                                </div>
+                                                <div>
+                                                    <p class="font-label-md text-label-md text-primary leading-none">Lab-Tested</p>
+                                                    <p class="text-[10px] text-on-surface-variant leading-none mt-0.5">100% Pure Quality</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Floating badge — top right -->
+                                            <div class="absolute -top-4 -right-4 z-10 hidden md:flex items-center gap-1 bg-primary text-white pl-2 pr-3 py-1.5 rounded-full shadow-lg">
+                                                <span class="material-symbols-outlined text-white text-[16px]" style="font-variation-settings: 'FILL' 1;">eco</span>
+                                                <span class="text-[11px] font-semibold tracking-wide">100% Natural</span>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
-                <div class="lg:col-span-6 relative mt-xl lg:mt-0">
-                    <div class="relative w-full aspect-square max-w-[600px] mx-auto">
-                        <!-- Decorative Botanical Background -->
-                        <div
-                            class="absolute -top-10 -right-10 w-full h-full bg-secondary-container/20 rounded-full blur-3xl -z-10">
-                        </div>
 
-                        <!-- Main Hero Image with Organic Masking -->
-                        <div class="w-full h-full overflow-hidden organic-shape shadow-2xl rounded-full">
-                            @if ($carousels && $carousels->count() > 0)
-                                <img class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
-                                    alt="{{ $carousels->first()->title }}"
-                                    src="{{ Storage::url($carousels->first()->image) }}" />
-                            @else
-                                <img class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
-                                    alt="Hero Image"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbWrds_KT3YCmlhSGLOzs3P5DEqXoY3DXYYjCwVc7KXFIVSSa91lOgJmaWb-io8ZR3F6fxvGq9iS6URaCLHyzKRA-4-XJA4RYn4JqVp5ireOIdv3FnbwKAGJ4Y-kGPb_byr6IXNOwJbcfrCdPPzKW-43y1c2nEajwwTZM_2bN3e992xgrzGGYFMqADfBKkYO-OpQ6Zno9ndkvUUL1kmBOUIpzFN9StLFsUahOgs5_UAu3ulPNVWoMpWb3sDdEYPYm9gRjK5eWYNx8b" />
-                            @endif
+                @if ($carousels->count() > 1)
+                    {{-- Prev / Next Arrows --}}
+                    <button id="carousel-prev"
+                        class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 backdrop-blur-md hover:bg-white text-primary rounded-full w-12 h-12 flex items-center justify-center shadow-lg border border-surface-container-high transition-all duration-200 hover:scale-110"
+                        aria-label="Previous slide">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <button id="carousel-next"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 backdrop-blur-md hover:bg-white text-primary rounded-full w-12 h-12 flex items-center justify-center shadow-lg border border-surface-container-high transition-all duration-200 hover:scale-110"
+                        aria-label="Next slide">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+
+                    {{-- Dot Indicators --}}
+                    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+                        @foreach ($carousels as $index => $carousel)
+                            <button
+                                class="carousel-dot w-2.5 h-2.5 rounded-full transition-all duration-300 {{ $index === 0 ? 'bg-primary w-6' : 'bg-primary/30 hover:bg-primary/60' }}"
+                                data-index="{{ $index }}" aria-label="Go to slide {{ $index + 1 }}"></button>
+                        @endforeach
+                    </div>
+                @endif
+
+            @else
+                {{-- Fallback static hero --}}
+                <div class="min-h-[921px] flex items-center px-margin-desktop max-w-container-max mx-auto overflow-visible">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center w-full py-xl">
+                        <div class="lg:col-span-6 z-10">
+                            <span
+                                class="inline-block font-label-md text-label-md text-secondary uppercase tracking-widest mb-md">
+                                প্রকৃতির বিশুদ্ধ পুষ্টি
+                            </span>
+                            <h1
+                                class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary leading-tight mb-lg">
+                                সুস্থ জীবনের জন্য <span class="italic text-tertiary">প্রকৃতির সেরা উপহার</span>
+                            </h1>
+                            <p class="text-body-lg text-on-surface-variant max-w-2xl mb-xl leading-relaxed">
+                                বিশুদ্ধ উপাদান, যত্নশীল প্রস্তুতি এবং প্রিমিয়াম মানের সুপার ফুড—
+                                আপনার প্রতিদিনের স্বাস্থ্যকর জীবনযাত্রার বিশ্বস্ত সঙ্গী।
+                            </p>
+                            <div class="flex flex-wrap gap-4">
+                                <a href="{{ route('public.products') }}"
+                                    class="inline-flex items-center justify-center bg-primary text-white px-xl py-base h-[56px] rounded-full font-label-md text-label-md hover:bg-primary-container transition-all duration-300 active:scale-95 shadow-lg shadow-primary/10">
+                                    পণ্যসমূহ দেখুন
+                                </a>
+                            </div>
                         </div>
-                        <!-- Floating Accent -->
-                        <div
-                            class="absolute -bottom-6 -left-6 bg-white/80 backdrop-blur-md p-md rounded-2xl shadow-xl border border-surface-container-high hidden md:block">
-                            <div class="flex items-center gap-base">
-                                <span class="material-symbols-outlined text-tertiary-fixed-dim"
-                                    style="font-variation-settings: 'FILL' 1;">stars</span>
-                                <span class="font-label-md text-label-md text-primary">Lab-Tested Purity</span>
+                        <div class="lg:col-span-6 relative mt-xl lg:mt-0">
+                            <div class="relative w-full aspect-square max-w-[560px] mx-auto">
+                                <!-- Glowing background aura -->
+                                <div class="absolute inset-0 bg-gradient-to-br from-secondary-container/40 via-tertiary-container/20 to-primary-container/30 rounded-full blur-3xl scale-110 -z-10 animate-pulse-slow"></div>
+                                <!-- Outer rotating gradient ring -->
+                                <div class="absolute inset-0 rounded-full p-[3px] hero-spin-ring">
+                                    <div class="w-full h-full rounded-full bg-surface"></div>
+                                </div>
+                                <!-- Decorative dashed ring -->
+                                <div class="absolute -inset-3 rounded-full border-2 border-dashed border-primary/20"></div>
+                                <!-- Decorative solid ring -->
+                                <div class="absolute -inset-6 rounded-full border border-secondary/10"></div>
+                                <!-- Main blob image frame -->
+                                <div class="absolute inset-[3px] overflow-hidden hero-blob-frame shadow-2xl">
+                                    <img class="w-full h-full object-cover transform hover:scale-108 transition-transform duration-700 ease-out"
+                                        alt="Hero Image"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbWrds_KT3YCmlhSGLOzs3P5DEqXoY3DXYYjCwVc7KXFIVSSa91lOgJmaWb-io8ZR3F6fxvGq9iS6URaCLHyzKRA-4-XJA4RYn4JqVp5ireOIdv3FnbwKAGJ4Y-kGPb_byr6IXNOwJbcfrCdPPzKW-43y1c2nEajwwTZM_2bN3e992xgrzGGYFMqADfBKkYO-OpQ6Zno9ndkvUUL1kmBOUIpzFN9StLFsUahOgs5_UAu3ulPNVWoMpWb3sDdEYPYm9gRjK5eWYNx8b" />
+                                    <div class="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-transparent"></div>
+                                </div>
+                                <!-- Floating badge — bottom left -->
+                                <div class="absolute -bottom-4 -left-4 z-10 hidden md:flex items-center gap-2 bg-white/90 backdrop-blur-md pl-2 pr-4 py-2 rounded-2xl shadow-xl border border-surface-container-high">
+                                    <div class="relative w-8 h-8 bg-tertiary-container rounded-xl flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-tertiary text-[18px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-white animate-ping-slow"></span>
+                                    </div>
+                                    <div>
+                                        <p class="font-label-md text-label-md text-primary leading-none">Lab-Tested</p>
+                                        <p class="text-[10px] text-on-surface-variant leading-none mt-0.5">100% Pure Quality</p>
+                                    </div>
+                                </div>
+                                <!-- Floating badge — top right -->
+                                <div class="absolute -top-4 -right-4 z-10 hidden md:flex items-center gap-1 bg-primary text-white pl-2 pr-3 py-1.5 rounded-full shadow-lg">
+                                    <span class="material-symbols-outlined text-white text-[16px]" style="font-variation-settings: 'FILL' 1;">eco</span>
+                                    <span class="text-[11px] font-semibold tracking-wide">100% Natural</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            @endif
+
         </section>
+
+        {{-- Carousel JS --}}
+        @if ($carousels && $carousels->count() > 1)
+            <script>
+                (function () {
+                    const slides = document.querySelectorAll('.carousel-slide');
+                    const dots = document.querySelectorAll('.carousel-dot');
+                    const total = slides.length;
+                    let current = 0;
+                    let timer = null;
+
+                    function goTo(next) {
+                        const prev = current;
+                        if (next === prev) return;
+
+                        // Outgoing slide
+                        slides[prev].style.position = 'absolute';
+                        slides[prev].classList.remove('opacity-100', 'translate-x-0', 'z-10');
+                        slides[prev].classList.add('opacity-0', next > prev ? '-translate-x-full' : 'translate-x-full', 'z-0');
+
+                        // Incoming slide
+                        slides[next].style.position = 'relative';
+                        slides[next].classList.remove('opacity-0', '-translate-x-full', 'translate-x-full', 'z-0');
+                        slides[next].classList.add('opacity-100', 'translate-x-0', 'z-10');
+
+                        // Dots
+                        dots[prev].classList.remove('bg-primary', 'w-6');
+                        dots[prev].classList.add('bg-primary/30', 'w-2.5');
+                        dots[next].classList.remove('bg-primary/30', 'w-2.5');
+                        dots[next].classList.add('bg-primary', 'w-6');
+
+                        current = next;
+                    }
+
+                    function next() { goTo((current + 1) % total); }
+                    function prev() { goTo((current - 1 + total) % total); }
+
+                    function startTimer() {
+                        stopTimer();
+                        timer = setInterval(next, 5000);
+                    }
+                    function stopTimer() {
+                        if (timer) { clearInterval(timer); timer = null; }
+                    }
+
+                    document.getElementById('carousel-next')?.addEventListener('click', function () { next(); startTimer(); });
+                    document.getElementById('carousel-prev')?.addEventListener('click', function () { prev(); startTimer(); });
+
+                    dots.forEach(function (dot) {
+                        dot.addEventListener('click', function () {
+                            goTo(parseInt(this.dataset.index));
+                            startTimer();
+                        });
+                    });
+
+                    // Pause on hover
+                    const section = document.getElementById('hero-carousel');
+                    section?.addEventListener('mouseenter', stopTimer);
+                    section?.addEventListener('mouseleave', startTimer);
+
+                    // Touch / swipe support
+                    let touchStartX = 0;
+                    section?.addEventListener('touchstart', function (e) { touchStartX = e.touches[0].clientX; }, { passive: true });
+                    section?.addEventListener('touchend', function (e) {
+                        const diff = touchStartX - e.changedTouches[0].clientX;
+                        if (Math.abs(diff) > 50) { diff > 0 ? next() : prev(); startTimer(); }
+                    });
+
+                    startTimer();
+                })();
+            </script>
+        @endif
 
         <!-- Featured Products Bento Grid -->
         @if (isset($featuredProducts) && $featuredProducts->count() > 0)
