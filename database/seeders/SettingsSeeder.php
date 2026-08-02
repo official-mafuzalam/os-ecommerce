@@ -761,5 +761,33 @@ class SettingsSeeder extends Seeder
             );
         }
 
+        // --------------------
+        // Affiliate Settings
+        // --------------------
+        $affiliateSettings = [
+            [
+                'key' => 'affiliate_marketing_status',
+                'value' => true,
+                'type' => 'boolean',
+                'group' => 'affiliate',
+                'label' => 'Affiliate Marketing Status',
+                'order' => 1,
+            ],
+            [
+                'key' => 'affiliate_commission_percentage',
+                'value' => '10',
+                'type' => 'text',
+                'group' => 'affiliate',
+                'label' => 'Affiliate Commission Percentage',
+                'order' => 2,
+            ]
+        ];
+
+        foreach ($affiliateSettings as $setting) {
+            Setting::updateOrCreate(
+                ['key' => $setting['key'], 'group' => $setting['group']],
+                $setting
+            );
+        }
     }
 }

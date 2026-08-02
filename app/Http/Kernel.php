@@ -37,6 +37,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\TrackAffiliate::class,
             \App\Http\Middleware\LastUserActivity::class,
             \App\Http\Middleware\CheckBlockedUser::class,
         ],
@@ -75,5 +76,6 @@ class Kernel extends HttpKernel
         // Add your license middleware here:
         'license.check' => \App\Http\Middleware\CheckLicense::class,
         'license.warning' => \App\Http\Middleware\LicenseWarning::class,
+        'affiliate.status' => \App\Http\Middleware\CheckAffiliateStatus::class,
     ];
 }

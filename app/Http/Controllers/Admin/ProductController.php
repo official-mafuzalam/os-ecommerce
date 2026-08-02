@@ -173,36 +173,52 @@ class ProductController extends Controller
 
             // Extract detail & seo fields before product create
             $detailFields = [
-                'description'        => $validated['description'] ?? null,
-                'short_description'  => $validated['short_description'] ?? null,
-                'weight'             => $validated['weight'] ?? null,
-                'length'             => $validated['length'] ?? null,
-                'width'              => $validated['width'] ?? null,
-                'height'             => $validated['height'] ?? null,
-                'tags'               => $tags,
-                'label'              => $validated['label'] ?? null,
-                'ingredients'        => $validated['ingredients'] ?? null,
+                'description' => $validated['description'] ?? null,
+                'short_description' => $validated['short_description'] ?? null,
+                'weight' => $validated['weight'] ?? null,
+                'length' => $validated['length'] ?? null,
+                'width' => $validated['width'] ?? null,
+                'height' => $validated['height'] ?? null,
+                'tags' => $tags,
+                'label' => $validated['label'] ?? null,
+                'ingredients' => $validated['ingredients'] ?? null,
                 'usage_instructions' => $validated['usage_instructions'] ?? null,
-                'warranty_info'      => $validated['warranty_info'] ?? null,
-                'origin_country'     => $validated['origin_country'] ?? null,
-                'certifications'     => $certifications,
-                'material'           => $validated['material'] ?? null,
-                'care_instructions'  => $validated['care_instructions'] ?? null,
-                'specifications'     => $specifications,
+                'warranty_info' => $validated['warranty_info'] ?? null,
+                'origin_country' => $validated['origin_country'] ?? null,
+                'certifications' => $certifications,
+                'material' => $validated['material'] ?? null,
+                'care_instructions' => $validated['care_instructions'] ?? null,
+                'specifications' => $specifications,
             ];
 
             $seoFields = [
-                'meta_title'       => $validated['meta_title'] ?? null,
+                'meta_title' => $validated['meta_title'] ?? null,
                 'meta_description' => $validated['meta_description'] ?? null,
-                'meta_keywords'    => $validated['meta_keywords'] ?? null,
+                'meta_keywords' => $validated['meta_keywords'] ?? null,
             ];
 
             // Remove detail/seo fields from validated before Product::create
             $productFields = array_diff_key($validated, array_flip([
-                'description', 'short_description', 'weight', 'length', 'width', 'height',
-                'tags', 'label', 'ingredients', 'usage_instructions', 'warranty_info',
-                'origin_country', 'certifications', 'material', 'care_instructions', 'specifications',
-                'meta_title', 'meta_description', 'meta_keywords', 'og_image',
+                'description',
+                'short_description',
+                'weight',
+                'length',
+                'width',
+                'height',
+                'tags',
+                'label',
+                'ingredients',
+                'usage_instructions',
+                'warranty_info',
+                'origin_country',
+                'certifications',
+                'material',
+                'care_instructions',
+                'specifications',
+                'meta_title',
+                'meta_description',
+                'meta_keywords',
+                'og_image',
             ]));
 
             // Create core product
@@ -221,10 +237,10 @@ class ProductController extends Controller
                         foreach ($attributeData['values'] as $valueIndex => $value) {
                             if (!empty(trim($value))) {
                                 ProductAttribute::create([
-                                    'product_id'   => $product->id,
+                                    'product_id' => $product->id,
                                     'attribute_id' => $attributeData['id'],
-                                    'value'        => trim($value),
-                                    'order'        => $valueIndex
+                                    'value' => trim($value),
+                                    'order' => $valueIndex
                                 ]);
                             }
                         }
@@ -237,13 +253,13 @@ class ProductController extends Controller
                 $imagePaths = $this->imageCompressor->bulkCompress(
                     $request->file('image_gallery'),
                     [
-                        'max_size_kb'    => 200,
-                        'max_width'      => 1200,
-                        'max_height'     => 1200,
-                        'target_ratio'   => 4 / 3,
-                        'format'         => 'jpg',
-                        'storage_path'   => 'products/gallery',
-                        'filename_prefix'=> 'prod-' . $product->id,
+                        'max_size_kb' => 200,
+                        'max_width' => 1200,
+                        'max_height' => 1200,
+                        'target_ratio' => 4 / 3,
+                        'format' => 'jpg',
+                        'storage_path' => 'products/gallery',
+                        'filename_prefix' => 'prod-' . $product->id,
                         'strip_metadata' => true,
                     ]
                 );
@@ -405,36 +421,52 @@ class ProductController extends Controller
 
             // Extract detail & seo fields
             $detailFields = [
-                'description'        => $validated['description'] ?? null,
-                'short_description'  => $validated['short_description'] ?? null,
-                'weight'             => $validated['weight'] ?? null,
-                'length'             => $validated['length'] ?? null,
-                'width'              => $validated['width'] ?? null,
-                'height'             => $validated['height'] ?? null,
-                'tags'               => $tags,
-                'label'              => $validated['label'] ?? null,
-                'ingredients'        => $validated['ingredients'] ?? null,
+                'description' => $validated['description'] ?? null,
+                'short_description' => $validated['short_description'] ?? null,
+                'weight' => $validated['weight'] ?? null,
+                'length' => $validated['length'] ?? null,
+                'width' => $validated['width'] ?? null,
+                'height' => $validated['height'] ?? null,
+                'tags' => $tags,
+                'label' => $validated['label'] ?? null,
+                'ingredients' => $validated['ingredients'] ?? null,
                 'usage_instructions' => $validated['usage_instructions'] ?? null,
-                'warranty_info'      => $validated['warranty_info'] ?? null,
-                'origin_country'     => $validated['origin_country'] ?? null,
-                'certifications'     => $certifications,
-                'material'           => $validated['material'] ?? null,
-                'care_instructions'  => $validated['care_instructions'] ?? null,
-                'specifications'     => $specifications,
+                'warranty_info' => $validated['warranty_info'] ?? null,
+                'origin_country' => $validated['origin_country'] ?? null,
+                'certifications' => $certifications,
+                'material' => $validated['material'] ?? null,
+                'care_instructions' => $validated['care_instructions'] ?? null,
+                'specifications' => $specifications,
             ];
 
             $seoFields = [
-                'meta_title'       => $validated['meta_title'] ?? null,
+                'meta_title' => $validated['meta_title'] ?? null,
                 'meta_description' => $validated['meta_description'] ?? null,
-                'meta_keywords'    => $validated['meta_keywords'] ?? null,
+                'meta_keywords' => $validated['meta_keywords'] ?? null,
             ];
 
             // Remove detail/seo fields from validated before product update
             $productFields = array_diff_key($validated, array_flip([
-                'description', 'short_description', 'weight', 'length', 'width', 'height',
-                'tags', 'label', 'ingredients', 'usage_instructions', 'warranty_info',
-                'origin_country', 'certifications', 'material', 'care_instructions', 'specifications',
-                'meta_title', 'meta_description', 'meta_keywords', 'og_image',
+                'description',
+                'short_description',
+                'weight',
+                'length',
+                'width',
+                'height',
+                'tags',
+                'label',
+                'ingredients',
+                'usage_instructions',
+                'warranty_info',
+                'origin_country',
+                'certifications',
+                'material',
+                'care_instructions',
+                'specifications',
+                'meta_title',
+                'meta_description',
+                'meta_keywords',
+                'og_image',
             ]));
 
             // Update core product
@@ -685,19 +717,12 @@ class ProductController extends Controller
         try {
             $product->update(['is_active' => !$product->is_active]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Product status updated successfully',
-                'status' => $product->is_active
-            ]);
+            return back()->with('success', 'Product status updated successfully.');
 
         } catch (\Exception $e) {
             Log::error('Toggle status failed: ' . $e->getMessage());
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update product status'
-            ], 500);
+            return back()->withErrors(['error' => 'Failed to update product status.']);
         }
     }
 
@@ -709,19 +734,12 @@ class ProductController extends Controller
         try {
             $product->update(['is_featured' => !$product->is_featured]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Product featured status updated successfully',
-                'status' => $product->is_featured
-            ]);
+            return back()->with('success', 'Product featured status updated successfully.');
 
         } catch (\Exception $e) {
             Log::error('Toggle featured failed: ' . $e->getMessage());
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update featured status'
-            ], 500);
+            return back()->withErrors(['error' => 'Failed to update featured status.']);
         }
     }
 

@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\AffiliateController;
 use App\Http\Controllers\Admin\ArtisanController;
+use App\Http\Controllers\Affiliate\AuthController;
+use App\Http\Controllers\Affiliate\DashboardController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AttributeController;
@@ -118,6 +121,15 @@ Route::middleware(['auth', 'license.check', 'role:super_admin|admin|user'])->gro
             Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
             Route::get('/{order}/invoice/pdf', [OrderController::class, 'downloadInvoice'])->name('invoice.pdf');
             Route::get('/{order}/invoice/email', [OrderController::class, 'emailInvoice'])->name('invoice.email');
+        });
+
+        // Affiliate Admin Routes
+        Route::prefix('affiliates')->name('admin.affiliates.')->group(function () {
+            Route::get('/', [AffiliateController::class, 'index'])->name('index');
+            Route::get('/{affiliate}', [AffiliateController::class, 'show'])->name('show');
+            Route::patch('/{affiliate}/toggle-status', [AffiliateController::class, 'toggleStatus'])->name('toggle-status');
+            Route::patch('/earnings/{earning}/status', [AffiliateController::class, 'updateEarningStatus'])->name('earning.status');
+            Route::delete('/{affiliate}', [AffiliateController::class, 'destroy'])->name('destroy');
         });
 
         // Reports Routes
@@ -253,7 +265,22 @@ Route::middleware(['auth', 'license.check', 'role:super_admin'])->group(function
 });
 
 // =====================================================================
-// AI Product Description Generator (Separate Route)
+// AFFILIATE ROUTES
 // =====================================================================
+Route::prefix('affiliate')->name('affiliate.')->middleware('affiliate.status')->group(function () {
+    // Guest routes
+    Route::middleware('guest:affiliate')->group(function () {
+        Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [AuthController::class, 'login']);
+        Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
+        Route::post('/register', [AuthController::class, 'register']);
+    });
+
+    // Authenticated routes
+    Route::middleware('auth:affiliate')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    });
+});
 
 require __DIR__ . '/auth.php';

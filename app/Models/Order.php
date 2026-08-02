@@ -20,6 +20,7 @@ class Order extends Model
         'discount_amount',
         'total_amount',
         'shipping_address_id',
+        'affiliate_id',
         'status',
         'payment_method',
         'payment_status',
@@ -56,6 +57,16 @@ class Order extends Model
     public function payment()
     {
         return $this->hasOne(Payment::class);
+    }
+
+    public function affiliate()
+    {
+        return $this->belongsTo(Affiliate::class);
+    }
+
+    public function earning()
+    {
+        return $this->hasOne(AffiliateEarning::class);
     }
 
     // Scopes

@@ -9,10 +9,12 @@ use App\Models\Product;
 use App\Models\ShippingAddress;
 use App\Models\Order;
 use App\Models\Attribute;
+use App\Models\AffiliateEarning;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cookie;
 
 class CheckoutController extends Controller
 {
@@ -179,6 +181,7 @@ class CheckoutController extends Controller
                 'status' => 'pending',
                 'notes' => $request->notes,
                 'payment_status' => 'pending',
+                'affiliate_id' => Cookie::get('affiliate_id'),
             ]);
 
             foreach ($cartItems as $cartItem) {
@@ -199,6 +202,20 @@ class CheckoutController extends Controller
                 }
 
                 $cartItem->product->decreaseStock($cartItem->quantity);
+            }
+
+            // Affiliate Commission Logic
+            if ($order->affiliate_id && setting('affiliate_marketing_status', true)) {
+                // Calculate 10% commission on subtotal
+                $commissionPercentage = setting('affiliate_commission_percentage', 10);
+                $commissionAmount = ($subtotal * $commissionPercentage) / 100;
+                
+                AffiliateEarning::create([
+                    'affiliate_id' => $order->affiliate_id,
+                    'order_id' => $order->id,
+                    'amount' => $commissionAmount,
+                    'status' => 'pending',
+                ]);
             }
 
             $cart->items()->delete();
