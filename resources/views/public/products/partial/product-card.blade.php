@@ -104,9 +104,10 @@
                 </button>
             </form>
 
-            <a href="{{ route('public.products.show', $product->slug) }}" title="Buy Now"
-                class="flex-1 border border-gray-800 text-gray-800 hover:bg-gray-800 hover:text-white py-2 px-3 rounded-lg transition duration-200 text-xs font-medium flex items-center justify-center">
-                <i class="fas fa-bolt text-sm"></i>
+            <a href="{{ route('public.products.show', $product->slug) }}" title="Order Now"
+                class="flex-1 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white py-2 px-3 rounded-lg transition duration-200 text-xs font-bold flex items-center justify-center gap-1 shadow-sm group">
+                <i class="fas fa-bolt text-amber-300 text-xs group-hover:animate-bounce"></i>
+                <span>{{ ($lang ?? null) === '1' ? 'অর্ডার করুন' : 'Order Now' }}</span>
             </a>
         </div>
     </div>

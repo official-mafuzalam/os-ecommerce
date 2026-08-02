@@ -17,13 +17,15 @@
         <!-- Badges -->
         <div class="absolute top-md left-md flex flex-col gap-1 z-10">
             @if ($product->is_bestseller)
-                <span class="bg-amber-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm uppercase">
+                <span
+                    class="bg-amber-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm uppercase">
                     BESTSELLER
                 </span>
             @endif
 
             @if ($product->is_new_arrival || (isset($product->created_at) && $product->created_at->gt(now()->subDays(7))))
-                <span class="bg-emerald-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm uppercase">
+                <span
+                    class="bg-emerald-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm uppercase">
                     NEW
                 </span>
             @endif
@@ -40,7 +42,8 @@
         <a href="{{ route('public.products.show', $product->slug ?? $product->id) }}" class="block">
             <h3
                 class="font-headline-md text-[24px] text-primary mb-xs group-hover:text-secondary transition-colors truncate">
-                {{ $product->name }}</h3>
+                {{ $product->name }}
+            </h3>
         </a>
         <p class="font-body-md text-on-surface-variant text-sm mb-md leading-relaxed line-clamp-2 min-h-[2.5rem]">
             {{ strip_tags($product->short_description ?? $product->description) }}
@@ -57,14 +60,13 @@
                         class="font-label-md text-primary text-lg font-bold">৳{{ number_format($product->final_price ?? ($product->base_price ?? $product->price), 2) }}</span>
                 @endif
             </div>
-            <form action="{{ route('cart.add', $product->id) }}" method="POST">
-                @csrf
-                <input type="hidden" name="product_id" value="{{ $product->id }}">
+            <form action="{{ route('public.products.buy-now', $product) }}" method="GET">
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit"
-                    class="material-symbols-outlined text-primary border border-primary/20 rounded-full p-xs hover:bg-primary hover:text-white transition-all active:scale-95 shadow-sm"
+                    class="bg-gradient-to-r from-emerald-600 to-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:from-emerald-500 hover:to-primary/90 transition-all duration-300 active:scale-95 shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 flex items-center gap-1 group"
                     {{ ($product->stock_quantity ?? 1) <= 0 ? 'disabled' : '' }}>
-                    add_shopping_cart
+                    <span class="material-symbols-outlined text-amber-300 text-sm group-hover:animate-bounce">bolt</span>
+                    <span>{{ ($lang ?? null) === '1' ? 'অর্ডার করুন' : 'Order Now' }}</span>
                 </button>
             </form>
         </div>

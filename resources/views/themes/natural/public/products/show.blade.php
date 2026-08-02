@@ -129,7 +129,7 @@
                         @endif
                     </div>
                     <div class="flex flex-col sm:flex-row items-stretch gap-sm">
-                        <!-- Add to Ritual -->
+                        <!-- Add to Cart (Secondary Outline) -->
                         <form action="{{ route('cart.add', $product) }}" method="POST"
                             class="flex-1 flex items-stretch">
                             @csrf
@@ -143,14 +143,14 @@
                             @endif
                             <button type="submit"
                                 onclick="document.getElementById('add-to-cart-qty-{{ $product->id }}').value = document.getElementById('qty-{{ $product->id }}').value"
-                                class="w-full bg-primary text-on-primary font-label-md text-label-md h-14 rounded-[16px] shadow-lg hover:shadow-xl hover:translate-y-[-2px] active:scale-95 transition-all duration-300 flex items-center justify-center gap-sm"
+                                class="w-full border-2 border-primary text-primary hover:bg-primary/10 font-label-md text-label-md h-14 rounded-[16px] font-bold hover:translate-y-[-2px] active:scale-95 transition-all duration-300 flex items-center justify-center gap-sm"
                                 {{ $product->stock_quantity == 0 ? 'disabled' : '' }}>
                                 <span class="material-symbols-outlined">shopping_bag</span>
                                 {{ $lang === '1' ? 'কার্টে যোগ করুন' : 'Add To Cart' }}
                             </button>
                         </form>
 
-                        <!-- Buy Now -->
+                        <!-- Order Now (Highlighted High Conversion Primary CTA) -->
                         <form action="{{ route('public.products.buy-now', $product) }}" method="GET"
                             class="flex-1 flex items-stretch">
                             <input type="hidden" name="quantity" value="{{ $themeMinQty }}" id="buy-now-qty-{{ $product->id }}">
@@ -162,9 +162,10 @@
                             @endif
                             <button type="submit"
                                 onclick="document.getElementById('buy-now-qty-{{ $product->id }}').value = document.getElementById('qty-{{ $product->id }}').value"
-                                class="w-full border-2 border-primary text-primary hover:bg-primary/5 font-label-md text-label-md h-14 rounded-[16px] hover:translate-y-[-2px] active:scale-95 transition-all duration-300 flex items-center justify-center gap-sm">
-                                <span class="material-symbols-outlined">bolt</span>
-                                {{ $lang === '1' ? 'এখনই কিনুন' : 'Buy Now' }}
+                                class="w-full bg-gradient-to-r from-emerald-600 via-primary to-emerald-700 text-white font-label-md text-label-md text-base h-14 rounded-[16px] shadow-lg shadow-emerald-700/30 hover:shadow-xl hover:shadow-emerald-700/40 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-sm font-bold relative overflow-hidden group">
+                                <span class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></span>
+                                <span class="material-symbols-outlined text-amber-300 animate-bounce">bolt</span>
+                                <span>{{ $lang === '1' ? 'অর্ডার করুন' : 'Order Now' }}</span>
                             </button>
                         </form>
                     </div>

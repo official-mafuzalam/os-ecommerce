@@ -234,7 +234,7 @@
                                         @endforeach
                                     @endif
                                     <button type="submit"
-                                        class="w-full fashion-btn flex items-center justify-center gap-2 py-4"
+                                        class="w-full border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-medium rounded-xl flex items-center justify-center gap-2 py-4 transition-all duration-200"
                                         {{ $product->stock_quantity == 0 ? 'disabled' : '' }}>
                                         <i class="fas fa-shopping-bag"></i>
                                         @if ($lang === '1')
@@ -245,7 +245,7 @@
                                     </button>
                                 </form>
 
-                                <!-- Buy Now -->
+                                <!-- Order Now (Primary High Conversion Button) -->
                                 <form action="{{ route('public.products.buy-now', $product) }}" method="GET"
                                     id="buy-now-form">
                                     <input type="hidden" name="quantity" value="1">
@@ -256,13 +256,15 @@
                                         @endforeach
                                     @endif
                                     <button type="submit"
-                                        class="w-full fashion-btn fashion-btn-outline flex items-center justify-center gap-2 py-4">
-                                        <i class="fas fa-bolt"></i>
-                                        @if ($lang === '1')
-                                            এখনই কিনুন
-                                        @else
-                                            Buy Now
-                                        @endif
+                                        class="w-full bg-gradient-to-r from-emerald-600 via-emerald-700 to-indigo-700 hover:from-emerald-500 hover:to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-700/25 hover:shadow-xl hover:scale-[1.01] active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 py-4 group">
+                                        <i class="fas fa-bolt text-amber-300 group-hover:animate-bounce"></i>
+                                        <span>
+                                            @if ($lang === '1')
+                                                অর্ডার করুন
+                                            @else
+                                                Order Now
+                                            @endif
+                                        </span>
                                     </button>
                                 </form>
                             </div>
