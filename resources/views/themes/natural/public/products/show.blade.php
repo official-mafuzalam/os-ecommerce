@@ -32,14 +32,14 @@
             <!-- Hero Image Left -->
             <div class="md:col-span-7 relative stagger-in">
                 <div id="image-zoom-container"
-                    class="aspect-square w-full rounded-[24px] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,69,37,0.08)] bg-surface-container relative cursor-zoom-in">
+                    class="inline-block w-full rounded-[24px] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,69,37,0.08)] bg-surface-container relative cursor-zoom-in">
                     @if ($product->images->count() > 0)
                         <img id="main-image"
-                            class="w-full h-full object-contain transition-transform duration-200 ease-out origin-center pointer-events-none"
+                            class="block w-full h-auto transition-transform duration-200 ease-out origin-center pointer-events-none"
                             src="{{ Storage::url($product->images->where('is_primary', true)->first()?->image_path ?? $product->images->first()->image_path) }}"
                             alt="{{ $product->name }}" />
                     @else
-                        <div class="w-full h-full flex items-center justify-center bg-surface-container-low">
+                        <div class="w-full flex items-center justify-center bg-surface-container-low py-20">
                             <span
                                 class="material-symbols-outlined text-[80px] text-outline-variant">image_not_supported</span>
                         </div>
@@ -492,19 +492,30 @@
             const mainImg = document.getElementById('main-image');
 
             if (zoomContainer && mainImg) {
+                let isZoomed = false;
+
                 zoomContainer.addEventListener('mousemove', (e) => {
                     const rect = zoomContainer.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
 
-                    const xPercent = (x / rect.width) * 100;
-                    const yPercent = (y / rect.height) * 100;
+                    // Clamp to [0,100] to prevent out-of-bounds origin
+                    const xPercent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                    const yPercent = Math.max(0, Math.min(100, (y / rect.height) * 100));
 
                     mainImg.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-                    mainImg.style.transform = 'scale(2)';
+                    mainImg.style.transform = 'scale(1.8)';
+                    isZoomed = true;
                 });
 
                 zoomContainer.addEventListener('mouseleave', () => {
+                    mainImg.style.transform = 'scale(1)';
+                    mainImg.style.transformOrigin = 'center center';
+                    isZoomed = false;
+                });
+
+                // Ensure reset if mouse never leaves properly
+                zoomContainer.addEventListener('mouseenter', () => {
                     mainImg.style.transform = 'scale(1)';
                     mainImg.style.transformOrigin = 'center center';
                 });

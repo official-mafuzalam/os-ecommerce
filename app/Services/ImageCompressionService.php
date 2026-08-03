@@ -31,7 +31,7 @@ class ImageCompressionService
         // Default configuration
         $config = array_merge([
             'max_size_kb' => 200,           // Maximum file size in KB
-            'max_width' => 1920,             // Maximum width in pixels
+            'max_width' => 1080,             // Maximum width in pixels
             'max_height' => 1080,             // Maximum height in pixels
             'maintain_aspect_ratio' => true,  // Maintain aspect ratio when resizing
             'quality' => 85,                   // Initial JPEG quality (0-100)
