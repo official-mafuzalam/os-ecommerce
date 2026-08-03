@@ -1,12 +1,12 @@
 <div
     class="group bg-white rounded-2xl overflow-hidden hover-lift p-base shadow-sm hover:shadow-md transition-shadow flex flex-col">
     <a href="{{ route('public.products.show', $product->slug ?? $product->id) }}"
-        class="block relative aspect-[4/5] rounded-xl overflow-hidden mb-md bg-surface-container-low">
+        class="block relative aspect-square rounded-xl overflow-hidden mb-md bg-surface-container-low">
         @php
             $primaryImg = $product->images->where('is_primary', true)->first() ?? $product->images->first();
         @endphp
         @if ($primaryImg)
-            <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            <img class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
                 alt="{{ $product->name }}" src="{{ Storage::url($primaryImg->image_path) }}" />
         @else
             <div class="w-full h-full flex items-center justify-center text-primary/30">

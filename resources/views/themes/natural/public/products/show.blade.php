@@ -32,10 +32,10 @@
             <!-- Hero Image Left -->
             <div class="md:col-span-7 relative stagger-in">
                 <div id="image-zoom-container"
-                    class="aspect-[1/1] sm:aspect-[4/3] w-full rounded-[24px] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,69,37,0.08)] bg-surface-container relative cursor-zoom-in">
+                    class="aspect-square w-full rounded-[24px] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,69,37,0.08)] bg-surface-container relative cursor-zoom-in">
                     @if ($product->images->count() > 0)
                         <img id="main-image"
-                            class="w-full h-full object-cover transition-transform duration-200 ease-out origin-center pointer-events-none"
+                            class="w-full h-full object-contain transition-transform duration-200 ease-out origin-center pointer-events-none"
                             src="{{ Storage::url($product->images->where('is_primary', true)->first()?->image_path ?? $product->images->first()->image_path) }}"
                             alt="{{ $product->name }}" />
                     @else
@@ -54,7 +54,7 @@
                                 onclick="document.getElementById('main-image').src='{{ Storage::url($image->image_path) }}'; document.querySelectorAll('.thumb-btn').forEach(btn => btn.classList.remove('border-primary')); this.classList.add('border-primary')"
                                 class="thumb-btn w-20 h-20 rounded-xl overflow-hidden border-2 {{ $image->is_primary || ($loop->first && !$product->images->where('is_primary', true)->count()) ? 'border-primary' : 'border-transparent' }} hover:border-primary transition-colors flex-shrink-0">
                                 <img src="{{ Storage::url($image->image_path) }}" alt="{{ $product->name }}"
-                                    class="w-full h-full object-cover" />
+                                    class="w-full h-full object-contain" />
                             </button>
                         @endforeach
                     </div>

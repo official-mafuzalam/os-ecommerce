@@ -44,7 +44,7 @@ class AiController extends Controller
 
         // Build a highly optimized marketing prompt requesting structured JSON
         $prompt = "As an expert copywriter and SEO specialist, write a premium marketing product description and metadata for: '{$productName}'.
-Language: {$language} (Write all text fields in this language).
+CRITICAL INSTRUCTION: You MUST write the ENTIRE response (all JSON values) in {$language} language. Do not use English unless the brand name requires it.
 Tone: {$tone}
 Category: {$category}
 Brand: {$brand}
@@ -101,13 +101,18 @@ Use this JSON schema:
         $model = setting("api_{$activeProvider}_model");
 
         if (!$apiKey) {
+            $fallback = $this->generateFallbackDescription($productName);
             return response()->json([
-                'error' => "API key for '{$activeProvider}' is not configured in settings."
-            ], 400);
+                'description' => $fallback,
+                'error' => "API key for '{$activeProvider}' is not configured in AI Settings. Using fallback description.",
+                'note' => 'Configure your AI API key in Admin → Settings → AI Settings to enable AI-generated descriptions.'
+            ]);
         }
 
         if ($activeProvider === 'gemini') {
-            $model = $model ?: 'gemini-1.5-flash';
+            if (!$model || $model === 'gemini-2.5-flash' || $model === 'gemini-2.5-flash-lite') {
+                $model = 'gemini-2.0-flash';
+            }
             $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
             $apiName = 'gemini';
 
@@ -199,15 +204,19 @@ Use this JSON schema:
 
             if ($response->failed()) {
                 $errBody = $response->json();
-                $errorMessage = $errBody['error']['message'] 
-                             ?? $errBody['message'] 
-                             ?? $errBody['error'] 
-                             ?? $response->body();
+                $errorMessage = $errBody['error']['message']
+                    ?? $errBody['message']
+                    ?? $errBody['error']
+                    ?? $response->body();
 
+                // \Illuminate\Support\Facades\Log::warning("AI generate-description failed [{$apiName} HTTP {$response->status()}]: " . (is_string($errorMessage) ? $errorMessage : json_encode($errorMessage)));
+
+                $fallback = $this->generateFallbackDescription($productName);
                 return response()->json([
-                    'error' => "API call failed for '{$apiName}' (HTTP {$response->status()})",
-                    'details' => $errorMessage
-                ], 400);
+                    'description' => $fallback,
+                    'error' => "AI API call failed ({$apiName}, HTTP {$response->status()}). Using fallback description.",
+                    'details' => is_string($errorMessage) ? $errorMessage : json_encode($errorMessage)
+                ]);
             }
 
             $result = $response->json();
@@ -239,7 +248,7 @@ Use this JSON schema:
                 } elseif (preg_match('/```\s*(.*?)\s*```/s', $text, $matches)) {
                     $jsonStr = $matches[1];
                 }
-                
+
                 $data = json_decode(trim($jsonStr), true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
                     $shortDescription = $data['short_description'] ?? '';

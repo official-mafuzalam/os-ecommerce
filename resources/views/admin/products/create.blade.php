@@ -864,8 +864,12 @@
                             if (data.care_instructions && document.getElementById('care_instructions')) {
                                 document.getElementById('care_instructions').value = data.care_instructions;
                             }
+                        } else if (data.error) {
+                            let msg = 'AI Generation Notice: ' + data.error;
+                            if (data.details) msg += '\n\nDetails: ' + data.details;
+                            alert(msg);
                         } else {
-                            alert('Failed to generate description');
+                            alert('Failed to generate description. Please check your AI API settings.');
                         }
                     })
                     .catch(error => {
