@@ -28,18 +28,18 @@
         @endphp
         <!-- Hero Section -->
         <section
-            class="px-margin-desktop py-md md:py-lg max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-12 gap-xl items-center">
+            class="px-margin-desktop py-md md:py-lg max-w-container-max mx-auto grid grid-cols-1 md:grid-cols-12 gap-xl items-start md:items-center">
             <!-- Hero Image Left -->
             <div class="md:col-span-7 relative stagger-in">
                 <div id="image-zoom-container"
-                    class="inline-block w-full rounded-[24px] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,69,37,0.08)] bg-surface-container relative cursor-zoom-in">
+                    class="aspect-square w-full rounded-[24px] overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,69,37,0.08)] bg-surface-container relative cursor-zoom-in">
                     @if ($product->images->count() > 0)
                         <img id="main-image"
-                            class="block w-full h-auto transition-transform duration-200 ease-out origin-center pointer-events-none"
+                            class="w-full h-full object-contain transition-transform duration-200 ease-out origin-center pointer-events-none"
                             src="{{ Storage::url($product->images->where('is_primary', true)->first()?->image_path ?? $product->images->first()->image_path) }}"
                             alt="{{ $product->name }}" />
                     @else
-                        <div class="w-full flex items-center justify-center bg-surface-container-low py-20">
+                        <div class="w-full h-full flex items-center justify-center bg-surface-container-low">
                             <span
                                 class="material-symbols-outlined text-[80px] text-outline-variant">image_not_supported</span>
                         </div>
@@ -48,11 +48,11 @@
 
                 {{-- Thumbnail Gallery --}}
                 @if ($product->images->count() > 1)
-                    <div class="flex gap-md mt-md">
-                        @foreach ($product->images->take(4) as $image)
+                    <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 mt-md">
+                        @foreach ($product->images as $image)
                             <button
                                 onclick="document.getElementById('main-image').src='{{ Storage::url($image->image_path) }}'; document.querySelectorAll('.thumb-btn').forEach(btn => btn.classList.remove('border-primary')); this.classList.add('border-primary')"
-                                class="thumb-btn w-20 h-20 rounded-xl overflow-hidden border-2 {{ $image->is_primary || ($loop->first && !$product->images->where('is_primary', true)->count()) ? 'border-primary' : 'border-transparent' }} hover:border-primary transition-colors flex-shrink-0">
+                                class="thumb-btn aspect-square w-full rounded-xl overflow-hidden border-2 {{ $image->is_primary || ($loop->first && !$product->images->where('is_primary', true)->count()) ? 'border-primary' : 'border-transparent' }} hover:border-primary transition-colors">
                                 <img src="{{ Storage::url($image->image_path) }}" alt="{{ $product->name }}"
                                     class="w-full h-full object-contain" />
                             </button>
@@ -61,7 +61,7 @@
                 @endif
 
                 <!-- Decorative botanical element -->
-                <div class="absolute -bottom-10 -left-10 w-40 h-40 opacity-10 pointer-events-none">
+                <div class="hidden md:block absolute -bottom-10 -left-10 w-40 h-40 opacity-10 pointer-events-none">
                     <span class="material-symbols-outlined text-[160px]"
                         style="font-variation-settings: 'opsz' 48;">eco</span>
                 </div>
@@ -72,7 +72,7 @@
                 <div class="flex flex-col gap-xs">
                     <span
                         class="font-label-md text-label-md text-secondary uppercase tracking-[0.2em]">{{ $product->category?->name ?? 'Ayurvedic Vitality' }}</span>
-                    <h1 class="font-display-lg text-display-lg text-primary leading-tight">{{ $product->name }}</h1>
+                    <h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary leading-tight">{{ $product->name }}</h1>
                 </div>
 
                 <div class="flex items-baseline gap-sm">
@@ -90,7 +90,7 @@
                     @endif
                 </div>
 
-                <p class="font-body-lg text-body-lg text-on-surface-variant max-w-[480px]">
+                <p class="font-body-lg text-body-lg text-on-surface-variant md:max-w-[480px]">
                     {{ $product->short_description ?? 'Premium natural product crafted for healthy living.' }}
                 </p>
 
@@ -217,82 +217,8 @@
         </section>
 
         <!-- Pure Composition Section -->
-        <section class="bg-surface-container-low py-xl px-margin-desktop overflow-hidden relative">
+        <section class="bg-surface-container-low px-margin-desktop overflow-hidden relative">
             <div class="max-w-container-max mx-auto relative z-10">
-                <div class="flex flex-col items-center text-center mb-xl">
-                    <h2 class="font-headline-lg text-headline-lg text-primary mb-sm">
-                        কেন {{ setting('site_name') }}?
-                    </h2>
-                    <div class="w-16 h-1 bg-tertiary-fixed-dim rounded-full"></div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-xl">
-
-                    <!-- Card 1 -->
-                    <div
-                        class="flex flex-col items-center text-center gap-md p-lg bg-surface/50 backdrop-blur-sm rounded-[24px] hover:shadow-xl transition-all duration-500">
-
-                        <div class="w-16 h-16 bg-primary-container/10 rounded-full flex items-center justify-center">
-                            <span class="material-symbols-outlined text-primary text-[32px]">
-                                eco
-                            </span>
-                        </div>
-
-                        <h3 class="font-label-md text-label-md text-primary">
-                            যত্নে নির্বাচিত প্রাকৃতিক উপাদান
-                        </h3>
-
-                        <p class="font-body-md text-body-md text-on-surface-variant">
-                            বিশ্বস্ত উৎস থেকে সংগ্রহ করা প্রাকৃতিক উপাদান দিয়ে তৈরি
-                            স্বাস্থ্যকর ওয়েলনেস পণ্য।
-                        </p>
-
-                    </div>
-
-                    <!-- Card 2 -->
-                    <div
-                        class="flex flex-col items-center text-center gap-md p-lg bg-surface/50 backdrop-blur-sm rounded-[24px] hover:shadow-xl transition-all duration-500">
-
-                        <div class="w-16 h-16 bg-primary-container/10 rounded-full flex items-center justify-center">
-                            <span class="material-symbols-outlined text-primary text-[32px]">
-                                verified
-                            </span>
-                        </div>
-
-                        <h3 class="font-label-md text-label-md text-primary">
-                            বিশুদ্ধতা ও মানের প্রতি অঙ্গীকার
-                        </h3>
-
-                        <p class="font-body-md text-body-md text-on-surface-variant">
-                            পরিচ্ছন্ন প্রক্রিয়াকরণ, নিরাপদ প্যাকেজিং এবং প্রতিটি ধাপে
-                            গুণগত মান বজায় রাখার প্রচেষ্টা।
-                        </p>
-
-                    </div>
-
-                    <!-- Card 3 -->
-                    <div
-                        class="flex flex-col items-center text-center gap-md p-lg bg-surface/50 backdrop-blur-sm rounded-[24px] hover:shadow-xl transition-all duration-500">
-
-                        <div class="w-16 h-16 bg-primary-container/10 rounded-full flex items-center justify-center">
-                            <span class="material-symbols-outlined text-primary text-[32px]">
-                                favorite
-                            </span>
-                        </div>
-
-                        <h3 class="font-label-md text-label-md text-primary">
-                            স্বাস্থ্যকর জীবনযাপনের সঙ্গী
-                        </h3>
-
-                        <p class="font-body-md text-body-md text-on-surface-variant">
-                            প্রতিদিনের খাদ্যাভ্যাসকে আরও পুষ্টিকর ও স্বাস্থ্যসচেতন করতে
-                            আপনার বিশ্বস্ত সঙ্গী।
-                        </p>
-
-                    </div>
-
-                </div>
-
                 {{-- Product Details --}}
                 @if (
                     $product->ingredients ||
@@ -394,7 +320,7 @@
             </div>
             <!-- Background Illustration -->
             <span
-                class="absolute -right-20 top-20 material-symbols-outlined text-[400px] text-primary opacity-5 select-none pointer-events-none">eco</span>
+                class="hidden md:block absolute -right-20 top-20 material-symbols-outlined text-[400px] text-primary opacity-5 select-none pointer-events-none">eco</span>
         </section>
 
         <!-- Product Description Section -->
@@ -414,7 +340,7 @@
         @if (isset($relatedProducts) && $relatedProducts->count() > 0)
             <section class="py-xl px-margin-desktop bg-surface-container-high/30">
                 <div class="max-w-container-max mx-auto">
-                    <div class="flex justify-between items-end mb-xl">
+                    <div class="flex flex-wrap justify-between items-end gap-sm mb-xl">
                         <div class="flex flex-col gap-xs">
                             <span class="font-label-md text-label-md text-secondary uppercase tracking-widest">Enhance
                                 Your
@@ -424,7 +350,7 @@
                         <a class="font-label-md text-label-md text-primary border-b border-primary pb-1"
                             href="{{ route('public.products') }}">View Collection</a>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-gutter">
                         @foreach ($relatedProducts->take(3) as $relatedProduct)
                             @include('themes.natural.public.products.partial.product-card', [
                                 'product' => $relatedProduct,
@@ -434,6 +360,85 @@
                 </div>
             </section>
         @endif
+        
+        <section class="bg-surface-container-low py-xl px-margin-desktop overflow-hidden relative">
+            <div class="max-w-container-max mx-auto relative z-10">
+                <div class="flex flex-col items-center text-center mb-xl">
+                    <h2 class="font-headline-lg text-headline-lg text-primary mb-sm">
+                        কেন {{ setting('site_name') }}?
+                    </h2>
+                    <div class="w-16 h-1 bg-tertiary-fixed-dim rounded-full"></div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-xl">
+
+                    <!-- Card 1 -->
+                    <div
+                        class="flex flex-col items-center text-center gap-md p-lg bg-surface/50 backdrop-blur-sm rounded-[24px] hover:shadow-xl transition-all duration-500">
+
+                        <div class="w-16 h-16 bg-primary-container/10 rounded-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-[32px]">
+                                eco
+                            </span>
+                        </div>
+
+                        <h3 class="font-label-md text-label-md text-primary">
+                            যত্নে নির্বাচিত প্রাকৃতিক উপাদান
+                        </h3>
+
+                        <p class="font-body-md text-body-md text-on-surface-variant">
+                            বিশ্বস্ত উৎস থেকে সংগ্রহ করা প্রাকৃতিক উপাদান দিয়ে তৈরি
+                            স্বাস্থ্যকর ওয়েলনেস পণ্য।
+                        </p>
+
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div
+                        class="flex flex-col items-center text-center gap-md p-lg bg-surface/50 backdrop-blur-sm rounded-[24px] hover:shadow-xl transition-all duration-500">
+
+                        <div class="w-16 h-16 bg-primary-container/10 rounded-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-[32px]">
+                                verified
+                            </span>
+                        </div>
+
+                        <h3 class="font-label-md text-label-md text-primary">
+                            বিশুদ্ধতা ও মানের প্রতি অঙ্গীকার
+                        </h3>
+
+                        <p class="font-body-md text-body-md text-on-surface-variant">
+                            পরিচ্ছন্ন প্রক্রিয়াকরণ, নিরাপদ প্যাকেজিং এবং প্রতিটি ধাপে
+                            গুণগত মান বজায় রাখার প্রচেষ্টা।
+                        </p>
+
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div
+                        class="flex flex-col items-center text-center gap-md p-lg bg-surface/50 backdrop-blur-sm rounded-[24px] hover:shadow-xl transition-all duration-500">
+
+                        <div class="w-16 h-16 bg-primary-container/10 rounded-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-[32px]">
+                                favorite
+                            </span>
+                        </div>
+
+                        <h3 class="font-label-md text-label-md text-primary">
+                            স্বাস্থ্যকর জীবনযাপনের সঙ্গী
+                        </h3>
+
+                        <p class="font-body-md text-body-md text-on-surface-variant">
+                            প্রতিদিনের খাদ্যাভ্যাসকে আরও পুষ্টিকর ও স্বাস্থ্যসচেতন করতে
+                            আপনার বিশ্বস্ত সঙ্গী।
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
     </x-slot>
 
     @push('scripts')

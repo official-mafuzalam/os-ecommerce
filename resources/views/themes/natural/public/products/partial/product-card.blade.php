@@ -41,7 +41,7 @@
     <div class="px-sm pb-md flex flex-col flex-grow">
         <a href="{{ route('public.products.show', $product->slug ?? $product->id) }}" class="block">
             <h3
-                class="font-headline-md text-[24px] text-primary mb-xs group-hover:text-secondary transition-colors truncate">
+                class="font-headline-md text-base sm:text-lg md:text-xl text-primary mb-xs group-hover:text-secondary transition-colors truncate">
                 {{ $product->name }}
             </h3>
         </a>
@@ -60,13 +60,17 @@
                         class="font-label-md text-primary text-lg font-bold">৳{{ number_format($product->final_price ?? ($product->base_price ?? $product->price), 2) }}</span>
                 @endif
             </div>
+            @php
+                $lang = setting('order_form_bangla') ? '1' : '0';
+            @endphp
             <form action="{{ route('public.products.buy-now', $product) }}" method="GET">
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit"
                     class="bg-gradient-to-r from-emerald-600 to-primary text-white text-xs font-bold px-3.5 py-2 rounded-xl hover:from-emerald-500 hover:to-primary/90 transition-all duration-300 active:scale-95 shadow-md shadow-emerald-700/20 hover:shadow-lg hover:shadow-emerald-700/30 flex items-center gap-1 group"
                     {{ ($product->stock_quantity ?? 1) <= 0 ? 'disabled' : '' }}>
-                    <span class="material-symbols-outlined text-amber-300 text-sm group-hover:animate-bounce">bolt</span>
-                    <span>{{ ($lang ?? null) === '1' ? 'অর্ডার করুন' : 'Order Now' }}</span>
+                    <span
+                        class="material-symbols-outlined text-amber-300 text-sm group-hover:animate-bounce">bolt</span>
+                    <span>{{ $lang === '1' ? 'অর্ডার করুন' : 'Order Now' }}</span>
                 </button>
             </form>
         </div>

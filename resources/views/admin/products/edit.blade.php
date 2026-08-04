@@ -265,16 +265,33 @@
 
                             <div>
                                 <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">Product Images
-                                    (Max size per photo: 400 KB)
+                                    <span class="ml-2 text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 px-2 py-0.5 rounded-full">Square 1:1</span>
                                 </h3>
                                 <div class="space-y-4">
                                     <div>
                                         <label for="image_gallery"
                                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product
-                                            Images (Recommended ratio 4:3)</label>
+                                            Images <span class="text-gray-400 font-normal">(ratio: 1:1 square)</span></label>
                                         <input type="file" id="image_gallery" name="image_gallery[]" multiple
                                             accept="image/*"
                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white py-2 px-3">
+
+                                        {{-- Image upload recommendation hint --}}
+                                        <div class="mt-2 flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 px-3 py-2">
+                                            <svg class="w-4 h-4 mt-0.5 text-amber-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <div class="text-xs text-amber-800 dark:text-amber-300 space-y-0.5">
+                                                <p class="font-semibold">Recommended image specs:</p>
+                                                <ul class="list-disc list-inside space-y-0.5 text-amber-700 dark:text-amber-400">
+                                                    <li>Ratio: <strong>1:1 (square)</strong> — e.g. 800×800, 1000×1000, 1200×1200 px</li>
+                                                    <li>Max size: <strong>400 KB</strong> per image (auto-compressed on upload)</li>
+                                                    <li>Formats: JPG, PNG, WEBP, AVIF</li>
+                                                    <li>Non-square images will be <strong>center-cropped</strong> to 1:1 automatically</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
                                         @error('image_gallery')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
